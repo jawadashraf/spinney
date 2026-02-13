@@ -25,6 +25,13 @@ final class LocalSeeder extends Seeder
             return;
         }
 
+        
+        $this->call([
+            SystemAdministratorSeeder::class,
+            TeamSeeder::class,
+        ]);
+        
+
         $user = User::firstOrCreate(
             ['email' => 'manuk.minasyan1@gmail.com'],
             [
@@ -33,11 +40,8 @@ final class LocalSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+        
 
-        $this->call([
-            SystemAdministratorSeeder::class,
-            TeamSeeder::class,
-        ]);
 
         if ($user->wasRecentlyCreated && ! $user->currentTeam) {
             $managementTeam = Team::where('name', 'Management')->first();

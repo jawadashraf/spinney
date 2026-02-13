@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Enquiry;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
-final class EnquiryPolicy
+class EnquiryPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Enquiry');
@@ -35,11 +35,6 @@ final class EnquiryPolicy
     public function delete(AuthUser $authUser, Enquiry $enquiry): bool
     {
         return $authUser->can('Delete:Enquiry');
-    }
-
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Enquiry');
     }
 
     public function restore(AuthUser $authUser, Enquiry $enquiry): bool
@@ -71,4 +66,5 @@ final class EnquiryPolicy
     {
         return $authUser->can('Reorder:Enquiry');
     }
+
 }

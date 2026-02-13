@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\CustomFieldSection;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
-final class CustomFieldSectionPolicy
+class CustomFieldSectionPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:CustomFieldSection');
@@ -35,11 +35,6 @@ final class CustomFieldSectionPolicy
     public function delete(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
     {
         return $authUser->can('Delete:CustomFieldSection');
-    }
-
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:CustomFieldSection');
     }
 
     public function restore(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
@@ -71,4 +66,5 @@ final class CustomFieldSectionPolicy
     {
         return $authUser->can('Reorder:CustomFieldSection');
     }
+
 }

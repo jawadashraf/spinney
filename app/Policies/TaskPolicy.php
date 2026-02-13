@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Task;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
-final class TaskPolicy
+class TaskPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Task');
@@ -35,11 +35,6 @@ final class TaskPolicy
     public function delete(AuthUser $authUser, Task $task): bool
     {
         return $authUser->can('Delete:Task');
-    }
-
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Task');
     }
 
     public function restore(AuthUser $authUser, Task $task): bool
@@ -71,4 +66,5 @@ final class TaskPolicy
     {
         return $authUser->can('Reorder:Task');
     }
+
 }

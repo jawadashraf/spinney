@@ -14,7 +14,7 @@ final class SystemAdministratorSeeder extends Seeder
     public function run(): void
     {
         \App\Models\User::firstOrCreate(
-            ['email' => 'sysadmin@relaticle.com'],
+            ['email' => 'superadmin@spinneyhill.com'],
             [
                 'name' => 'System Administrator',
                 'password' => bcrypt('password'),

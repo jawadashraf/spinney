@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Opportunity;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
-final class OpportunityPolicy
+class OpportunityPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Opportunity');
@@ -35,11 +35,6 @@ final class OpportunityPolicy
     public function delete(AuthUser $authUser, Opportunity $opportunity): bool
     {
         return $authUser->can('Delete:Opportunity');
-    }
-
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Opportunity');
     }
 
     public function restore(AuthUser $authUser, Opportunity $opportunity): bool
@@ -71,4 +66,5 @@ final class OpportunityPolicy
     {
         return $authUser->can('Reorder:Opportunity');
     }
+
 }

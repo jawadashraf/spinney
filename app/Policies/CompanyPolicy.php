@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Company;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
-final class CompanyPolicy
+class CompanyPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Company');
@@ -35,11 +35,6 @@ final class CompanyPolicy
     public function delete(AuthUser $authUser, Company $company): bool
     {
         return $authUser->can('Delete:Company');
-    }
-
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Company');
     }
 
     public function restore(AuthUser $authUser, Company $company): bool
@@ -71,4 +66,5 @@ final class CompanyPolicy
     {
         return $authUser->can('Reorder:Company');
     }
+
 }

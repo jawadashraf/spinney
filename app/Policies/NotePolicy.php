@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Note;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
-final class NotePolicy
+class NotePolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Note');
@@ -35,11 +35,6 @@ final class NotePolicy
     public function delete(AuthUser $authUser, Note $note): bool
     {
         return $authUser->can('Delete:Note');
-    }
-
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Note');
     }
 
     public function restore(AuthUser $authUser, Note $note): bool
@@ -71,4 +66,5 @@ final class NotePolicy
     {
         return $authUser->can('Reorder:Note');
     }
+
 }

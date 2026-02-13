@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\Permission\Models\Role;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class RolePolicy
+class RolePolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Role');
@@ -35,11 +35,6 @@ final class RolePolicy
     public function delete(AuthUser $authUser, Role $role): bool
     {
         return $authUser->can('Delete:Role');
-    }
-
-    public function deleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('DeleteAny:Role');
     }
 
     public function restore(AuthUser $authUser, Role $role): bool
@@ -71,4 +66,5 @@ final class RolePolicy
     {
         return $authUser->can('Reorder:Role');
     }
+
 }
