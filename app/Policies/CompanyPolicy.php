@@ -5,61 +5,70 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\Company;
-use App\Models\User;
-use Filament\Facades\Filament;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-final readonly class CompanyPolicy
+final class CompanyPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(User $user): bool
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('ViewAny:Company');
     }
 
-    public function view(User $user, Company $company): bool
+    public function view(AuthUser $authUser, Company $company): bool
     {
-        return true; // Functional teams: anyone can view
+        return $authUser->can('View:Company');
     }
 
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('Create:Company');
     }
 
-    public function update(User $user, Company $company): bool
+    public function update(AuthUser $authUser, Company $company): bool
     {
-        return true;
+        return $authUser->can('Update:Company');
     }
 
-    public function delete(User $user, Company $company): bool
+    public function delete(AuthUser $authUser, Company $company): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('Delete:Company');
     }
 
-    public function deleteAny(User $user): bool
+    public function deleteAny(AuthUser $authUser): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('DeleteAny:Company');
     }
 
-    public function restore(User $user, Company $company): bool
+    public function restore(AuthUser $authUser, Company $company): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('Restore:Company');
     }
 
-    public function restoreAny(User $user): bool
+    public function forceDelete(AuthUser $authUser, Company $company): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('ForceDelete:Company');
     }
 
-    public function forceDelete(User $user, Company $company): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('ForceDeleteAny:Company');
     }
 
-    public function forceDeleteAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('RestoreAny:Company');
+    }
+
+    public function replicate(AuthUser $authUser, Company $company): bool
+    {
+        return $authUser->can('Replicate:Company');
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:Company');
     }
 }

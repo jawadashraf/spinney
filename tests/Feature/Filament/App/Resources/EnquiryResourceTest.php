@@ -8,12 +8,12 @@ use App\Filament\Resources\Enquiries\Pages\ListEnquiries;
 use App\Filament\Resources\Enquiries\Pages\ViewEnquiry;
 use App\Models\Enquiry;
 use App\Models\User;
-use Filament\Facades\Filament;
 
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
+    $this->user->assignRole('super_admin');
     $this->actingAs($this->user);
 });
 
@@ -55,9 +55,9 @@ it('has correctly configured table filters', function (string $filter): void {
 
 it('can validate form fields', function (string $field, mixed $value, string $rule): void {
     livewire(CreateEnquiry::class)
-        ->fill(['data.' . $field => $value])
+        ->fill(['data.'.$field => $value])
         ->call('create')
-        ->assertHasErrors(['data.' . $field]);
+        ->assertHasErrors(['data.'.$field]);
 })->with([
     'category' => ['category', null, 'required'],
     'reason_for_contact' => ['reason_for_contact', null, 'required'],

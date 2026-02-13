@@ -16,7 +16,7 @@
         "php": "^8.4",
         "ashallendesign/favicon-fetcher": "^3.8",
         "awcodes/overlook": "^v3.0",
-        "bezhansalleh/filament-shield": "*",
+        "bezhansalleh/filament-shield": "^4.1",
         "blade-ui-kit/blade-heroicons": "^2.6",
         "blade-ui-kit/blade-icons": "^1.8",
         "filament/filament": "^4.0",

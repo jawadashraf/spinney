@@ -10,12 +10,12 @@ use App\Models\CustomField;
 use App\Models\Enquiry;
 use App\Models\People;
 use App\Models\User;
-use Filament\Facades\Filament;
 
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
+    $this->user->assignRole('super_admin');
     $this->actingAs($this->user);
 
     // Ensure custom fields are seeded for the test team

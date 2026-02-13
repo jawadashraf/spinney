@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
-use Filament\Facades\Filament;
 
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
+    $this->user->assignRole('super_admin');
     $this->actingAs($this->user);
 });
 

@@ -24,6 +24,9 @@ pest()->extend(Tests\TestCase::class)
         Event::fake([
             \Laravel\Jetstream\Events\TeamCreated::class,
         ]);
+
+        // Seed Shield roles so permission-based policies can function in tests.
+        $this->seed(\Database\Seeders\ShieldSeeder::class);
     })
     ->in('Feature', 'Unit');
 

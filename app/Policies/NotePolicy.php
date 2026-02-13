@@ -5,61 +5,70 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\Note;
-use App\Models\User;
-use Filament\Facades\Filament;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-final readonly class NotePolicy
+final class NotePolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(User $user): bool
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('ViewAny:Note');
     }
 
-    public function view(User $user, Note $note): bool
+    public function view(AuthUser $authUser, Note $note): bool
     {
-        return true;
+        return $authUser->can('View:Note');
     }
 
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('Create:Note');
     }
 
-    public function update(User $user, Note $note): bool
+    public function update(AuthUser $authUser, Note $note): bool
     {
-        return true;
+        return $authUser->can('Update:Note');
     }
 
-    public function delete(User $user, Note $note): bool
+    public function delete(AuthUser $authUser, Note $note): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('Delete:Note');
     }
 
-    public function deleteAny(User $user): bool
+    public function deleteAny(AuthUser $authUser): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('DeleteAny:Note');
     }
 
-    public function restore(User $user, Note $note): bool
+    public function restore(AuthUser $authUser, Note $note): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('Restore:Note');
     }
 
-    public function restoreAny(User $user): bool
+    public function forceDelete(AuthUser $authUser, Note $note): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('ForceDelete:Note');
     }
 
-    public function forceDelete(User $user, Note $note): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('ForceDeleteAny:Note');
     }
 
-    public function forceDeleteAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('RestoreAny:Note');
+    }
+
+    public function replicate(AuthUser $authUser, Note $note): bool
+    {
+        return $authUser->can('Replicate:Note');
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:Note');
     }
 }

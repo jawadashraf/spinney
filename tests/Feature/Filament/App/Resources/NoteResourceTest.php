@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use function Pest\Livewire\livewire;
@@ -12,6 +11,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->user = User::factory()->create();
+    $this->user->assignRole('super_admin');
     $this->actingAs($this->user);
 });
 

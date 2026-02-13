@@ -5,61 +5,70 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\CustomField;
-use App\Models\User;
-use Filament\Facades\Filament;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-final readonly class CustomFieldPolicy
+final class CustomFieldPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(User $user): bool
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('ViewAny:CustomField');
     }
 
-    public function view(User $user, CustomField $customField): bool
+    public function view(AuthUser $authUser, CustomField $customField): bool
     {
-        return true;
+        return $authUser->can('View:CustomField');
     }
 
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('Create:CustomField');
     }
 
-    public function update(User $user, CustomField $customField): bool
+    public function update(AuthUser $authUser, CustomField $customField): bool
     {
-        return $user->belongsToTeam($customField->team);
+        return $authUser->can('Update:CustomField');
     }
 
-    public function delete(User $user, CustomField $customField): bool
+    public function delete(AuthUser $authUser, CustomField $customField): bool
     {
-        return $user->belongsToTeam($customField->team);
+        return $authUser->can('Delete:CustomField');
     }
 
-    public function deleteAny(User $user): bool
+    public function deleteAny(AuthUser $authUser): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('DeleteAny:CustomField');
     }
 
-    public function restore(User $user, CustomField $customField): bool
+    public function restore(AuthUser $authUser, CustomField $customField): bool
     {
-        return $user->belongsToTeam($customField->team);
+        return $authUser->can('Restore:CustomField');
     }
 
-    public function restoreAny(User $user): bool
+    public function forceDelete(AuthUser $authUser, CustomField $customField): bool
     {
-        return $user->hasVerifiedEmail();
+        return $authUser->can('ForceDelete:CustomField');
     }
 
-    public function forceDelete(User $user, CustomField $customField): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->currentTeam && $user->hasTeamRole($user->currentTeam, 'admin');
+        return $authUser->can('ForceDeleteAny:CustomField');
     }
 
-    public function forceDeleteAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->currentTeam && $user->hasTeamRole($user->currentTeam, 'admin');
+        return $authUser->can('RestoreAny:CustomField');
+    }
+
+    public function replicate(AuthUser $authUser, CustomField $customField): bool
+    {
+        return $authUser->can('Replicate:CustomField');
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:CustomField');
     }
 }

@@ -5,95 +5,70 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\Enquiry;
-use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 final class EnquiryPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(): bool
+    use HandlesAuthorization;
+
+    public function viewAny(AuthUser $authUser): bool
     {
-        return true;
+        return $authUser->can('ViewAny:Enquiry');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Enquiry $enquiry): bool
+    public function view(AuthUser $authUser, Enquiry $enquiry): bool
     {
-        return true;
+        return $authUser->can('View:Enquiry');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(): bool
+    public function create(AuthUser $authUser): bool
     {
-        return true;
+        return $authUser->can('Create:Enquiry');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, Enquiry $enquiry): bool
+    public function update(AuthUser $authUser, Enquiry $enquiry): bool
     {
-        return $user->id === $enquiry->user_id || $user->is_system_admin;
+        return $authUser->can('Update:Enquiry');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user): bool
+    public function delete(AuthUser $authUser, Enquiry $enquiry): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('Delete:Enquiry');
     }
 
-    /**
-     * Determine whether the user can delete any models.
-     */
-    public function deleteAny(User $user): bool
+    public function deleteAny(AuthUser $authUser): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('DeleteAny:Enquiry');
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user): bool
+    public function restore(AuthUser $authUser, Enquiry $enquiry): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('Restore:Enquiry');
     }
 
-    /**
-     * Determine whether the user can restore any models.
-     */
-    public function restoreAny(User $user): bool
+    public function forceDelete(AuthUser $authUser, Enquiry $enquiry): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('ForceDelete:Enquiry');
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('ForceDeleteAny:Enquiry');
     }
 
-    /**
-     * Determine whether the user can permanently delete any models.
-     */
-    public function forceDeleteAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->is_system_admin;
+        return $authUser->can('RestoreAny:Enquiry');
     }
 
-    /**
-     * Determine whether the user can convert the enquiry to a service user.
-     */
-    public function convertToServiceUser(User $user, Enquiry $enquiry): bool
+    public function replicate(AuthUser $authUser, Enquiry $enquiry): bool
     {
-        return $this->update($user, $enquiry);
+        return $authUser->can('Replicate:Enquiry');
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:Enquiry');
     }
 }

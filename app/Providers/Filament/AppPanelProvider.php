@@ -9,6 +9,7 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Resources\CompanyResource;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -32,7 +33,6 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Event;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Jetstream\Features;
 use Openplain\FilamentShadcnTheme\Color;
@@ -62,6 +62,7 @@ final class AppPanelProvider extends PanelProvider
             ->domain('app.'.parse_url((string) config('app.url'))['host'])
             ->homeUrl(fn (): string => CompanyResource::getUrl('index'))
             ->brandName('Relaticle')
+            ->plugin(FilamentShieldPlugin::make())
             ->login(Login::class)
             ->registration(Register::class)
             ->authGuard('web')

@@ -21,7 +21,7 @@ use Illuminate\Support\Carbon;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Collection;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property string $name
@@ -42,6 +42,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
     use HasFactory;
 
     use HasProfilePhoto;
+    use HasRoles;
     use HasTeams;
     use Notifiable;
     use TwoFactorAuthenticatable;

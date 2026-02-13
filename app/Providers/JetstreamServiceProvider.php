@@ -66,6 +66,9 @@ final class JetstreamServiceProvider extends ServiceProvider
     {
         Jetstream::defaultApiTokenPermissions(['read']);
 
+        // These Jetstream roles are used by the TeamMemberManager UI for
+        // member invitations and role assignments. They are separate from
+        // Shield/Spatie permissions which control resource-level access.
         Jetstream::role('admin', 'Administrator', [
             'create',
             'read',
