@@ -66,11 +66,12 @@ final class AppPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make(),
                 AuthUIEnhancerPlugin::make()
-                ->showEmptyPanelOnMobile(false)
+                ->showEmptyPanelOnMobile(true)
             ->formPanelPosition('right')
             ->formPanelWidth('40%')
-            ->emptyPanelBackgroundImageOpacity('70%')
-            ->emptyPanelBackgroundImageUrl('https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'),
+            // ->emptyPanelBackgroundImageOpacity('100%')
+            // ->emptyPanelBackgroundImageUrl('https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')
+            ->emptyPanelBackgroundImageUrl(asset('images/spinney_bg.png')),
             ActivityLogPlugin::make()
                 ->label('Log')
                 ->pluralLabel('Logs')
