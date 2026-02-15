@@ -37,7 +37,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Jetstream\Features;
 use Openplain\FilamentShadcnTheme\Color;
 use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
-
+use AlizHarb\ActivityLog\ActivityLogPlugin;
 final class AppPanelProvider extends PanelProvider
 {
     /**
@@ -70,7 +70,11 @@ final class AppPanelProvider extends PanelProvider
             ->formPanelPosition('right')
             ->formPanelWidth('40%')
             ->emptyPanelBackgroundImageOpacity('70%')
-            ->emptyPanelBackgroundImageUrl('https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')
+            ->emptyPanelBackgroundImageUrl('https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'),
+            ActivityLogPlugin::make()
+                ->label('Log')
+                ->pluralLabel('Logs')
+                ->navigationGroup('System')
             ])
             ->login(Login::class)
             ->registration(Register::class)

@@ -22,6 +22,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 /**
  * @property string $name
@@ -46,6 +48,14 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
     use HasTeams;
     use Notifiable;
     use TwoFactorAuthenticatable;
+
+    use LogsActivity;
+ 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll();
+    }
 
     /**
      * The attributes that are mass assignable.
