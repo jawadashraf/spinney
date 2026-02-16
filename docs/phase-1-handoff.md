@@ -153,14 +153,14 @@ Acceptance Criteria
 
 **Module: Audit Trail**
 Scope
-- Full audit trail of access and changes.
+- Full audit trail of access and changes, utilizing `spatie/laravel-activitylog` integrated into Filament.
 Data
-- New model `AuditLog` with fields: user_id, action, auditable_type, auditable_id, metadata, created_at.
+- Activity Log entries including user_id, action (description), subject_type, subject_id, properties (metadata), and timestamps.
 Permissions
 - Management and Admin.
-Acceptance Criteria
-- Create, update, and delete events are logged.
-- Access to restricted notes is logged.
+Acceptability Criteria
+- Model changes (create, update, delete) are automatically logged.
+- Significant system events and unauthorized access attempts are tracked.
 
 **Permissions Matrix**
 Role definitions are Spatie Permission roles managed via Filament Shield. Roles are seeded and permissions assigned through the Shield admin UI or programmatically.

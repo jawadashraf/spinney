@@ -3,9 +3,9 @@
 Date: 2026-02-08
 
 ## Current Sprint
-- **Sprint**: 2 (Enquiries)
-- **Status**: Completed
-- **Next Task**: Assessment Flow & Case Notes implementation.
+- **Sprint**: 3 (Authentication & Aesthetics)
+- **Status**: In Progress
+- **Next Task**: Unified Case Files & Restricted Notes implementation.
 
 ## Accomplishments
 ### Sprint 1: Foundations (Enquiry)
@@ -23,6 +23,13 @@ Date: 2026-02-08
 - [x] **[Conversion Flow]** Implemented "Promote to Service User" action with modal form for consent and initial assessment.
 - [x] **[Seeding Fix]** Resolved SQL `sort_order` error by ensuring integer indexes in `ServiceUserCustomFieldSeeder` and `CreateTeamCustomFields` listener.
 - [x] Verified full lifecycle from Enquiry logging to Service User promotion with tests.
+
+### Sprint 3: Authentication & Aesthetics (Current)
+- [x] **[Authentication]** Integrated Laravel Fortify with Filament for robust security foundations.
+- [x] **[UI/UX]** Integrated and configured `Filament Auth UI Enhancer` for customized, premium login and registration experiences.
+- [x] **[Layouts]** Implemented `plain` and `guest2` layout variations for flexible content presentation.
+- [x] **[Branding]** Updated application branding and optimized URL generation macros for cleaner environment-agnostic links.
+- [x] **[Auditability]** Implemented Filament Activity Log for comprehensive tracking of model changes and user actions.
 
 ## Decisions
 | Date | Decision | Rationale | Owner |

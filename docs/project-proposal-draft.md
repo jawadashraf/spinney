@@ -1,58 +1,47 @@
 # Project Proposal: Spinney Hill Integrated CRM (Phase 1)
 
 ## 1. Executive Summary
-Spinney Hill provides critical community support services that are currently hindered by paper-based, disconnected systems. This proposal outlines the development of a secure, integrated, and modern CRM system—the **Spinney Hill Digital Backbone**. 
+Spinney Hill Recovery Centre provides critical community support services. To enhance impact and efficiency, we are developing a secure, integrated CRM system—the **Spinney Hill Digital Backbone**. 
 
-This platform will unify frontline enquiries, case management, safeguarding, and donor relations into a single source of truth, enabling the team to focus on what matters most: **impact and recovery**.
+This platform unifies frontline enquiries, case management, and organizational infrastructure into a single source of truth. By digitizing workflows, we ensure service users receive joined-up care while maintaining the highest standards of data security and safeguarding.
 
-## 2. The Challenge
-*   **Paper-Based Risks:** Inefficiencies in data capture and potential safeguarding gaps.
-*   **Disconnected Data:** Difficulty in tracking long-term service user journeys across multiple teams.
-*   **Reporting Overhead:** Manual effort required for funding and governance reports.
+## 2. Strategic Objectives
+*   **Operational Integrity:** Eliminate paper-based risks and centralize data intake.
+*   **Collaborative Care:** Enable seamless transitions from initial enquiry to active case management.
+*   **Safeguarding Excellence:** Implement strict role-based access control for sensitive service user data.
+*   **Demonstrable Impact:** Automated reporting for funding bodies and internal governance.
 
-## 3. Our Solution: The Digital Backbone
-Built on the industry-leading **Laravel 12** and **Filament 4** frameworks, the CRM will provide:
-*   **Integrated Intake:** A "Front Door" for all telephone and walk-in enquiries.
-*   **Unified Case Files:** Shared records for practitioners (D&A, Counselling, Outreach).
-*   **Safeguarding First:** Role-based access and restricted sensitive notes.
-*   **Community Impact:** Streamlined reporting for funders and stakeholders.
+## 3. The Solution: Modern Infrastructure
+Built on a state-of-the-art tech stack (**Laravel 12, Filament 4, PHP 8.4**), the CRM offers:
+*   **Integrated Intake:** A dedicated "Front Door" for call-in and walk-in enquiries.
+*   **Unified Case Files:** Shared records accessible to practitioners in D&A, Counselling, and Outreach.
+*   **Secure Auditability:** Comprehensive activity logging of all record changes and access.
+*   **Premium UX:** High-performance, mobile-responsive interface designed for frontline efficiency.
 
-## 4. Key Value Proposition
-1.  **Security & Compliance:** GDPR-compliant by design with full audit trails.
-2.  **Scalability:** Modern tech stack that grows with the organisation.
-3.  **Efficiency:** Significant reduction in administrative burden for staff.
-4.  **Dignified Support:** Service users experience joined-up care, not repeated assessments.
+## 4. Phase 1 Core Modules
 
----
+### 4.1 Enquiries & Referral Management
+*   Centralized logging with rapid "Conversion" to Service User records.
+*   Automated risk flagging for immediate safeguarding triage.
 
-## 5. Phase 1 Module Overview
+### 4.2 Integrated Case Management
+*   Unified profiles with team-based tenancy and restricted notes.
+*   Granular permissions for sensitive counselling and recovery logs.
 
-### 5.1 Enquiries & Intake
-*   Centralised logging of all initial contacts.
-*   Quick "Conversion" to full service user records.
-*   Early risk flagging.
+### 4.3 Digital Scheduling (Shared Diaries)
+*   Integrated calendars for assessments and follow-up sessions.
+*   Internal and external notification triggers.
 
-### 5.2 Case Management & Collaboration
-*   Single client record shared across specialized teams.
-*   Multi-team case notes with timestamping.
-*   Sensitive data protection (Safeguarding Lead access only).
+### 4.4 Directory & Donor Relations
+*   Management of partner referral networks.
+*   Donation tracking with Gift Aid compliance reporting.
 
-### 5.3 Appointments & Diaries
-*   Shared calendars for Assessment and Support teams.
-*   Automatic internal notifications and email confirmations.
+## 5. Timeline & Delivery
+Phase 1 is scheduled for delivery over **6 focused weekly sprints**. 
 
-### 5.4 Partner & Outreach Directories
-*   Central directory for referrals and partnerships.
-*   Engagement history with schools and youth organizations.
-
-### 5.5 Donor Management & Gift Aid
-*   Secure tracking of donations and supporters.
-*   Gift Aid compliance and reporting.
+> [!NOTE]
+> Detailed sprint breakdowns, milestones, and technical deliverables are documented in the [Project Timeline](file:///Users/jawadashraf/Herd/spinney/docs/project-timeline.md).
 
 ---
-
-## 6. Technical Excellence
-*   **Framework:** Laravel 12 (Modern, Secure, High Performance).
-*   **Admin UI:** Filament 4 (Intuitive, Fast, Professional).
-*   **Security:** Multi-tenant architecture with strict role-based access control (RBAC) powered by Filament Shield and Spatie Permissions.
-*   **Sustainability:** Built with code quality (Pest 4 tests) to ensure long-term stability.
+**Prepared By:** Antigravity (Advanced AI Coding Assistant)
+**Date:** February 16, 2026
