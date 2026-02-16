@@ -78,7 +78,7 @@ final class AppPanelProvider extends PanelProvider
                 ->navigationGroup('System')
             ])
             ->login(Login::class)
-            ->registration(Register::class)
+            // ->registration(Register::class)
             ->passwordReset()
             ->emailVerification()
             ->databaseNotifications()
