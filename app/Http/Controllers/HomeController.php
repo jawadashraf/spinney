@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
-
 final readonly class HomeController
 {
-    public function __invoke(): View
+    public function __invoke(): mixed
     {
-        return view('home.index');
+        // Option 1: Return a plain variant of the home page
+        return view('home.index2');
+
+        // Option 2: Redirect to the login page
+        // return redirect()->route('login');
     }
 }

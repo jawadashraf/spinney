@@ -27,6 +27,6 @@ final class GuestLayout extends Component
     #[Override]
     public function render(): View
     {
-        return view('layouts.guest');
+        return view('layouts.guest2');
     }
 }
