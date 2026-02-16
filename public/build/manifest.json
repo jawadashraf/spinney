@@ -1,6 +1,6 @@
 {
   "app-modules/Documentation/resources/css/documentation.css": {
-    "file": "assets/documentation-OKCivCT6.css",
+    "file": "assets/documentation-Do1nc8l5.css",
     "src": "app-modules/Documentation/resources/css/documentation.css",
     "isEntry": true,
     "name": "documentation",
@@ -15,7 +15,7 @@
     "isEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-BfnHeyfz.css",
+    "file": "assets/app-BNvGsXLv.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -33,7 +33,7 @@
     ]
   },
   "resources/css/filament/app/theme.css": {
-    "file": "assets/theme-B6hiH2vD.css",
+    "file": "assets/theme-C-1xrHWJ.css",
     "src": "resources/css/filament/app/theme.css"
   },
   "resources/js/app.js": {
