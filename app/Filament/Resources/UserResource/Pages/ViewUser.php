@@ -33,7 +33,7 @@ final class ViewUser extends ViewRecord
             Section::make()->schema([
                 Flex::make([
                     TextEntry::make('name')
-                        ->label('')
+                        ->hiddenLabel()
                         ->size(TextSize::Large),
                     TextEntry::make('email')
                         ->label('Email')

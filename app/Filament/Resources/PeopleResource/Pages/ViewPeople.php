@@ -41,12 +41,12 @@ final class ViewPeople extends ViewRecord
             Section::make()->schema([
                 Flex::make([
                     ImageEntry::make('avatar')
-                        ->label('')
+                        ->hiddenLabel()
                         ->height(30)
                         ->circular()
                         ->grow(false),
                     TextEntry::make('name')
-                        ->label('')
+                        ->hiddenLabel()
                         ->size(TextSize::Large),
                     TextEntry::make('company.name')
                         ->label('Company')

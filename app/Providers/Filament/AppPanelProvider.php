@@ -94,7 +94,7 @@ final class AppPanelProvider extends PanelProvider
             ->emailVerification()
             ->databaseNotifications()
             ->brandLogoHeight('2.6rem')
-            ->brandLogo(fn (): View|Factory => view('filament.app.logo'))
+            // ->brandLogo(fn (): View|Factory => view('filament.app.logo'))
             ->viteTheme('resources/css/app.css')
             ->colors([
                 // 'primary' => [
@@ -133,7 +133,7 @@ final class AppPanelProvider extends PanelProvider
                 ApiTokens::class,
             ])
             ->spa()
-            ->breadcrumbs(false)
+            ->breadcrumbs(true)
             ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([
                 NavigationGroup::make()

@@ -64,7 +64,7 @@ final class UserResource extends Resource
             ->columns([
                 ImageColumn::make('profile_photo_url')
                     ->label('')
-                    ->size(24)
+                    ->imageSize(24)
                     ->circular(),
                 TextColumn::make('name')
                     ->searchable()

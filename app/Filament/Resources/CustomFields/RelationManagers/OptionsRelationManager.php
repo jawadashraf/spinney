@@ -49,7 +49,7 @@ class OptionsRelationManager extends RelationManager
             ->defaultSort('sort_order')
             ->headerActions([
                 CreateAction::make()
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->mutateDataUsing(function (array $data): array {
                         $data['team_id'] = $this->getOwnerRecord()->team_id;
                         return $data;
                     }),

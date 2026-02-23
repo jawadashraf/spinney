@@ -103,7 +103,7 @@ final class PeopleResource extends Resource
     {
         return $table
             ->columns([
-                ImageColumn::make('avatar')->label('')->size(24)->circular(),
+                ImageColumn::make('avatar')->label('')->imageSize(24)->circular(),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('company.name')

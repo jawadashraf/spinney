@@ -78,7 +78,7 @@ final class ViewCompany extends ViewRecord
                                 ->avatarSize('lg')
                                 ->textSize('xl')
                                 ->square()
-                                ->label(''),
+                                ->hiddenLabel(),
                             AvatarName::make('creator')
                                 ->avatar('creator.avatar')
                                 ->name('creator.name')
