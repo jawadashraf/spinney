@@ -23,6 +23,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\Size;
 use Filament\Tables\Table;
 use Filament\View\PanelsRenderHook;
+use Guava\FilamentKnowledgeBase\Plugins\KnowledgeBaseCompanionPlugin;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -84,6 +85,8 @@ final class AppPanelProvider extends PanelProvider
         ->setNavigationGroup('Settings')
         ->setTitle('General Settings')
         ->setNavigationLabel('General Settings'),
+        KnowledgeBaseCompanionPlugin::make()
+    ->knowledgeBasePanelId('knowledge-base'),
             ])
             ->login(Login::class)
             // ->registration(Register::class)

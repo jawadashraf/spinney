@@ -153,7 +153,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
             return $this->is_system_admin && $this->hasVerifiedEmail();
         }
 
-        if ($panel->getId() === 'app') {
+        if ($panel->getId() === 'app' || $panel->getId() === 'knowledge-base') {
             return $this->hasVerifiedEmail();
         }
 

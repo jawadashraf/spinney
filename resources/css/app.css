@@ -4,3 +4,5 @@
 /* Tailwind Typography Plugin */
 @plugin "@tailwindcss/typography";
 @import "./theme.css";
+@source '../../../../vendor/guava/filament-knowledge-base/src/**/*';
+@source '../../../../vendor/guava/filament-knowledge-base/resources/views/**/*'

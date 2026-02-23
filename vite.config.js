@@ -16,6 +16,7 @@ export default defineConfig({
                 // Documentation
                 'app-modules/Documentation/resources/css/documentation.css',
                 'app-modules/Documentation/resources/js/documentation.js',
+                'resources/css/filament/knowledge-base/theme.css',
             ],
             refresh: true,
         }),
