@@ -15,7 +15,8 @@
     --color-primary-800: oklch(0.432 0.211 292.759);
     --color-primary-900: oklch(0.380 0.178 293.745);
     --color-primary-950: oklch(0.283 0.135 291.089);
-    --color-primary: oklch(0.541 0.247 293.009); /* DEFAULT: primary-600 */
+    --color-primary: oklch(0.541 0.247 293.009);
+    /* DEFAULT: primary-600 */
 }
 
 @custom-variant dark (&:where(.dark, .dark *));

@@ -3,5 +3,4 @@
 
 /* Tailwind Typography Plugin */
 @plugin "@tailwindcss/typography";
-
 @import "./theme.css";

@@ -34,6 +34,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Joaopaulolndev\FilamentGeneralSettings\FilamentGeneralSettingsPlugin;
 use Laravel\Jetstream\Features;
 use Openplain\FilamentShadcnTheme\Color;
 use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
@@ -75,7 +76,14 @@ final class AppPanelProvider extends PanelProvider
             ActivityLogPlugin::make()
                 ->label('Log')
                 ->pluralLabel('Logs')
-                ->navigationGroup('System')
+                ->navigationGroup('System'),
+                FilamentGeneralSettingsPlugin::make()
+        ->canAccess(fn() => auth()->user()->id === 1)
+        ->setSort(3)
+        ->setIcon('heroicon-o-cog')
+        ->setNavigationGroup('Settings')
+        ->setTitle('General Settings')
+        ->setNavigationLabel('General Settings'),
             ])
             ->login(Login::class)
             // ->registration(Register::class)

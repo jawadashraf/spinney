@@ -22,6 +22,8 @@
         "blade-ui-kit/blade-icons": "^1.8",
         "diogogpinto/filament-auth-ui-enhancer": "^2.0",
         "filament/filament": "^4.0",
+        "guava/filament-knowledge-base": "^2.1",
+        "joaopaulolndev/filament-general-settings": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/horizon": "^5.29",
         "laravel/jetstream": "^5.2",
