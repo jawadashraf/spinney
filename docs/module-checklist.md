@@ -41,6 +41,10 @@ Date: 2026-02-05
 ## Telephone Check-In and Aftercare
 - [ ] Data model and migration complete
 - [ ] Engagement log UI
+- [ ] **Automated follow-up task generation**:
+    - [ ] Weekly/Bi-weekly logic for Active users
+    - [ ] Monthly logic for Post-care users (< 2 years)
+- [ ] **Due/Overdue alert system**
 - [ ] Outcomes and next steps captured
 - [ ] Permissions enforced
 - [ ] Tests added and passing
@@ -66,15 +70,65 @@ Date: 2026-02-05
 - [ ] Consent tracking fields defined
 - [ ] Tests added and passing
 
+## Team Management & Tasks
+- [ ] Team management module implemented
+- [ ] Task assignment to individuals within teams
+- [ ] Task alerts (attention, due time)
+- [ ] Permissions enforced
+- [ ] Tests added and passing
+
+## Care Timeline & Session Logs
+- [ ] Session log model for Check-In, Spiritual, and Therapy
+- [ ] Shared timeline view for service users
+- [ ] Therapist "suggest action" functionality
+- [ ] Restricted view permissions for session logs
+- [ ] Tests added and passing
+
+## Dynamic Scheduled Forms
+- [ ] Dynamic form builder/structure
+- [ ] Daily/Weekly schedule generation
+- [ ] Service user update UI
+- [ ] Reminder and motivation logic
+- [ ] Team alerts based on submissions
+- [ ] Tests added and passing
+
+## Multi-Channel Notifications
+- [ ] Live notifications with actionable links
+- [ ] Targeted database notifications with filtering
+- [ ] Email notification system
+- [ ] Tests added and passing
+
+## Payments & Charging
+- [ ] Therapist session charging logic
+- [ ] Online payment tracking
+- [ ] Offline & Bank Transfer recording
+- [ ] Permissions enforced
+- [ ] Tests added and passing
+
+## AI Engagement (Chatbot)
+- [ ] AI Chatbot frontend interface
+- [ ] Intent classification and lead capture logic
+- [ ] Automated Enquiry creation from chat sessions
+- [ ] Permissions and oversight views
+- [ ] Tests added and passing
+
+## Multi-Dashboard Infrastructure
+- [ ] Role-specific dashboard system (Check-In, Counselor, Therapist)
+- [ ] Multiple dashboards for managing admin
+- [ ] Custom metric/widget support
+- [ ] Permissions enforced
+- [ ] Tests added and passing
+
 ## Reporting and Exports
 - [ ] Baseline reports implemented
 - [ ] Export functionality available
+- [ ] Payment and engagement reports
 - [ ] Permissions enforced
 - [ ] Tests added and passing
 
 ## Audit Trail
 - [ ] Audit log model and storage
 - [ ] Logging for create/update/delete
-- [ ] Logging for access to restricted notes
+- [ ] Logging for access to restricted notes and session logs
 - [ ] Admin/management views
 - [ ] Tests added and passing

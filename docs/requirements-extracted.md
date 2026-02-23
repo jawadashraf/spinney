@@ -83,15 +83,18 @@ Notes should be:
 
 Sensitive notes (e.g., safeguarding, spiritual counselling) must have restricted access.
 
-## 8. Telephone Check‑In & Aftercare
+## 8. Telephone Check‑In & Aftercare (Follow-Up)
 The CRM should support ongoing recovery and aftercare by:
-- Giving telephone support staff access to:
-  - Contact details of current and past service users
-  - Engagement history
+- Giving telephone support staff access to contact details and engagement history.
+- **Automated Follow-Up Tasks**:
+    - **Active Service Users**: Adjustable follow-up schedule (every 1 week or 2 weeks).
+    - **Post-Care (Inactive)**: Monthly follow-ups for service users who are "cured/sober" for less than 2 years.
+- **Task Management**:
+    - Generated follow-up tasks assigned to Check-In workers.
+    - System alerts for due and overdue follow-ups.
 - Allowing staff to log:
-  - Welfare check‑in calls
-  - Follow‑ups
-  - Outcomes and next steps
+    - Welfare check‑in calls and follow‑ups.
+    - Outcomes and next steps.
 
 ## 9. Directories & Relationship Management
 
@@ -156,21 +159,48 @@ CRM must support reporting on:
 
 Dashboards for leadership and exportable reports for funders and trustees are highly desirable.
 
-## 13. Recommended Additional Features
-- Task and workflow automation
-- Communication logs (calls, emails, appointments)
-- Outcome and progress tracking
-- Faith and cultural sensitivity fields
-- Mobile and tablet‑friendly access
+## 13. Enhanced Care & Operations (New)
+### 13.1 Team & Task Management
+- Teams must have tasks and individuals from those teams will be assigned to tasks.
+- Task features: attention, alerts, and due time approaching notifications.
+- Integrated Team management module.
 
-## 14. Success Criteria
-CRM is successful if:
-- All enquiries are logged in one place
-- Teams collaborate on shared client records
-- Appointments and referrals are streamlined
-- Data supports funding, governance, and learning
-- Staff experience reduced admin and better coordination
-- Service users receive joined‑up, dignified support
+### 13.2 Specialized Care Roles
+- **Check-In Worker**: Regular logs of sessions and timeline access.
+- **Spiritual Counselor**: Regular logs of sessions and timeline access.
+- **Therapist**: 
+  - Access to all notes.
+  - Suggest actions for the service user.
+  - Sessions can be charged (online/offline payments).
 
-## Summary
-The CRM is a collaboration platform, safeguarding tool, funding enabler, and long‑term recovery support system aligned to Spinney Hill’s mission and values.
+### 13.3 Dynamic Scheduled Forms
+- Dynamic forms (surveys) generated for each service user.
+- Daily and/or weekly actions for service users to perform and update.
+- System reminders and motivation for service users.
+- Automated alerts for relevant teams based on form activity.
+
+### 13.4 Multi-Channel Notifications
+- **Live Notifications**: Real-time alerts to relevant roles with actionable links.
+- **Targeted Database Notifications**: Historical alerts that can be filtered.
+- **Email Notifications**: For relevant roles, persons, or teams.
+
+### 13.5 Payment Tracking
+- Charging logic for Therapist sessions.
+- Support for multiple payment methods: Online, Offline, Bank Transfer.
+
+### 13.7 AI Engagement (Chatbot)
+- Automated chatbot to engage website visitors enquiring about services.
+- Intelligent information capture (name, contact details, reason for enquiry).
+- Seamless integration with the Enquiry management module (creating automated enquiry records).
+
+## 14. Budget & Engagement
+- **Total Project Fee**: £4,000.
+- **Project Duration**: 6-8 weeks.
+- **Payment Structure**: Installment-based (linked to milestones).
+
+## 15. Success Criteria
+- All enquiries (manual and chatbot-generated) are logged in one place.
+- Teams collaborate on shared client records with clear session histories.
+- Service users engage with dynamic daily/weekly surveys.
+- Payments and charges are tracked accurately.
+- Staff experience reduced admin and better coordination through real-time notifications, role-specific dashboards, and automated chatbot leads.

@@ -24,20 +24,34 @@ Built on a state-of-the-art tech stack (**Laravel 12, Filament 4, PHP 8.4**), th
 *   Centralized logging with rapid "Conversion" to Service User records.
 *   Automated risk flagging for immediate safeguarding triage.
 
-### 4.2 Integrated Case Management
-*   Unified profiles with team-based tenancy and restricted notes.
-*   Granular permissions for sensitive counselling and recovery logs.
+### 4.2 Integrated Case Management & Care Timeline
+*   **Specialized Roles**: Check-In Workers, Spiritual Counselors, and Therapists.
+*   **Shared Timeline**: A unified session history visible to practitioners.
+*   **Smart Follow-Ups**: Check-In workers are automatically assigned follow-up tasks based on user status:
+    *   **Active**: Weekly or bi-weekly check-ins.
+    *   **Post-Recovery**: Monthly check-ins for up to 2 years post-care.
+*   **Therapist Actions**: Ability for therapists to suggest care actions and charge for sessions.
 
-### 4.3 Digital Scheduling (Shared Diaries)
+### 4.3 Digital Scheduling & Dynamic Forms
 *   Integrated calendars for assessments and follow-up sessions.
-*   Internal and external notification triggers.
+*   **Dynamic Surveys**: Automated daily/weekly actions for service users to perform, with motivational reminders.
+*   **Smart Alerts**: System triggers for relevant teams based on form activity.
 
-### 4.4 Directory & Donor Relations
-*   Management of partner referral networks.
-*   Donation tracking with Gift Aid compliance reporting.
+### 4.4 Team Management & AI Engagement
+*   **Integrated Teams**: Task assignment to individuals within teams with "attention" and "due time" alerts.
+*   **Multi-Channel Alerts**: Real-time live links, targeted database notifications, and email alerts.
+*   **AI Chatbot**: Automated engagement tool for the public-facing "Front door" to capture enquiries and provide initial guidance 24/7.
 
-## 5. Timeline & Delivery
-Phase 1 is scheduled for delivery over **6 focused weekly sprints**. 
+### 4.5 Payment Tracking & Role Dashboards
+*   Logging of therapist session charges.
+*   Support for Online, Offline, and Bank Transfer recording.
+*   **Multi-Dashboard System**: Specialized, multiple dashboards for each practitioner role and the managing admin to track key performance indicators and service user status.
+
+## 5. Budget & Funding
+The total project fee for Phase 1 (Core Backbone + Care Module) is **£4,000**. To support sustainable delivery, the payment is structured into **installments linked to delivery milestones**.
+
+## 6. Timeline & Delivery
+Phase 1 is scheduled for delivery over **6-8 focused weekly sprints**. 
 
 > [!NOTE]
 > Detailed sprint breakdowns, milestones, and technical deliverables are documented in the [Project Timeline](file:///Users/jawadashraf/Herd/spinney/docs/project-timeline.md).
