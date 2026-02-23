@@ -19,6 +19,11 @@ use Illuminate\Support\Facades\Event;
 pest()->extend(Tests\TestCase::class)
     ->use(RefreshDatabase::class)
     ->beforeEach(function () {
+        // Safety check to prevent wiping the main database
+        if (config('database.connections.mysql.database') === 'spinney') {
+            throw new \Exception('CRITICAL: Testing database is pointing to "spinney". Aborting to prevent data loss. Run "php artisan config:clear" and try again.');
+        }
+
         // Globally disable TeamCreated event to prevent demo record creation during tests
         // while allowing model observers to function.
         Event::fake([

@@ -1,0 +1,18 @@
+resources:
+  Team:
+    model: App\Models\Team
+    navigationGroup: Workspace
+    navigationIcon: heroicon-o-users
+    schema:
+      - name:
+          required: true
+      - personal_team:
+          type: boolean
+          default: false
+    relations:
+      - users:
+          model: App\Models\User
+          type: BelongsToMany
+          schema:
+            - name
+            - email

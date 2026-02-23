@@ -17,7 +17,7 @@ php artisan db:seed --class=ShieldSeeder --no-interaction
 echo "🔑 Generating Shield permissions for app panel..."
 php artisan shield:generate --all --panel=app --no-interaction
 
-echo "👑 Assigning super_admin role to user ID 2..."
+echo "👑 Assigning super_admin role to user ID 1..."
 php artisan shield:super-admin --user=1 --panel=app --no-interaction
 
 echo ""
