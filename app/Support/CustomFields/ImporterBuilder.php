@@ -11,9 +11,9 @@ use Illuminate\Database\Eloquent\Model;
 
 final class ImporterBuilder
 {
-    protected ?Model $record = null;
+    private ?Model $record = null;
 
-    protected ?string $modelClass = null;
+    private ?string $modelClass = null;
 
     public function forModel(mixed $model): static
     {
@@ -51,13 +51,13 @@ final class ImporterBuilder
 
     public function saveValues(): void
     {
-        if (! $this->record) {
+        if (! $this->record instanceof \Illuminate\Database\Eloquent\Model) {
             return;
         }
 
         $values = ImportDataStorage::pull($this->record);
 
-        if (empty($values)) {
+        if ($values === []) {
             return;
         }
 

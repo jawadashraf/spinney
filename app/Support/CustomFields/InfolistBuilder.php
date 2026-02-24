@@ -14,15 +14,15 @@ use Illuminate\Support\Collection;
 
 final class InfolistBuilder
 {
-    protected ?Schema $schema = null;
+    private ?Schema $schema = null;
 
-    protected array $only = [];
+    private array $only = [];
 
-    protected bool $hiddenLabels = false;
+    private bool $hiddenLabels = false;
 
-    protected bool $visibleWhenFilled = false;
+    private bool $visibleWhenFilled = false;
 
-    protected bool $withoutSections = false;
+    private bool $withoutSections = false;
 
     public function forSchema(Schema $schema): static
     {
@@ -61,7 +61,7 @@ final class InfolistBuilder
 
     public function build(): Grid
     {
-        $modelClass = $this->schema ? $this->schema->getModel() : null;
+        $modelClass = $this->schema instanceof \Filament\Schemas\Schema ? $this->schema->getModel() : null;
 
         if ($modelClass && ! $this->withoutSections) {
             $sections = CustomFieldSection::query()
@@ -76,15 +76,15 @@ final class InfolistBuilder
                 foreach ($sections as $section) {
                     $fields = $section->fields;
 
-                    if (! empty($this->only)) {
-                        $fields = $fields->filter(fn (CustomField $field) => in_array($field->code, $this->only));
+                    if ($this->only !== []) {
+                        $fields = $fields->filter(fn (CustomField $field): bool => in_array($field->code, $this->only));
                     }
 
                     if ($fields->isEmpty()) {
                         continue;
                     }
 
-                    $entryComponents = $fields->map(fn (CustomField $field) => $this->createEntry($field))->toArray();
+                    $entryComponents = $fields->map(fn (CustomField $field): mixed => $this->createEntry($field))->toArray();
 
                     $sectionComponents[] = Section::make($section->name)
                         ->description($section->description)
@@ -92,7 +92,7 @@ final class InfolistBuilder
                         ->columns(2);
                 }
 
-                if (! empty($sectionComponents)) {
+                if ($sectionComponents !== []) {
                     return Grid::make(1)->components($sectionComponents);
                 }
             }
@@ -103,7 +103,7 @@ final class InfolistBuilder
 
     public function values(): Collection
     {
-        $modelClass = $this->schema ? $this->schema->getModel() : null;
+        $modelClass = $this->schema instanceof \Filament\Schemas\Schema ? $this->schema->getModel() : null;
 
         $query = CustomField::query()
             ->where('active', true)
@@ -116,14 +116,14 @@ final class InfolistBuilder
 
         $fields = $query->get();
 
-        if (! empty($this->only)) {
-            $fields = $fields->filter(fn (CustomField $field) => in_array($field->code, $this->only));
+        if ($this->only !== []) {
+            $fields = $fields->filter(fn (CustomField $field): bool => in_array($field->code, $this->only));
         }
 
-        return $fields->map(fn (CustomField $field) => $this->createEntry($field));
+        return $fields->map(fn (CustomField $field): mixed => $this->createEntry($field));
     }
 
-    protected function createEntry(CustomField $field): mixed
+    private function createEntry(CustomField $field): mixed
     {
         // For simplicity, we use TextEntry for most fields in infolists
         $entry = TextEntry::make($field->code);
@@ -135,7 +135,7 @@ final class InfolistBuilder
         }
 
         if ($this->visibleWhenFilled) {
-            $entry->visible(fn ($record) => filled($record->{$field->code} ?? null));
+            $entry->visible(fn ($record): bool => filled($record->{$field->code} ?? null));
         }
 
         return $entry;

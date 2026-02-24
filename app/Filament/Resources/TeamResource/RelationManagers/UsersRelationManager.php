@@ -18,7 +18,6 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Validation\Rule;
 
 final class UsersRelationManager extends RelationManager
 {
@@ -57,9 +56,9 @@ final class UsersRelationManager extends RelationManager
                 CreateAction::make(),
                 AttachAction::make()
                     ->recordSelectOptionsQuery(fn ($query) => $query->whereDoesntHave('roles', fn ($query) => $query->where('name', 'service_user')))
-                    ->recordSelect(fn (Select $select) => $select->rules([
+                    ->recordSelect(fn (Select $select): \Filament\Forms\Components\Select => $select->rules([
                         'required',
-                        fn () => function (string $attribute, $value, \Closure $fail) {
+                        fn (): \Closure => function (string $attribute, $value, \Closure $fail): void {
                             if (! \App\Models\User::query()
                                 ->where('id', $value)
                                 ->whereDoesntHave('roles', fn ($q) => $q->where('name', 'service_user'))

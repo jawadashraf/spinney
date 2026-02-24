@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Enums\CustomFields\PeopleField;
 use App\Enums\CustomFields\CustomFieldSectionType;
-use App\Models\People;
-use App\Models\Team;
+use App\Enums\CustomFields\PeopleField;
 use App\Models\CustomField;
 use App\Models\CustomFieldSection;
+use App\Models\People;
+use App\Models\Team;
 use Illuminate\Database\Seeder;
 
 final class ServiceUserCustomFieldSeeder extends Seeder

@@ -13,7 +13,7 @@ final class UserPolicy
         return $user->is_system_admin;
     }
 
-    public function view(User $user, User $model): bool
+    public function view(User $user): bool
     {
         return $user->is_system_admin;
     }
@@ -23,7 +23,7 @@ final class UserPolicy
         return $user->is_system_admin;
     }
 
-    public function update(User $user, User $model): bool
+    public function update(User $user): bool
     {
         return $user->is_system_admin;
     }
@@ -42,7 +42,7 @@ final class UserPolicy
         return $user->is_system_admin;
     }
 
-    public function restore(User $user, User $model): bool
+    public function restore(User $user): bool
     {
         return $user->is_system_admin;
     }

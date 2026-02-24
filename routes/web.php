@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Auth\CallbackController;
-use App\Http\Controllers\Auth\RedirectController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PrivacyPolicyController;
 use App\Http\Controllers\TermsOfServiceController;

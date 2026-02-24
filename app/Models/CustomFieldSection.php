@@ -40,7 +40,8 @@ final class CustomFieldSection extends Model
         return $this->hasMany(CustomField::class)->orderBy('sort_order');
     }
 
-    public function scopeForEntity($query, string $entityType)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function forEntity($query, string $entityType)
     {
         return $query->where('entity_type', $entityType);
     }

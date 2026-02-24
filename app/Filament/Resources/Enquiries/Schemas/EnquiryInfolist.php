@@ -31,7 +31,7 @@ final class EnquiryInfolist
 
                         TextEntry::make('converted_at')
                             ->dateTime()
-                            ->visible(fn ($record) => $record?->converted_at !== null),
+                            ->visible(fn ($record): bool => $record?->converted_at !== null),
 
                         IconEntry::make('safeguarding_flags')
                             ->boolean()

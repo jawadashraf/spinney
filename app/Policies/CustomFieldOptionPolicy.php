@@ -6,7 +6,6 @@ namespace App\Policies;
 
 use App\Models\CustomFieldOption;
 use App\Models\User;
-use Filament\Facades\Filament;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 final readonly class CustomFieldOptionPolicy
@@ -18,7 +17,7 @@ final readonly class CustomFieldOptionPolicy
         return $user->hasVerifiedEmail();
     }
 
-    public function view(User $user, CustomFieldOption $customFieldOption): bool
+    public function view(): bool
     {
         return true;
     }
@@ -53,7 +52,7 @@ final readonly class CustomFieldOptionPolicy
         return $user->hasVerifiedEmail();
     }
 
-    public function forceDelete(User $user, CustomFieldOption $customFieldOption): bool
+    public function forceDelete(User $user): bool
     {
         return $user->currentTeam && $user->hasTeamRole($user->currentTeam, 'admin');
     }

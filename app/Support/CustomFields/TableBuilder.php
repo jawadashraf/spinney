@@ -10,7 +10,7 @@ use Filament\Tables\Filters\SelectFilter;
 
 final class TableBuilder
 {
-    protected ?string $model = null;
+    private ?string $model = null;
 
     public function forModel(?string $model): static
     {
@@ -29,7 +29,7 @@ final class TableBuilder
             $query->where('entity_type', $this->model);
         }
 
-        return $query->get()->map(fn (CustomField $field) => $this->createColumn($field))->all();
+        return $query->get()->map(fn (CustomField $field): \Filament\Tables\Columns\TextColumn => $this->createColumn($field))->all();
     }
 
     public function filters(): array
@@ -43,10 +43,10 @@ final class TableBuilder
             $query->where('entity_type', $this->model);
         }
 
-        return $query->get()->map(fn (CustomField $field) => $this->createFilter($field))->filter()->all();
+        return $query->get()->map(fn (CustomField $field): mixed => $this->createFilter($field))->filter()->all();
     }
 
-    protected function createColumn(CustomField $field): TextColumn
+    private function createColumn(CustomField $field): TextColumn
     {
         $column = TextColumn::make($field->code)
             ->label($field->name)
@@ -62,7 +62,7 @@ final class TableBuilder
         return $column;
     }
 
-    protected function createFilter(CustomField $field): mixed
+    private function createFilter(CustomField $field): mixed
     {
         if ($field->type === 'select') {
             return SelectFilter::make($field->code)

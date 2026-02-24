@@ -98,7 +98,7 @@ final class ConvertToServiceUserAction extends Action
                     ])->columns(2),
             ])
             ->action(function (array $data, Enquiry $record): void {
-                DB::transaction(function () use ($data, $record) {
+                DB::transaction(function () use ($data, $record): void {
                     /** @var People $person */
                     $person = $record->people;
 
@@ -128,7 +128,7 @@ final class ConvertToServiceUserAction extends Action
                     ]);
 
                     // 5. Notify Staff (super_admin and safeguarding)
-                    User::role(['super_admin', 'safeguarding'])->get()->each(function (User $staff) use ($person) {
+                    User::role(['super_admin', 'safeguarding'])->get()->each(function (User $staff) use ($person): void {
                         $staff->notify(new ServiceUserPromotedNotification($person));
                     });
                 });

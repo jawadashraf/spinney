@@ -167,7 +167,7 @@ final class PeopleResource extends Resource
                         ->label('Lock Profile')
                         ->icon('heroicon-o-lock-closed')
                         ->color('danger')
-                        ->visible(function (People $record) {
+                        ->visible(function (People $record): bool {
                             /** @var User|null $user */
                             $user = Auth::user();
 
@@ -179,7 +179,7 @@ final class PeopleResource extends Resource
                         ->label('Unlock Profile')
                         ->icon('heroicon-o-lock-open')
                         ->color('success')
-                        ->visible(function (People $record) {
+                        ->visible(function (People $record): bool {
                             /** @var User|null $user */
                             $user = Auth::user();
 

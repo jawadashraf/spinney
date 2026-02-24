@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use AlizHarb\ActivityLog\ActivityLogPlugin;
 use App\Filament\Pages\ApiTokens;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Resources\CompanyResource;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -38,8 +40,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Joaopaulolndev\FilamentGeneralSettings\FilamentGeneralSettingsPlugin;
 use Laravel\Jetstream\Features;
 use Openplain\FilamentShadcnTheme\Color;
-use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
-use AlizHarb\ActivityLog\ActivityLogPlugin;
+
 final class AppPanelProvider extends PanelProvider
 {
     /**
@@ -68,25 +69,25 @@ final class AppPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make(),
                 AuthUIEnhancerPlugin::make()
-                ->showEmptyPanelOnMobile(true)
-            ->formPanelPosition('right')
-            ->formPanelWidth('40%')
+                    ->showEmptyPanelOnMobile(true)
+                    ->formPanelPosition('right')
+                    ->formPanelWidth('40%')
             // ->emptyPanelBackgroundImageOpacity('100%')
             // ->emptyPanelBackgroundImageUrl('https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')
-            ->emptyPanelBackgroundImageUrl(asset('images/spinney_bg.png')),
-            ActivityLogPlugin::make()
-                ->label('Log')
-                ->pluralLabel('Logs')
-                ->navigationGroup('System'),
+                    ->emptyPanelBackgroundImageUrl(asset('images/spinney_bg.png')),
+                ActivityLogPlugin::make()
+                    ->label('Log')
+                    ->pluralLabel('Logs')
+                    ->navigationGroup('System'),
                 FilamentGeneralSettingsPlugin::make()
-        ->canAccess(fn() => auth()->user()->id === 1)
-        ->setSort(3)
-        ->setIcon('heroicon-o-cog')
-        ->setNavigationGroup('Settings')
-        ->setTitle('General Settings')
-        ->setNavigationLabel('General Settings'),
-        KnowledgeBaseCompanionPlugin::make()
-    ->knowledgeBasePanelId('knowledge-base'),
+                    ->canAccess(fn (): bool => auth()->user()->id === 1)
+                    ->setSort(3)
+                    ->setIcon('heroicon-o-cog')
+                    ->setNavigationGroup('Settings')
+                    ->setTitle('General Settings')
+                    ->setNavigationLabel('General Settings'),
+                KnowledgeBaseCompanionPlugin::make()
+                    ->knowledgeBasePanelId('knowledge-base'),
             ])
             ->login(Login::class)
             // ->registration(Register::class)

@@ -11,6 +11,7 @@ use Filament\Support\Enums\Size;
 final class Login extends \Filament\Auth\Pages\Login
 {
     use HasCustomLayout;
+
     protected function getAuthenticateFormAction(): Action
     {
         return Action::make('authenticate')

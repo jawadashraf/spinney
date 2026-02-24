@@ -11,7 +11,6 @@ use App\Models\People;
 use App\Models\Team;
 use App\Models\User;
 use Filament\Facades\Filament;
-use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,12 +24,10 @@ final class LocalSeeder extends Seeder
             return;
         }
 
-        
         $this->call([
             SystemAdministratorSeeder::class,
             TeamSeeder::class,
         ]);
-        
 
         $user = User::firstOrCreate(
             ['email' => 'manuk.minasyan1@gmail.com'],
@@ -40,8 +37,6 @@ final class LocalSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        
-
 
         if ($user->wasRecentlyCreated && ! $user->currentTeam) {
             $managementTeam = Team::where('name', 'Management')->first();

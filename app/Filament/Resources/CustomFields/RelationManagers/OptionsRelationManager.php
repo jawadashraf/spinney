@@ -16,7 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class OptionsRelationManager extends RelationManager
+final class OptionsRelationManager extends RelationManager
 {
     protected static string $relationship = 'options';
 
@@ -51,6 +51,7 @@ class OptionsRelationManager extends RelationManager
                 CreateAction::make()
                     ->mutateDataUsing(function (array $data): array {
                         $data['team_id'] = $this->getOwnerRecord()->team_id;
+
                         return $data;
                     }),
             ])

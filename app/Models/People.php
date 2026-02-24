@@ -96,7 +96,8 @@ final class People extends Model implements HasCustomFieldsContract
      * @param  Builder<People>  $query
      * @return Builder<People>
      */
-    public function scopeServiceUsers(Builder $query): Builder
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function serviceUsers(Builder $query): Builder
     {
         return $query->where('is_service_user', true);
     }

@@ -16,8 +16,8 @@ use App\Models\Task;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -60,10 +60,8 @@ final class CustomFieldSectionResource extends Resource
                         TextInput::make('code')
                             ->required()
                             ->maxLength(255)
-                            ->unique(ignoreRecord: true, modifyRuleUsing: function ($rule, $get) {
-                                return $rule->where('entity_type', $get('entity_type'))
-                                            ->where('team_id', Auth::user()?->current_team_id);
-                            }),
+                            ->unique(ignoreRecord: true, modifyRuleUsing: fn ($rule, $get) => $rule->where('entity_type', $get('entity_type'))
+                                ->where('team_id', Auth::user()?->current_team_id)),
 
                         Select::make('type')
                             ->options([

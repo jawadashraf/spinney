@@ -11,7 +11,6 @@ use App\Models\Task;
 use App\Models\User;
 use App\Services\AI\RecordContextBuilder;
 use App\Services\AI\RecordSummaryService;
-use Filament\Facades\Filament;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\Testing\TextResponseFake;

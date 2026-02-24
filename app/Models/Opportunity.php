@@ -31,11 +31,11 @@ final class Opportunity extends Model implements HasCustomFieldsContract
 {
     use HasAiSummary;
     use HasCreator;
-
     use HasCustomFields;
 
     /** @use HasFactory<OpportunityFactory> */
     use HasFactory;
+
     use HasNotes;
     use HasTeam;
     use SoftDeletes;

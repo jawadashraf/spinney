@@ -162,7 +162,11 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
         }
 
         if ($panel->getId() === 'app' || $panel->getId() === 'knowledge-base') {
-            return $this->hasVerifiedEmail() || $this->hasRole('service_user');
+            if ($this->hasVerifiedEmail()) {
+                return true;
+            }
+
+            return $this->hasRole('service_user');
         }
 
         return false;

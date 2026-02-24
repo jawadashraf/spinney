@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\CustomFieldSections\Pages;
 
 use App\Filament\Resources\CustomFieldSections\CustomFieldSectionResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
-class ListCustomFieldSections extends ListRecords
+final class ListCustomFieldSections extends ListRecords
 {
     protected static string $resource = CustomFieldSectionResource::class;
 

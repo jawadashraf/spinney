@@ -9,7 +9,7 @@ use Filament\Actions\Exports\ExportColumn;
 
 final class ExporterBuilder
 {
-    protected ?string $model = null;
+    private ?string $model = null;
 
     public function forModel(?string $model): static
     {
@@ -28,15 +28,13 @@ final class ExporterBuilder
             $query->where('entity_type', $this->model);
         }
 
-        return $query->get()->map(fn (CustomField $field) => $this->createColumn($field))->all();
+        return $query->get()->map(fn (CustomField $field): \Filament\Actions\Exports\ExportColumn => $this->createColumn($field))->all();
     }
 
-    protected function createColumn(CustomField $field): ExportColumn
+    private function createColumn(CustomField $field): ExportColumn
     {
         return ExportColumn::make($field->code)
             ->label($field->name)
-            ->state(function ($record) use ($field) {
-                return $record->getCustomFieldValue($field);
-            });
+            ->state(fn ($record) => $record->getCustomFieldValue($field));
     }
 }

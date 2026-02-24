@@ -34,7 +34,7 @@ final class EnquiryForm
 
                 Section::make('Enquiry Details')
                     ->schema([
-                         Select::make('people_id')
+                        Select::make('people_id')
                             ->relationship('people', 'name')
                             ->searchable()
                             ->preload()

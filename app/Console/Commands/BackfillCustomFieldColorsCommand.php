@@ -6,8 +6,8 @@ namespace App\Console\Commands;
 
 use App\Enums\CustomFields\OpportunityField as OpportunityCustomField;
 use App\Enums\CustomFields\TaskField as TaskCustomField;
-use Illuminate\Console\Command;
 use App\Models\CustomField;
+use Illuminate\Console\Command;
 
 final class BackfillCustomFieldColorsCommand extends Command
 {

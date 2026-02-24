@@ -119,7 +119,7 @@ final class TaskResource extends Resource
                 TrashedFilter::make(),
             ])
             ->groups(array_filter([
-                ...collect(['status', 'priority'])->map(fn (string $fieldCode) => $customFields->contains('code', $fieldCode) ? self::makeCustomFieldGroup($fieldCode, $customFields, $valueResolver) : null
+                ...collect(['status', 'priority'])->map(fn (string $fieldCode): ?\Filament\Tables\Grouping\Group => $customFields->contains('code', $fieldCode) ? self::makeCustomFieldGroup($fieldCode, $customFields, $valueResolver) : null
                 )->filter()->toArray(),
             ]))
             ->recordActions([

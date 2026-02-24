@@ -21,13 +21,13 @@ use Filament\Schemas\Schema;
 
 final class FormBuilder
 {
-    protected ?Schema $schema = null;
+    private ?Schema $schema = null;
 
-    protected array $except = [];
+    private array $except = [];
 
-    protected array $only = [];
+    private array $only = [];
 
-    protected bool $columnSpanFull = false;
+    private bool $columnSpanFull = false;
 
     public function forSchema(Schema $schema): static
     {
@@ -59,7 +59,7 @@ final class FormBuilder
 
     public function build(): Grid
     {
-        $modelClass = $this->schema ? $this->schema->getModel() : null;
+        $modelClass = $this->schema instanceof \Filament\Schemas\Schema ? $this->schema->getModel() : null;
 
         if ($modelClass) {
             $sections = CustomFieldSection::query()
@@ -74,19 +74,19 @@ final class FormBuilder
                 foreach ($sections as $section) {
                     $fields = $section->fields;
 
-                    if (! empty($this->except)) {
-                        $fields = $fields->reject(fn (CustomField $field) => in_array($field->code, $this->except));
+                    if ($this->except !== []) {
+                        $fields = $fields->reject(fn (CustomField $field): bool => in_array($field->code, $this->except));
                     }
 
-                    if (! empty($this->only)) {
-                        $fields = $fields->filter(fn (CustomField $field) => in_array($field->code, $this->only));
+                    if ($this->only !== []) {
+                        $fields = $fields->filter(fn (CustomField $field): bool => in_array($field->code, $this->only));
                     }
 
                     if ($fields->isEmpty()) {
                         continue;
                     }
 
-                    $fieldComponents = $fields->map(fn (CustomField $field) => $this->createComponent($field))->toArray();
+                    $fieldComponents = $fields->map(fn (CustomField $field): mixed => $this->createComponent($field))->toArray();
 
                     $sectionComponents[] = Section::make($section->name)
                         ->description($section->description)
@@ -94,11 +94,12 @@ final class FormBuilder
                         ->columns(2);
                 }
 
-                if (! empty($sectionComponents)) {
+                if ($sectionComponents !== []) {
                     $grid = Grid::make(1)->components($sectionComponents);
                     if ($this->columnSpanFull) {
                         $grid->columnSpanFull();
                     }
+
                     return $grid;
                 }
             }
@@ -116,15 +117,15 @@ final class FormBuilder
 
         $fields = $query->get();
 
-        if (! empty($this->except)) {
-            $fields = $fields->reject(fn (CustomField $field) => in_array($field->code, $this->except));
+        if ($this->except !== []) {
+            $fields = $fields->reject(fn (CustomField $field): bool => in_array($field->code, $this->except));
         }
 
-        if (! empty($this->only)) {
-            $fields = $fields->filter(fn (CustomField $field) => in_array($field->code, $this->only));
+        if ($this->only !== []) {
+            $fields = $fields->filter(fn (CustomField $field): bool => in_array($field->code, $this->only));
         }
 
-        $components = $fields->map(fn (CustomField $field) => $this->createComponent($field))->toArray();
+        $components = $fields->map(fn (CustomField $field): mixed => $this->createComponent($field))->toArray();
 
         $grid = Grid::make(2)->components($components);
 

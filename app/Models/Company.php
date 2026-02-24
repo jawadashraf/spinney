@@ -39,11 +39,11 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
 {
     use HasAiSummary;
     use HasCreator;
-
     use HasCustomFields;
 
     /** @use HasFactory<CompanyFactory> */
     use HasFactory;
+
     use HasNotes;
     use HasTeam;
     use InteractsWithMedia;

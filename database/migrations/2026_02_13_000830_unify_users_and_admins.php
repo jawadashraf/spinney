@@ -15,7 +15,7 @@ return new class extends Migration
     public function up(): void
     {
         if (! Schema::hasColumn('users', 'is_system_admin')) {
-            Schema::table('users', function (Blueprint $table) {
+            Schema::table('users', function (Blueprint $table): void {
                 $table->boolean('is_system_admin')->default(false)->after('password');
             });
         }
@@ -49,7 +49,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->dropColumn('is_system_admin');
         });
     }

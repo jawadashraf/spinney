@@ -27,11 +27,11 @@ use Illuminate\Support\Carbon;
 final class Note extends Model implements HasCustomFieldsContract
 {
     use HasCreator;
-
     use HasCustomFields;
 
     /** @use HasFactory<NoteFactory> */
     use HasFactory;
+
     use HasTeam;
     use InvalidatesRelatedAiSummaries;
     use SoftDeletes;

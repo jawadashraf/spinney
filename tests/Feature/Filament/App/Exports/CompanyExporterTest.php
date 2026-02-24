@@ -12,7 +12,6 @@ use App\Models\Company;
 use App\Models\Team;
 use App\Models\User;
 use Filament\Actions\Exports\Models\Export;
-use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Relaticle\CustomFields\Contracts\CustomsFieldsMigrators;

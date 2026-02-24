@@ -4,27 +4,27 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\CustomFields;
 
+use App\Enums\CustomFields\CustomFieldWidth;
 use App\Filament\Resources\CustomFields\Pages\CreateCustomField;
 use App\Filament\Resources\CustomFields\Pages\EditCustomField;
 use App\Filament\Resources\CustomFields\Pages\ListCustomFields;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\CustomFieldSection;
 use App\Models\Note;
 use App\Models\Opportunity;
 use App\Models\People;
 use App\Models\Task;
-use App\Models\CustomFieldSection;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use App\Enums\CustomFields\CustomFieldWidth;
 use Illuminate\Support\Facades\Auth;
 
 final class CustomFieldResource extends Resource
@@ -55,13 +55,16 @@ final class CustomFieldResource extends Resource
                             ])
                             ->required()
                             ->live()
-                            ->afterStateUpdated(fn (Select $component) => $component->getContainer()->getComponent(fn ($c) => $c->getName() === 'custom_field_section_id')?->state(null)),
+                            ->afterStateUpdated(fn (Select $component): ?\Filament\Schemas\Components\Component => $component->getContainer()->getComponent(fn ($c): bool => $c->getName() === 'custom_field_section_id')?->state(null)),
 
                         Select::make('custom_field_section_id')
                             ->label('Section')
                             ->options(function ($get) {
                                 $entityType = $get('entity_type');
-                                if (!$entityType) return [];
+                                if (! $entityType) {
+                                    return [];
+                                }
+
                                 return CustomFieldSection::query()
                                     ->where('entity_type', $entityType)
                                     ->pluck('name', 'id');
@@ -76,10 +79,8 @@ final class CustomFieldResource extends Resource
                         TextInput::make('code')
                             ->required()
                             ->maxLength(255)
-                            ->unique(ignoreRecord: true, modifyRuleUsing: function ($rule, $get) {
-                                return $rule->where('entity_type', $get('entity_type'))
-                                            ->where('team_id', Auth::user()?->current_team_id);
-                            }),
+                            ->unique(ignoreRecord: true, modifyRuleUsing: fn ($rule, $get) => $rule->where('entity_type', $get('entity_type'))
+                                ->where('team_id', Auth::user()?->current_team_id)),
 
                         Select::make('type')
                             ->options([
@@ -96,7 +97,7 @@ final class CustomFieldResource extends Resource
                             ->live(),
 
                         Select::make('width')
-                            ->options(collect(CustomFieldWidth::cases())->mapWithKeys(fn ($case) => [$case->value => $case->value])->toArray())
+                            ->options(collect(CustomFieldWidth::cases())->mapWithKeys(fn ($case): array => [$case->value => $case->value])->toArray())
                             ->default(CustomFieldWidth::_100->value),
 
                         TextInput::make('sort_order')
@@ -112,7 +113,7 @@ final class CustomFieldResource extends Resource
                             ->label('System Defined'),
                     ]),
             ]);
-}
+    }
 
     public static function table(Table $table): Table
     {

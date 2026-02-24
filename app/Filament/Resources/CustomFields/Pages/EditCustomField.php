@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\CustomFields\Pages;
 
 use App\Filament\Resources\CustomFields\CustomFieldResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditCustomField extends EditRecord
+final class EditCustomField extends EditRecord
 {
     protected static string $resource = CustomFieldResource::class;
 

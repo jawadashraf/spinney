@@ -54,7 +54,8 @@ final class CustomField extends Model
         return $this->hasMany(CustomFieldValue::class);
     }
 
-    public function scopeForEntity($query, string $entityType)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function forEntity($query, string $entityType)
     {
         return $query->where('entity_type', $entityType);
     }

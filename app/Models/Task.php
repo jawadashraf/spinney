@@ -34,11 +34,11 @@ use Spatie\EloquentSortable\SortableTrait;
 final class Task extends Model implements HasCustomFieldsContract
 {
     use HasCreator;
-
     use HasCustomFields;
 
     /** @use HasFactory<TaskFactory> */
     use HasFactory;
+
     use HasTeam;
     use InvalidatesRelatedAiSummaries;
     use SoftDeletes;
