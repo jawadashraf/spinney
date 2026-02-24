@@ -9,9 +9,11 @@ use App\Filament\Exports\PeopleExporter;
 use App\Filament\Resources\PeopleResource\Pages\ListPeople;
 use App\Filament\Resources\PeopleResource\Pages\ViewPeople;
 use App\Filament\Resources\PeopleResource\RelationManagers\NotesRelationManager;
+use App\Filament\Resources\PeopleResource\RelationManagers\RelatedPeopleRelationManager;
 use App\Filament\Resources\PeopleResource\RelationManagers\TasksRelationManager;
 use App\Models\Company;
 use App\Models\People;
+use App\Models\User;
 use App\Support\CustomFields;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -27,6 +29,7 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Set;
@@ -39,6 +42,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 final class PeopleResource extends Resource
 {
@@ -64,7 +68,8 @@ final class PeopleResource extends Resource
                         TextInput::make('name')
                             ->required()
                             ->maxLength(255)
-                            ->columnSpan(7),
+                            ->columnSpan(7)
+                            ->disabled(fn (?People $record) => $record?->is_locked),
                         Select::make('company_id')
                             ->relationship('company', 'name')
                             ->suffixAction(
@@ -92,10 +97,24 @@ final class PeopleResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->columnSpan(5),
+                            ->columnSpan(5)
+                            ->disabled(fn (?People $record) => $record?->is_locked),
                     ])
                     ->columns(12),
-                CustomFields::form()->forSchema($schema)->build()->columnSpanFull(),
+                CustomFields::form()->forSchema($schema)->build()
+                    ->columnSpanFull()
+                    ->disabled(fn (?People $record) => $record?->is_locked),
+                Toggle::make('is_locked')
+                    ->label('Lock Profile')
+                    ->helperText('When locked, service users cannot edit their details.')
+                    ->visible(function () {
+                        /** @var User|null $user */
+                        $user = Auth::user();
+
+                        return $user?->hasAnyRole(['super_admin', 'admin']);
+                    })
+                    ->dehydrated(true)
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -144,6 +163,30 @@ final class PeopleResource extends Resource
                 ActionGroup::make([
                     ViewAction::make(),
                     EditAction::make(),
+                    Action::make('lock')
+                        ->label('Lock Profile')
+                        ->icon('heroicon-o-lock-closed')
+                        ->color('danger')
+                        ->visible(function (People $record) {
+                            /** @var User|null $user */
+                            $user = Auth::user();
+
+                            return ! $record->is_locked && $user?->hasAnyRole(['super_admin', 'admin']);
+                        })
+                        ->action(fn (People $record) => $record->update(['is_locked' => true]))
+                        ->requiresConfirmation(),
+                    Action::make('unlock')
+                        ->label('Unlock Profile')
+                        ->icon('heroicon-o-lock-open')
+                        ->color('success')
+                        ->visible(function (People $record) {
+                            /** @var User|null $user */
+                            $user = Auth::user();
+
+                            return $record->is_locked && $user?->hasAnyRole(['super_admin', 'admin']);
+                        })
+                        ->action(fn (People $record) => $record->update(['is_locked' => false]))
+                        ->requiresConfirmation(),
                     RestoreAction::make(),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),
@@ -165,6 +208,7 @@ final class PeopleResource extends Resource
         return [
             TasksRelationManager::class,
             NotesRelationManager::class,
+            RelatedPeopleRelationManager::class,
         ];
     }
 
@@ -181,7 +225,11 @@ final class PeopleResource extends Resource
      */
     public static function getEloquentQuery(): Builder
     {
+        /** @var User|null $user */
+        $user = Auth::user();
+
         return parent::getEloquentQuery()
+            ->when($user?->hasRole('service_user'), fn (Builder $query) => $query->where('user_id', Auth::id()))
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

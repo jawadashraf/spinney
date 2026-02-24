@@ -19,9 +19,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Parental\HasChildren;
 
 /**
  * @property Carbon|null $deleted_at
@@ -31,12 +33,13 @@ use Illuminate\Support\Carbon;
 final class People extends Model implements HasCustomFieldsContract
 {
     use HasAiSummary;
+    use HasChildren;
     use HasCreator;
-
     use HasCustomFields;
 
     /** @use HasFactory<PeopleFactory> */
     use HasFactory;
+
     use HasNotes;
     use HasTeam;
     use SoftDeletes;
@@ -48,8 +51,19 @@ final class People extends Model implements HasCustomFieldsContract
      */
     protected $fillable = [
         'name',
+        'email',
         'creation_source',
         'is_service_user',
+        'user_id',
+        'is_locked',
+        'type',
+    ];
+
+    protected $childTypes = [
+        'service_user' => ServiceUser::class,
+        'relative' => Relative::class,
+        'donor' => Donor::class,
+        'professional' => Professional::class,
     ];
 
     /**
@@ -74,6 +88,7 @@ final class People extends Model implements HasCustomFieldsContract
         return [
             'creation_source' => CreationSource::class,
             'is_service_user' => 'boolean',
+            'is_locked' => 'boolean',
         ];
     }
 
@@ -97,6 +112,28 @@ final class People extends Model implements HasCustomFieldsContract
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function relatedPeople(): BelongsToMany
+    {
+        return $this->belongsToMany(People::class, 'person_relationships', 'person_id', 'related_person_id')
+            ->withPivot('relation_type', 'is_emergency_contact')
+            ->withTimestamps();
+    }
+
+    public function relatedBy(): BelongsToMany
+    {
+        return $this->belongsToMany(People::class, 'person_relationships', 'related_person_id', 'person_id')
+            ->withPivot('relation_type', 'is_emergency_contact')
+            ->withTimestamps();
     }
 
     /**

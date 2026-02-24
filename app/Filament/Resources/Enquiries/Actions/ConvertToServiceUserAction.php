@@ -9,6 +9,8 @@ use App\Enums\EnquiryStatus;
 use App\Enums\ServiceTeam;
 use App\Models\Enquiry;
 use App\Models\People;
+use App\Models\User;
+use App\Notifications\ServiceUserPromotedNotification;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -19,6 +21,9 @@ use Filament\Schemas\Components\Section;
 use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 final class ConvertToServiceUserAction extends Action
 {
@@ -51,6 +56,18 @@ final class ConvertToServiceUserAction extends Action
                             ->label('Consent for Communications'),
                     ])->columns(3),
 
+                Section::make('User Account')
+                    ->schema([
+                        TextInput::make('email')
+                            ->email()
+                            ->required()
+                            ->default(fn (Enquiry $record) => $record->people?->email),
+                        TextInput::make('password')
+                            ->password()
+                            ->helperText('Leave blank to auto-generate a secure password.')
+                            ->dehydrated(true),
+                    ])->columns(2),
+
                 Section::make('Initial Assessment')
                     ->schema([
                         Textarea::make('presenting_issues')
@@ -81,31 +98,44 @@ final class ConvertToServiceUserAction extends Action
                     ])->columns(2),
             ])
             ->action(function (array $data, Enquiry $record): void {
-                dd($data);
                 DB::transaction(function () use ($data, $record) {
                     /** @var People $person */
                     $person = $record->people;
 
-                    $customFields = $data;
-                    $customFields['service_team'] = $data['target_service_team'];
-                    unset($customFields['target_service_team']);
-
-                    // Promote to Service User and Pass Custom Fields to Observer
-                    $person->custom_fields = $customFields;
-                    $person->update([
-                        'is_service_user' => true,
+                    // 1. Create User
+                    $password = $data['password'] ?? Str::random(12);
+                    $user = User::create([
+                        'name' => $person->name,
+                        'email' => $data['email'],
+                        'password' => Hash::make($password),
                     ]);
 
-                    // Update Enquiry Status
+                    // 2. Assign Service User Role
+                    $user->assignRole('service_user');
+
+                    // 3. Link Person to User and update details
+                    $person->update([
+                        'email' => $data['email'],
+                        'user_id' => $user->id,
+                        'is_service_user' => true,
+                        'type' => 'service_user',
+                    ]);
+
+                    // 4. Update Enquiry Status
                     $record->update([
                         'status' => EnquiryStatus::CONVERTED,
                         'converted_at' => now(),
                     ]);
+
+                    // 5. Notify Staff (super_admin and safeguarding)
+                    User::role(['super_admin', 'safeguarding'])->get()->each(function (User $staff) use ($person) {
+                        $staff->notify(new ServiceUserPromotedNotification($person));
+                    });
                 });
 
                 Notification::make()
                     ->title('Success')
-                    ->body('Enquiry has been converted to a Service User record.')
+                    ->body('Enquiry has been converted, user account created, and staff notified.')
                     ->success()
                     ->send();
             });

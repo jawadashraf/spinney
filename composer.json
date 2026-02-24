@@ -48,7 +48,8 @@
         "stechstudio/filament-impersonate": "^5.0",
         "symfony/http-client": "^7.2",
         "symfony/postmark-mailer": "^7.2",
-        "symfony/yaml": "^7.2"
+        "symfony/yaml": "^7.2",
+        "tightenco/parental": "^1.5"
     },
     "require-dev": {
         "cweagans/composer-patches": "*",

@@ -15,15 +15,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property string $name
@@ -46,11 +47,10 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
     use HasProfilePhoto;
     use HasRoles;
     use HasTeams;
+    use LogsActivity;
     use Notifiable;
     use TwoFactorAuthenticatable;
 
-    use LogsActivity;
- 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -129,6 +129,14 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
     }
 
     /**
+     * @return HasOne<People, $this>
+     */
+    public function people(): HasOne
+    {
+        return $this->hasOne(People::class);
+    }
+
+    /**
      * Determine if this user can impersonate other users.
      */
     public function canImpersonate(): bool
@@ -154,7 +162,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
         }
 
         if ($panel->getId() === 'app' || $panel->getId() === 'knowledge-base') {
-            return $this->hasVerifiedEmail();
+            return $this->hasVerifiedEmail() || $this->hasRole('service_user');
         }
 
         return false;
