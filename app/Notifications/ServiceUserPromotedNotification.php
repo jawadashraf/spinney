@@ -43,7 +43,7 @@ final class ServiceUserPromotedNotification extends Notification implements Shou
             ->greeting('Hello!')
             ->line('A new enquiry has been promoted to a Service User.')
             ->line('Name: '.$this->people->name)
-            ->action('View Profile', route('filament.app.resources.people.edit', $this->people))
+            ->action('View Profile', route('filament.app.resources.people.view', $this->people))
             ->line('Thank you for using our application!');
     }
 
