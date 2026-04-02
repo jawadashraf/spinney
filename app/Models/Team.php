@@ -12,11 +12,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Jetstream\Events\TeamCreated;
 use Laravel\Jetstream\Events\TeamDeleted;
 use Laravel\Jetstream\Events\TeamUpdated;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Laravel\Jetstream\Team as JetstreamTeam;
 
 /**
  * @property string $name
  */
+#[CollectedBy(\Illuminate\Database\Eloquent\Collection::class)]
 final class Team extends JetstreamTeam implements HasAvatar
 {
     /** @use HasFactory<TeamFactory> */
