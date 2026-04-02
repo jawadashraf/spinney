@@ -25,12 +25,11 @@ use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\Size;
 use Filament\Tables\Table;
 use Filament\View\PanelsRenderHook;
-use Guava\FilamentKnowledgeBase\Plugins\KnowledgeBaseCompanionPlugin;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
@@ -86,8 +85,8 @@ final class AppPanelProvider extends PanelProvider
                     ->setNavigationGroup('Settings')
                     ->setTitle('General Settings')
                     ->setNavigationLabel('General Settings'),
-                KnowledgeBaseCompanionPlugin::make()
-                    ->knowledgeBasePanelId('knowledge-base'),
+                // KnowledgeBaseCompanionPlugin::make()
+                //     ->knowledgeBasePanelId('knowledge-base'), // TODO: Re-enable when guava/filament-knowledge-base supports Laravel 13
             ])
             ->login(Login::class)
             // ->registration(Register::class)
@@ -147,7 +146,7 @@ final class AppPanelProvider extends PanelProvider
                 StartSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
-                VerifyCsrfToken::class,
+                PreventRequestForgery::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
