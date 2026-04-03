@@ -1,0 +1,26 @@
+{
+    "agents": [
+        "claude_code",
+        "codex",
+        "gemini",
+        "opencode"
+    ],
+    "guidelines": true,
+    "mcp": true,
+    "nightwatch_mcp": false,
+    "packages": [
+        "filament/filament",
+        "spatie/laravel-medialibrary",
+        "filament/blueprint"
+    ],
+    "sail": false,
+    "skills": [
+        "laravel-best-practices",
+        "configuring-horizon",
+        "socialite-development",
+        "livewire-development",
+        "pest-testing",
+        "tailwindcss-development",
+        "medialibrary-development"
+    ]
+}
