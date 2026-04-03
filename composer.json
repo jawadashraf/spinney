@@ -29,6 +29,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.16",
         "laravel/tinker": "^3.0",
+        "laraveljutsu/zap": "*",
         "livewire/livewire": "^4.0",
         "openplain/filament-shadcn-theme": "^1.0",
         "relaticle/flowforge": "^4.0",

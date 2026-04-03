@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a8df939c9d1d5437c9d5175f302d4e3d",
+    "content-hash": "7e1f6e54bdcc3cc53ba6b6687c92d011",
     "packages": [
         {
             "name": "alizharb/filament-activity-log",
@@ -3805,6 +3805,71 @@
                 "source": "https://github.com/laravel/tinker/tree/v3.0.0"
             },
             "time": "2026-03-17T14:53:17+00:00"
+        },
+        {
+            "name": "laraveljutsu/zap",
+            "version": "v1.15.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ludoguenet/laravel-zap.git",
+                "reference": "c93568e994fd3ede5d1582c6f72e10801da9bdcc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ludoguenet/laravel-zap/zipball/c93568e994fd3ede5d1582c6f72e10801da9bdcc",
+                "reference": "c93568e994fd3ede5d1582c6f72e10801da9bdcc",
+                "shasum": ""
+            },
+            "require": {
+                "ext-intl": "*",
+                "php": ">=8.2 <8.6"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.20",
+                "orchestra/testbench": "^10.0|^11.0",
+                "pestphp/pest": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Zap": "Zap\\Facades\\Zap"
+                    },
+                    "providers": [
+                        "Zap\\ZapServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Zap\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Laravel Jutsu",
+                    "email": "ludo@epekta.com",
+                    "homepage": "https://laraveljutsu.net"
+                }
+            ],
+            "description": "A flexible, performant, and developer-friendly schedule management system for Laravel",
+            "keywords": [
+                "booking",
+                "calendar",
+                "laravel",
+                "management",
+                "schedule"
+            ],
+            "support": {
+                "issues": "https://github.com/ludoguenet/laravel-zap/issues",
+                "source": "https://github.com/ludoguenet/laravel-zap/tree/v1.15.0"
+            },
+            "time": "2026-03-27T22:27:58+00:00"
         },
         {
             "name": "league/commonmark",

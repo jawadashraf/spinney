@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\CounselorType;
 use App\Models\Concerns\HasProfilePhoto;
 use Database\Factories\UserFactory;
 use Exception;
@@ -24,8 +25,6 @@ use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Permission\Traits\HasRoles;
-
 /**
  * @property string $name
  * @property string $email
@@ -37,6 +36,9 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $two_factor_recovery_codes
  * @property string|null $two_factor_secret
  */
+use Spatie\Permission\Traits\HasRoles;
+use Zap\Models\Concerns\HasSchedules;
+
 final class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
 {
     use HasApiTokens;
@@ -46,6 +48,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
 
     use HasProfilePhoto;
     use HasRoles;
+    use HasSchedules;
     use HasTeams;
     use LogsActivity;
     use Notifiable;
@@ -67,6 +70,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
         'email',
         'password',
         'is_system_admin',
+        'counselor_types',
     ];
 
     /**
@@ -101,7 +105,31 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_system_admin' => 'boolean',
+            'counselor_types' => 'array',
         ];
+    }
+
+    public function hasSpecialty(CounselorType $type): bool
+    {
+        return in_array($type->value, $this->counselor_types ?? []);
+    }
+
+    public function addSpecialty(CounselorType $type): void
+    {
+        $types = $this->counselor_types ?? [];
+        if (! in_array($type->value, $types)) {
+            $types[] = $type->value;
+            $this->counselor_types = $types;
+            $this->save();
+        }
+    }
+
+    public function removeSpecialty(CounselorType $type): void
+    {
+        $types = $this->counselor_types ?? [];
+        $types = array_filter($types, fn ($t) => $t !== $type->value);
+        $this->counselor_types = array_values($types);
+        $this->save();
     }
 
     /**
