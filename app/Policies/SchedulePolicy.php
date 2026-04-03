@@ -4,66 +4,77 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Schedule;
-use App\Models\User;
-use Zap\Enums\ScheduleTypes;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class SchedulePolicy
+class SchedulePolicy
 {
-    public function viewAny(User $user): bool
+    use HandlesAuthorization;
+
+    public function viewAny(AuthUser $authUser): bool
     {
-        return true;
+        return $authUser->can('ViewAny:Schedule');
     }
 
-    public function view(User $user, Schedule $schedule): bool
+    public function view(AuthUser $authUser, Schedule $schedule): bool
     {
-        return true;
+        return $authUser->can('View:Schedule');
     }
 
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->hasAnyRole(['counselor', 'management', 'admin']);
+        return $authUser->can('Create:Schedule');
     }
 
-    public function update(User $user, Schedule $schedule): bool
+    public function update(AuthUser $authUser, Schedule $schedule): bool
     {
-        if ($schedule->schedule_type === ScheduleTypes::AVAILABILITY) {
-            if ($schedule->metadata['is_locked'] ?? false) {
-                return $user->hasAnyRole(['management', 'admin']);
-            }
-
-            return $user->hasAnyRole(['counselor', 'management', 'admin'])
-                || ($user->id === $schedule->schedulable_id);
-        }
-
-        if ($schedule->schedule_type === ScheduleTypes::APPOINTMENT) {
-            return $user->hasAnyRole(['management', 'admin']);
-        }
-
-        return $user->hasAnyRole(['management', 'admin']);
+        return $authUser->can('Update:Schedule');
     }
 
-    public function delete(User $user, Schedule $schedule): bool
+    public function delete(AuthUser $authUser, Schedule $schedule): bool
     {
-        if ($schedule->metadata['is_locked'] ?? false) {
-            return false;
-        }
-
-        if ($schedule->schedule_type === ScheduleTypes::AVAILABILITY) {
-            return $user->hasAnyRole(['counselor', 'management', 'admin'])
-                || ($user->id === $schedule->schedulable_id);
-        }
-
-        return $user->hasAnyRole(['management', 'admin']);
+        return $authUser->can('Delete:Schedule');
     }
 
-    public function restore(User $user, Schedule $schedule): bool
+    public function restore(AuthUser $authUser, Schedule $schedule): bool
     {
-        return $user->hasAnyRole(['management', 'admin']);
+        return $authUser->can('Restore:Schedule');
     }
 
-    public function forceDelete(User $user, Schedule $schedule): bool
+    public function forceDelete(AuthUser $authUser, Schedule $schedule): bool
     {
-        return $user->hasRole('admin');
+        return $authUser->can('ForceDelete:Schedule');
     }
+
+    public function forceDeleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('ForceDeleteAny:Schedule');
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:Schedule');
+    }
+
+    public function replicate(AuthUser $authUser, Schedule $schedule): bool
+    {
+        return $authUser->can('Replicate:Schedule');
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:Schedule');
+    }
+
+    public function lock(AuthUser $authUser, Schedule $schedule): bool
+    {
+        return $authUser->can('Lock:Schedule');
+    }
+
+    public function unlock(AuthUser $authUser, Schedule $schedule): bool
+    {
+        return $authUser->can('Unlock:Schedule');
+    }
+
 }

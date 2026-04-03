@@ -23,7 +23,7 @@ return [
             'pages' => true,
             'widgets' => true,
             'resources' => true,
-            'custom_permissions' => false,
+            'custom_permissions' => true,
         ],
     ],
 
@@ -228,7 +228,11 @@ return [
     |
     */
 
-    'custom_permissions' => [],
+    'custom_permissions' => [
+        'Impersonate:User' => 'Impersonate User',
+        'Lock:Schedule' => 'Lock Schedule',
+        'Unlock:Schedule' => 'Unlock Schedule',
+    ],
 
     /*
     |--------------------------------------------------------------------------

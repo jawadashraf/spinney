@@ -113,7 +113,7 @@ final class LocalSeeder extends Seeder
 
         $this->call([
             ShieldSeeder::class,
-            RolePermissionSeeder::class,
+//            SimplifiedRolePermissionSeeder::class,
         ]);
     }
 }

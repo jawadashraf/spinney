@@ -10,6 +10,7 @@ use BezhanSalleh\FilamentShield\Support\Utils;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 final class ShieldSeeder extends Seeder
 {
@@ -19,7 +20,7 @@ final class ShieldSeeder extends Seeder
      */
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $superAdminRole = Role::firstOrCreate(
             ['name' => Utils::getSuperAdminName()],
@@ -29,15 +30,16 @@ final class ShieldSeeder extends Seeder
         // Application roles from the Phase 1 Handoff Permissions Matrix.
         // Maps role name => matching team name for team assignment.
         $applicationRoles = [
-            'frontline' => 'Frontline',
-            'assessment' => 'Assessment',
-            'drug_alcohol' => 'Drug & Alcohol',
-            'spiritual' => 'Spiritual Counselling',
-            'education_outreach' => 'Education & Outreach',
-            'aftercare' => 'Aftercare',
-            'safeguarding' => 'Safeguarding',
-            'fundraising' => 'Fundraising',
-            'management' => 'Management',
+            'liaison' => 'Liaison',
+            //            'assessor' => 'Assessment',
+            //            'drug_alcohol' => 'Drug & Alcohol',
+            //            'spiritual' => 'Spiritual Counselling',
+            //            'education_outreach' => 'Education & Outreach',
+            //            'aftercare' => 'Aftercare',
+            //            'safeguarding' => 'Safeguarding',
+            //            'fundraising' => 'Fundraising',
+            'counselor' => 'Counselor',
+            'manager' => 'Management',
             'admin' => 'Management',
         ];
 

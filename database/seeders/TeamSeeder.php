@@ -26,14 +26,8 @@ final class TeamSeeder extends Seeder
         }
 
         $teams = [
-            'Frontline',
-            'Assessment',
-            'Drug & Alcohol',
-            'Spiritual Counselling',
-            'Education & Outreach',
-            'Aftercare',
-            'Safeguarding',
-            'Fundraising',
+            'Liaison',
+            'Counselor',
             'Management',
         ];
 

@@ -14,50 +14,46 @@ final class SimplifiedRolePermissionSeeder extends Seeder
     {
         // Define roles with their permissions
         $rolePermissions = [
-            'frontline' => [
-                'display_name' => 'Frontline',
-                'permissions' => ['view_any_schedule', 'view_schedule'],
+            'liaison' => [
+                'display_name' => 'Liaison',
+                'permissions' => ['ViewAny:Company', 'ViewAny:Schedule', 'View:Schedule'],
             ],
-            'assessment' => [
-                'display_name' => 'Assessment',
-                'permissions' => ['view_any_schedule', 'view_schedule'],
+            'assessor' => [
+                'display_name' => 'Assessor',
+                'permissions' => ['ViewAny:Company', 'ViewAny:Schedule', 'View:Schedule'],
             ],
             'counselor' => [
                 'display_name' => 'Counselor',
+                'permissions' => ['ViewAny:Company', 'ViewAny:Schedule', 'View:Schedule', 'Create:Schedule',
+                    'Update:Schedule', 'Delete:Schedule'],
+            ],
+//            'aftercare' => [
+//                'display_name' => 'Aftercare',
+//                'permissions' => ['view_any_schedule', 'view_schedule'],
+//            ],
+//            'safeguarding' => [
+//                'display_name' => 'Safeguarding',
+//                'permissions' => ['view_any_schedule', 'view_schedule'],
+//            ],
+//            'fundraising' => [
+//                'display_name' => 'Fundraising',
+//                'permissions' => ['view_any_schedule', 'view_schedule'],
+//            ],
+            'manager' => [
+                'display_name' => 'Manager',
                 'permissions' => [
-                    'view_any_schedule',
-                    'view_schedule',
-                    'create_schedule',
-                    'update_schedule',
-                    'delete_schedule',
-                ],
-            ],
-            'aftercare' => [
-                'display_name' => 'Aftercare',
-                'permissions' => ['view_any_schedule', 'view_schedule'],
-            ],
-            'safeguarding' => [
-                'display_name' => 'Safeguarding',
-                'permissions' => ['view_any_schedule', 'view_schedule'],
-            ],
-            'fundraising' => [
-                'display_name' => 'Fundraising',
-                'permissions' => ['view_any_schedule', 'view_schedule'],
-            ],
-            'management' => [
-                'display_name' => 'Management',
-                'permissions' => [
-                    'view_any_schedule',
-                    'view_schedule',
-                    'create_schedule',
-                    'update_schedule',
-                    'delete_schedule',
-                    'lock_schedule',
-                    'unlock_schedule',
+                    'ViewAny:Company',
+                    'ViewAny:Schedule',
+                    'View:Schedule',
+                    'Create:Schedule',
+                    'Update:Schedule',
+                    'Delete:Schedule',
+                    'Lock:Schedule',
+                    'Unlock:Schedule',
                 ],
             ],
             'admin' => [
-                'display_name' => 'Administration',
+                'display_name' => 'Admin',
                 'permissions' => '*', // All permissions
             ],
         ];
