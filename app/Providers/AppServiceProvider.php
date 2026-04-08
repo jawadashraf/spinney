@@ -123,6 +123,7 @@ final class AppServiceProvider extends ServiceProvider
             'task' => Task::class,
             'note' => Note::class,
             'import' => Import::class,
+            'third_party_care_plan' => \App\Models\ThirdPartyCarePlan::class,
         ]);
 
         // Bind our custom Import model to the Filament Import model

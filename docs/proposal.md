@@ -79,6 +79,12 @@ This proposal covers Phase 1 development over a 6-week timeline, with additional
 
 ### Phase 4: Reporting & User Acceptance Testing (UAT) (Week 6)
 
+**Landing Pages**
+- Home
+- About us
+- Contact us
+- How we work
+
 **Dashboards**
 - Role-specific dashboards
 - Key performance indicators

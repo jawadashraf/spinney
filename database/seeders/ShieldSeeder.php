@@ -20,6 +20,13 @@ final class ShieldSeeder extends Seeder
      */
     public function run(): void
     {
+        //        $this->command->call('shield:generate', [
+        //            '--all' => true,
+        //            '--ignore-existing-policies' => true,
+        //            '--no-interaction' => true,
+        //            '--panel' => 'app',
+        //        ]);
+
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $superAdminRole = Role::firstOrCreate(

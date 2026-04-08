@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Schedule;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-class SchedulePolicy
+final class SchedulePolicy
 {
     use HandlesAuthorization;
 
@@ -66,15 +66,4 @@ class SchedulePolicy
     {
         return $authUser->can('Reorder:Schedule');
     }
-
-    public function lock(AuthUser $authUser, Schedule $schedule): bool
-    {
-        return $authUser->can('Lock:Schedule');
-    }
-
-    public function unlock(AuthUser $authUser, Schedule $schedule): bool
-    {
-        return $authUser->can('Unlock:Schedule');
-    }
-
 }

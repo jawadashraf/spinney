@@ -75,7 +75,7 @@ final class PeopleResource extends Resource
                             ->suffixAction(
                                 Action::make('Create Company')
                                     ->model(Company::class)
-                                    ->schema(fn (Schema $schema): \Filament\Schemas\Schema => $schema->components([
+                                    ->schema(fn (Schema $schema): Schema => $schema->components([
                                         TextInput::make('name')
                                             ->required(),
                                         Select::make('account_owner_id')
@@ -209,6 +209,7 @@ final class PeopleResource extends Resource
             TasksRelationManager::class,
             NotesRelationManager::class,
             RelatedPeopleRelationManager::class,
+            ThirdPartyCarePlansRelationManager::class,
         ];
     }
 

@@ -32,10 +32,11 @@ final class ViewCompany extends ViewRecord
         return [
             GenerateRecordSummaryAction::make(),
             ActionGroup::make([
-                EditAction::make()
-                    ->after(function (Company $record, array $data): void {
-                        $this->dispatchFaviconFetchIfNeeded($record, $data);
-                    }),
+                // EditAction::make()
+                //     ->after(function (Company $record, array $data): void {
+                //         $this->dispatchFaviconFetchIfNeeded($record, $data);
+                //     }),
+                EditAction::make(),
                 DeleteAction::make(),
             ]),
         ];
@@ -60,9 +61,10 @@ final class ViewCompany extends ViewRecord
         $oldDomain = $domainField !== null ? $company->getCustomFieldValue($domainField) : null;
 
         // Only dispatch if domain changed and new value is not empty
-        if (! in_array($newDomain, [$oldDomain, null, '', '0'], true)) {
-            FetchFaviconForCompany::dispatch($company)->afterCommit();
-        }
+
+        // if (! in_array($newDomain, [$oldDomain, null, '', '0'], true)) {
+        //     FetchFaviconForCompany::dispatch($company)->afterCommit();
+        // }
     }
 
     public function infolist(Schema $schema): Schema

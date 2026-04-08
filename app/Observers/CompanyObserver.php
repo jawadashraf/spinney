@@ -27,7 +27,7 @@ final readonly class CompanyObserver
      */
     public function created(Company $company): void
     {
-        FetchFaviconForCompany::dispatch($company)->afterCommit();
+        // FetchFaviconForCompany::dispatch($company)->afterCommit();
     }
 
     /**

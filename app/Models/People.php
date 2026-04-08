@@ -15,11 +15,13 @@ use App\Observers\PeopleObserver;
 use App\Services\AvatarService;
 use Database\Factories\PeopleFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -30,7 +32,7 @@ use Parental\HasChildren;
  * @property CreationSource $creation_source
  */
 #[ObservedBy(PeopleObserver::class)]
-class People extends Model implements HasCustomFieldsContract
+final class People extends Model implements HasCustomFieldsContract
 {
     use HasAiSummary;
     use HasChildren;
@@ -159,7 +161,7 @@ class People extends Model implements HasCustomFieldsContract
      * @param  Builder<People>  $query
      * @return Builder<People>
      */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    #[Scope]
     protected function serviceUsers(Builder $query): Builder
     {
         return $query->where('is_service_user', true);
@@ -206,5 +208,28 @@ class People extends Model implements HasCustomFieldsContract
     public function tasks(): MorphToMany
     {
         return $this->morphToMany(Task::class, 'taskable');
+    }
+
+    /**
+     * @return HasMany<ThirdPartyCarePlan, $this>
+     */
+    public function thirdPartyCarePlans(): HasMany
+    {
+        return $this->hasMany(ThirdPartyCarePlan::class, 'people_id');
+    }
+
+    /**
+     * @return HasMany<ThirdPartyCarePlan, $this>
+     */
+    public function activeCarePlans(): HasMany
+    {
+        return $this->hasMany(ThirdPartyCarePlan::class, 'people_id')
+            ->whereIn('status', ['pending', 'in_progress']);
+    }
+
+    public function appointments()
+    {
+        // Appointments are accessed via Schedule metadata
+        // This is a convenience method for querying
     }
 }

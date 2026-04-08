@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Support\CustomFields;
 
 use App\Enums\CustomFields\CustomFieldWidth;
+use App\Models\Contracts\HasCustomFields;
+use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Models\CustomField;
 use App\Models\CustomFieldSection;
 use Filament\Forms\Components\DatePicker;
@@ -15,9 +17,12 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema as SchemaFacade;
 
 final class FormBuilder
 {
@@ -59,7 +64,7 @@ final class FormBuilder
 
     public function build(): Grid
     {
-        $modelClass = $this->schema instanceof \Filament\Schemas\Schema ? $this->schema->getModel() : null;
+        $modelClass = $this->schema instanceof Schema ? $this->schema->getModel() : null;
 
         if ($modelClass) {
             $sections = CustomFieldSection::query()
@@ -153,6 +158,31 @@ final class FormBuilder
         };
 
         $component->label($field->name);
+
+        $modelClass = $this->schema instanceof Schema ? $this->schema->getModel() : null;
+
+        if ($modelClass) {
+            /** @var Model $modelInstance */
+            $modelInstance = new $modelClass;
+            $tableName = $modelInstance->getTable();
+
+            if (! SchemaFacade::hasColumn($tableName, $field->code)) {
+                $component
+                    ->dehydrated(false)
+                    ->afterStateHydrated(function (Component $component, ?Model $record) use ($field) {
+                        if ($record instanceof HasCustomFieldsContract) {
+                            /** @var HasCustomFields $record */
+                            $component->state($record->getCustomFieldValue($field));
+                        }
+                    })
+                    ->saveRelationshipsUsing(function (Model $record, $state) use ($field) {
+                        if ($record instanceof HasCustomFieldsContract) {
+                            /** @var HasCustomFields $record */
+                            $record->saveCustomFieldValue($field, $state);
+                        }
+                    });
+            }
+        }
 
         if ($field->validation_rules) {
             $component->rules($field->validation_rules);

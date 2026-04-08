@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Support\CustomFields;
 
+use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Models\CustomField;
 use App\Models\CustomFieldSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema as SchemaFacade;
 
 final class InfolistBuilder
 {
@@ -61,7 +64,7 @@ final class InfolistBuilder
 
     public function build(): Grid
     {
-        $modelClass = $this->schema instanceof \Filament\Schemas\Schema ? $this->schema->getModel() : null;
+        $modelClass = $this->schema instanceof Schema ? $this->schema->getModel() : null;
 
         if ($modelClass && ! $this->withoutSections) {
             $sections = CustomFieldSection::query()
@@ -103,7 +106,7 @@ final class InfolistBuilder
 
     public function values(): Collection
     {
-        $modelClass = $this->schema instanceof \Filament\Schemas\Schema ? $this->schema->getModel() : null;
+        $modelClass = $this->schema instanceof Schema ? $this->schema->getModel() : null;
 
         $query = CustomField::query()
             ->where('active', true)
@@ -127,6 +130,24 @@ final class InfolistBuilder
     {
         // For simplicity, we use TextEntry for most fields in infolists
         $entry = TextEntry::make($field->code);
+
+        $modelClass = $this->schema instanceof Schema ? $this->schema->getModel() : null;
+
+        if ($modelClass) {
+            /** @var Model $modelInstance */
+            $modelInstance = new $modelClass;
+            $tableName = $modelInstance->getTable();
+
+            if (! SchemaFacade::hasColumn($tableName, $field->code)) {
+                $entry->getStateUsing(function (Model $record) use ($field) {
+                    if ($record instanceof HasCustomFieldsContract) {
+                        return $record->getCustomFieldValue($field);
+                    }
+
+                    return null;
+                });
+            }
+        }
 
         if ($this->hiddenLabels) {
             $entry->hiddenLabel();
