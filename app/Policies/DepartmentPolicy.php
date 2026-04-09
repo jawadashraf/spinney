@@ -4,67 +4,66 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Department;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class DepartmentPolicy
+final class DepartmentPolicy
 {
     use HandlesAuthorization;
-    
-    public function viewAny(AuthUser $authUser): bool
+
+    public function viewAny(User $user): bool
     {
-        return $authUser->can('ViewAny:Department');
+        return $user->checkPermissionTo('ViewAny:Department');
     }
 
-    public function view(AuthUser $authUser, Department $department): bool
+    public function view(User $user, Department $department): bool
     {
-        return $authUser->can('View:Department');
+        return $user->checkPermissionTo('View:Department');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(User $user): bool
     {
-        return $authUser->can('Create:Department');
+        return $user->checkPermissionTo('Create:Department');
     }
 
-    public function update(AuthUser $authUser, Department $department): bool
+    public function update(User $user, Department $department): bool
     {
-        return $authUser->can('Update:Department');
+        return $user->checkPermissionTo('Update:Department');
     }
 
-    public function delete(AuthUser $authUser, Department $department): bool
+    public function delete(User $user, Department $department): bool
     {
-        return $authUser->can('Delete:Department');
+        return $user->checkPermissionTo('Delete:Department');
     }
 
-    public function restore(AuthUser $authUser, Department $department): bool
+    public function restore(User $user, Department $department): bool
     {
-        return $authUser->can('Restore:Department');
+        return $user->checkPermissionTo('Restore:Department');
     }
 
-    public function forceDelete(AuthUser $authUser, Department $department): bool
+    public function forceDelete(User $user, Department $department): bool
     {
-        return $authUser->can('ForceDelete:Department');
+        return $user->checkPermissionTo('ForceDelete:Department');
     }
 
-    public function forceDeleteAny(AuthUser $authUser): bool
+    public function forceDeleteAny(User $user): bool
     {
-        return $authUser->can('ForceDeleteAny:Department');
+        return $user->checkPermissionTo('ForceDeleteAny:Department');
     }
 
-    public function restoreAny(AuthUser $authUser): bool
+    public function restoreAny(User $user): bool
     {
-        return $authUser->can('RestoreAny:Department');
+        return $user->checkPermissionTo('RestoreAny:Department');
     }
 
-    public function replicate(AuthUser $authUser, Department $department): bool
+    public function replicate(User $user, Department $department): bool
     {
-        return $authUser->can('Replicate:Department');
+        return $user->checkPermissionTo('Replicate:Department');
     }
 
-    public function reorder(AuthUser $authUser): bool
+    public function reorder(User $user): bool
     {
-        return $authUser->can('Reorder:Department');
+        return $user->checkPermissionTo('Reorder:Department');
     }
-
 }

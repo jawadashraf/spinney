@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\PeopleResource\Pages;
 
+use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Exports\PeopleExporter;
 use App\Filament\Imports\PeopleImporter;
 use App\Filament\Resources\PeopleResource;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
 final class ListPeople extends ListRecords
 {
     use InteractsWithCustomFields;
+    use SyncsPermissionTeamId;
 
     protected static string $resource = PeopleResource::class;
 

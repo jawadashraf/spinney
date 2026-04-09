@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ThirdPartyCarePlans\Pages;
 
+use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\ThirdPartyCarePlans\ThirdPartyCarePlanResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -13,6 +14,8 @@ use Filament\Resources\Pages\EditRecord;
 
 final class EditThirdPartyCarePlan extends EditRecord
 {
+    use SyncsPermissionTeamId;
+
     protected static string $resource = ThirdPartyCarePlanResource::class;
 
     protected function getHeaderActions(): array

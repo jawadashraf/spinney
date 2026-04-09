@@ -4,67 +4,66 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\CustomField;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class CustomFieldPolicy
+final class CustomFieldPolicy
 {
     use HandlesAuthorization;
-    
-    public function viewAny(AuthUser $authUser): bool
+
+    public function viewAny(User $user): bool
     {
-        return $authUser->can('ViewAny:CustomField');
+        return $user->checkPermissionTo('ViewAny:CustomField');
     }
 
-    public function view(AuthUser $authUser, CustomField $customField): bool
+    public function view(User $user, CustomField $customField): bool
     {
-        return $authUser->can('View:CustomField');
+        return $user->checkPermissionTo('View:CustomField');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(User $user): bool
     {
-        return $authUser->can('Create:CustomField');
+        return $user->checkPermissionTo('Create:CustomField');
     }
 
-    public function update(AuthUser $authUser, CustomField $customField): bool
+    public function update(User $user, CustomField $customField): bool
     {
-        return $authUser->can('Update:CustomField');
+        return $user->checkPermissionTo('Update:CustomField');
     }
 
-    public function delete(AuthUser $authUser, CustomField $customField): bool
+    public function delete(User $user, CustomField $customField): bool
     {
-        return $authUser->can('Delete:CustomField');
+        return $user->checkPermissionTo('Delete:CustomField');
     }
 
-    public function restore(AuthUser $authUser, CustomField $customField): bool
+    public function restore(User $user, CustomField $customField): bool
     {
-        return $authUser->can('Restore:CustomField');
+        return $user->checkPermissionTo('Restore:CustomField');
     }
 
-    public function forceDelete(AuthUser $authUser, CustomField $customField): bool
+    public function forceDelete(User $user, CustomField $customField): bool
     {
-        return $authUser->can('ForceDelete:CustomField');
+        return $user->checkPermissionTo('ForceDelete:CustomField');
     }
 
-    public function forceDeleteAny(AuthUser $authUser): bool
+    public function forceDeleteAny(User $user): bool
     {
-        return $authUser->can('ForceDeleteAny:CustomField');
+        return $user->checkPermissionTo('ForceDeleteAny:CustomField');
     }
 
-    public function restoreAny(AuthUser $authUser): bool
+    public function restoreAny(User $user): bool
     {
-        return $authUser->can('RestoreAny:CustomField');
+        return $user->checkPermissionTo('RestoreAny:CustomField');
     }
 
-    public function replicate(AuthUser $authUser, CustomField $customField): bool
+    public function replicate(User $user, CustomField $customField): bool
     {
-        return $authUser->can('Replicate:CustomField');
+        return $user->checkPermissionTo('Replicate:CustomField');
     }
 
-    public function reorder(AuthUser $authUser): bool
+    public function reorder(User $user): bool
     {
-        return $authUser->can('Reorder:CustomField');
+        return $user->checkPermissionTo('Reorder:CustomField');
     }
-
 }

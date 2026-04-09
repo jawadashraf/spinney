@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\OpportunityResource\Pages;
 
 use App\Filament\Actions\GenerateRecordSummaryAction;
+use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\CompanyResource;
 use App\Filament\Resources\OpportunityResource;
 use App\Filament\Resources\PeopleResource;
@@ -21,6 +22,8 @@ use Filament\Schemas\Schema;
 
 final class ViewOpportunity extends ViewRecord
 {
+    use SyncsPermissionTeamId;
+
     protected static string $resource = OpportunityResource::class;
 
     protected function getHeaderActions(): array

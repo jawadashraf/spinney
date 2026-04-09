@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Team;
 use App\Models\Department;
+use App\Models\Role;
+use App\Models\Team;
 use App\Models\User;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use App\Models\Role;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
 final class ShieldSeeder extends Seeder
@@ -90,9 +91,19 @@ final class ShieldSeeder extends Seeder
             }
         }
 
-        // Assign the super_admin role to system administrators for the primary team.
+        // Assign the super_admin role and sync permissions for other roles.
         if ($team) {
             setPermissionsTeamId($team->id);
+
+            // Sync ALL permissions to admin and manager roles for this team
+            $allPermissions = Permission::all();
+
+            Role::whereIn('name', ['admin', 'manager'])
+                ->where('team_id', $team->id)
+                ->each(function (Role $role) use ($allPermissions): void {
+                    $role->syncPermissions($allPermissions);
+                });
+
             User::query()
                 ->where('is_system_admin', true)
                 ->each(function (User $user) use ($superAdminRole): void {

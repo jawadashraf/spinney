@@ -122,5 +122,9 @@ final class Task extends Model implements HasCustomFieldsContract
         return $this->belongsTo(User::class, 'assignee_id');
     }
 
-
+    /** @return BelongsTo<Team, self> */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
 }

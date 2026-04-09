@@ -13,6 +13,7 @@ use Zap\Models\Schedule as ZapSchedule;
 final class Schedule extends ZapSchedule
 {
     use HasTeam;
+
     /**
      * Get the service user for this appointment.
      *
@@ -79,7 +80,9 @@ final class Schedule extends ZapSchedule
         return $this->metadata['care_plan_id'] ?? null;
     }
 
-
-
-
+    /** @return BelongsTo<Team, self> */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
 }

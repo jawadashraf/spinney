@@ -233,5 +233,9 @@ class People extends Model implements HasCustomFieldsContract
         // This is a convenience method for querying
     }
 
-
+    /** @return BelongsTo<Team, self> */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
 }

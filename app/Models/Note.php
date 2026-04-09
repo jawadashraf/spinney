@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CreationSource;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Concerns\HasCreator;
 use App\Models\Concerns\HasCustomFields;
 use App\Models\Concerns\HasTeam;
@@ -16,6 +15,7 @@ use Database\Factories\NoteFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -89,5 +89,9 @@ final class Note extends Model implements HasCustomFieldsContract
         return $this->morphedByMany(Opportunity::class, 'noteable');
     }
 
-
+    /** @return BelongsTo<Team, self> */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
 }

@@ -4,67 +4,66 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class TaskPolicy
+final class TaskPolicy
 {
     use HandlesAuthorization;
-    
-    public function viewAny(AuthUser $authUser): bool
+
+    public function viewAny(User $user): bool
     {
-        return $authUser->can('ViewAny:Task');
+        return $user->checkPermissionTo('ViewAny:Task');
     }
 
-    public function view(AuthUser $authUser, Task $task): bool
+    public function view(User $user, Task $task): bool
     {
-        return $authUser->can('View:Task');
+        return $user->checkPermissionTo('View:Task');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(User $user): bool
     {
-        return $authUser->can('Create:Task');
+        return $user->checkPermissionTo('Create:Task');
     }
 
-    public function update(AuthUser $authUser, Task $task): bool
+    public function update(User $user, Task $task): bool
     {
-        return $authUser->can('Update:Task');
+        return $user->checkPermissionTo('Update:Task');
     }
 
-    public function delete(AuthUser $authUser, Task $task): bool
+    public function delete(User $user, Task $task): bool
     {
-        return $authUser->can('Delete:Task');
+        return $user->checkPermissionTo('Delete:Task');
     }
 
-    public function restore(AuthUser $authUser, Task $task): bool
+    public function restore(User $user, Task $task): bool
     {
-        return $authUser->can('Restore:Task');
+        return $user->checkPermissionTo('Restore:Task');
     }
 
-    public function forceDelete(AuthUser $authUser, Task $task): bool
+    public function forceDelete(User $user, Task $task): bool
     {
-        return $authUser->can('ForceDelete:Task');
+        return $user->checkPermissionTo('ForceDelete:Task');
     }
 
-    public function forceDeleteAny(AuthUser $authUser): bool
+    public function forceDeleteAny(User $user): bool
     {
-        return $authUser->can('ForceDeleteAny:Task');
+        return $user->checkPermissionTo('ForceDeleteAny:Task');
     }
 
-    public function restoreAny(AuthUser $authUser): bool
+    public function restoreAny(User $user): bool
     {
-        return $authUser->can('RestoreAny:Task');
+        return $user->checkPermissionTo('RestoreAny:Task');
     }
 
-    public function replicate(AuthUser $authUser, Task $task): bool
+    public function replicate(User $user, Task $task): bool
     {
-        return $authUser->can('Replicate:Task');
+        return $user->checkPermissionTo('Replicate:Task');
     }
 
-    public function reorder(AuthUser $authUser): bool
+    public function reorder(User $user): bool
     {
-        return $authUser->can('Reorder:Task');
+        return $user->checkPermissionTo('Reorder:Task');
     }
-
 }

@@ -4,67 +4,66 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\CustomFieldSection;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class CustomFieldSectionPolicy
+final class CustomFieldSectionPolicy
 {
     use HandlesAuthorization;
-    
-    public function viewAny(AuthUser $authUser): bool
+
+    public function viewAny(User $user): bool
     {
-        return $authUser->can('ViewAny:CustomFieldSection');
+        return $user->checkPermissionTo('ViewAny:CustomFieldSection');
     }
 
-    public function view(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function view(User $user, CustomFieldSection $customFieldSection): bool
     {
-        return $authUser->can('View:CustomFieldSection');
+        return $user->checkPermissionTo('View:CustomFieldSection');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(User $user): bool
     {
-        return $authUser->can('Create:CustomFieldSection');
+        return $user->checkPermissionTo('Create:CustomFieldSection');
     }
 
-    public function update(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function update(User $user, CustomFieldSection $customFieldSection): bool
     {
-        return $authUser->can('Update:CustomFieldSection');
+        return $user->checkPermissionTo('Update:CustomFieldSection');
     }
 
-    public function delete(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function delete(User $user, CustomFieldSection $customFieldSection): bool
     {
-        return $authUser->can('Delete:CustomFieldSection');
+        return $user->checkPermissionTo('Delete:CustomFieldSection');
     }
 
-    public function restore(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function restore(User $user, CustomFieldSection $customFieldSection): bool
     {
-        return $authUser->can('Restore:CustomFieldSection');
+        return $user->checkPermissionTo('Restore:CustomFieldSection');
     }
 
-    public function forceDelete(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function forceDelete(User $user, CustomFieldSection $customFieldSection): bool
     {
-        return $authUser->can('ForceDelete:CustomFieldSection');
+        return $user->checkPermissionTo('ForceDelete:CustomFieldSection');
     }
 
-    public function forceDeleteAny(AuthUser $authUser): bool
+    public function forceDeleteAny(User $user): bool
     {
-        return $authUser->can('ForceDeleteAny:CustomFieldSection');
+        return $user->checkPermissionTo('ForceDeleteAny:CustomFieldSection');
     }
 
-    public function restoreAny(AuthUser $authUser): bool
+    public function restoreAny(User $user): bool
     {
-        return $authUser->can('RestoreAny:CustomFieldSection');
+        return $user->checkPermissionTo('RestoreAny:CustomFieldSection');
     }
 
-    public function replicate(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function replicate(User $user, CustomFieldSection $customFieldSection): bool
     {
-        return $authUser->can('Replicate:CustomFieldSection');
+        return $user->checkPermissionTo('Replicate:CustomFieldSection');
     }
 
-    public function reorder(AuthUser $authUser): bool
+    public function reorder(User $user): bool
     {
-        return $authUser->can('Reorder:CustomFieldSection');
+        return $user->checkPermissionTo('Reorder:CustomFieldSection');
     }
-
 }

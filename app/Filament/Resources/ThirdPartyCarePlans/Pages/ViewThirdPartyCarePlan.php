@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ThirdPartyCarePlans\Pages;
 
+use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\ThirdPartyCarePlans\ThirdPartyCarePlanResource;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 final class ViewThirdPartyCarePlan extends ViewRecord
 {
+    use SyncsPermissionTeamId;
+
     protected static string $resource = ThirdPartyCarePlanResource::class;
 
     protected function getHeaderActions(): array

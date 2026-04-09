@@ -4,67 +4,66 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Note;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class NotePolicy
+final class NotePolicy
 {
     use HandlesAuthorization;
-    
-    public function viewAny(AuthUser $authUser): bool
+
+    public function viewAny(User $user): bool
     {
-        return $authUser->can('ViewAny:Note');
+        return $user->checkPermissionTo('ViewAny:Note');
     }
 
-    public function view(AuthUser $authUser, Note $note): bool
+    public function view(User $user, Note $note): bool
     {
-        return $authUser->can('View:Note');
+        return $user->checkPermissionTo('View:Note');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(User $user): bool
     {
-        return $authUser->can('Create:Note');
+        return $user->checkPermissionTo('Create:Note');
     }
 
-    public function update(AuthUser $authUser, Note $note): bool
+    public function update(User $user, Note $note): bool
     {
-        return $authUser->can('Update:Note');
+        return $user->checkPermissionTo('Update:Note');
     }
 
-    public function delete(AuthUser $authUser, Note $note): bool
+    public function delete(User $user, Note $note): bool
     {
-        return $authUser->can('Delete:Note');
+        return $user->checkPermissionTo('Delete:Note');
     }
 
-    public function restore(AuthUser $authUser, Note $note): bool
+    public function restore(User $user, Note $note): bool
     {
-        return $authUser->can('Restore:Note');
+        return $user->checkPermissionTo('Restore:Note');
     }
 
-    public function forceDelete(AuthUser $authUser, Note $note): bool
+    public function forceDelete(User $user, Note $note): bool
     {
-        return $authUser->can('ForceDelete:Note');
+        return $user->checkPermissionTo('ForceDelete:Note');
     }
 
-    public function forceDeleteAny(AuthUser $authUser): bool
+    public function forceDeleteAny(User $user): bool
     {
-        return $authUser->can('ForceDeleteAny:Note');
+        return $user->checkPermissionTo('ForceDeleteAny:Note');
     }
 
-    public function restoreAny(AuthUser $authUser): bool
+    public function restoreAny(User $user): bool
     {
-        return $authUser->can('RestoreAny:Note');
+        return $user->checkPermissionTo('RestoreAny:Note');
     }
 
-    public function replicate(AuthUser $authUser, Note $note): bool
+    public function replicate(User $user, Note $note): bool
     {
-        return $authUser->can('Replicate:Note');
+        return $user->checkPermissionTo('Replicate:Note');
     }
 
-    public function reorder(AuthUser $authUser): bool
+    public function reorder(User $user): bool
     {
-        return $authUser->can('Reorder:Note');
+        return $user->checkPermissionTo('Reorder:Note');
     }
-
 }

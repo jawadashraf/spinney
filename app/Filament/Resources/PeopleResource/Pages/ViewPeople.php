@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\PeopleResource\Pages;
 
 use App\Filament\Actions\GenerateRecordSummaryAction;
+use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\CompanyResource;
 use App\Filament\Resources\PeopleResource;
 use App\Models\People;
@@ -22,6 +23,8 @@ use Filament\Support\Enums\TextSize;
 
 final class ViewPeople extends ViewRecord
 {
+    use SyncsPermissionTeamId;
+
     protected static string $resource = PeopleResource::class;
 
     protected function getHeaderActions(): array

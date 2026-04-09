@@ -12,6 +12,7 @@ use App\Models\Opportunity;
 use App\Models\People;
 use App\Models\Task;
 use App\Models\Team;
+use App\Models\ThirdPartyCarePlan;
 use App\Models\User;
 use App\Services\GitHubService;
 use Filament\Actions\Action;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
+use Spatie\Permission\PermissionRegistrar;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -38,7 +40,7 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::before(function (User $user) {
+        Gate::before(function (User $user, $ability) {
             if ($user->is_system_admin) {
                 return true;
             }
@@ -46,6 +48,17 @@ final class AppServiceProvider extends ServiceProvider
             // Check if user has the super_admin role assigned for any team (global access)
             if ($user->roles()->where('roles.name', 'super_admin')->exists()) {
                 return true;
+            }
+
+            // Ensure Spatie's team context is set for permission resolution.
+            // During Livewire requests the tenant middleware may not re-run,
+            // so we lazily sync from Filament's tenant here.
+            $registrar = app(PermissionRegistrar::class);
+            if ($registrar->getPermissionsTeamId() === null) {
+                $tenant = Filament::getTenant();
+                if ($tenant) {
+                    setPermissionsTeamId($tenant->getKey());
+                }
             }
         });
 
@@ -134,7 +147,7 @@ final class AppServiceProvider extends ServiceProvider
             'task' => Task::class,
             'note' => Note::class,
             'import' => Import::class,
-            'third_party_care_plan' => \App\Models\ThirdPartyCarePlan::class,
+            'third_party_care_plan' => ThirdPartyCarePlan::class,
         ]);
 
         // Bind our custom Import model to the Filament Import model

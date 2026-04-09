@@ -120,5 +120,9 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
         return $this->morphToMany(Task::class, 'taskable');
     }
 
-
+    /** @return BelongsTo<Team, self> */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
 }

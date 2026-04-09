@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CounselorType;
-use App\Models\Department;
 use App\Models\Concerns\HasProfilePhoto;
 use Database\Factories\UserFactory;
 use Exception;
@@ -16,18 +15,17 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 /**
  * @property string $name
  * @property string $email
@@ -39,6 +37,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property string|null $two_factor_recovery_codes
  * @property string|null $two_factor_secret
  */
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 use Zap\Models\Concerns\HasSchedules;
 
@@ -212,9 +211,9 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     }
 
     /**
-     * @return array<\Illuminate\Database\Eloquent\Model>|\Illuminate\Support\Collection<\Illuminate\Database\Eloquent\Model>
+     * @return array<Model>|Collection<Model>
      */
-    public function getTenants(Panel $panel): array|\Illuminate\Support\Collection
+    public function getTenants(Panel $panel): array|Collection
     {
         if ($this->is_system_admin) {
             return Team::all();
@@ -233,18 +232,18 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     }
 
     /**
-     * @return BelongsTo<Team, $this>
+     * @return BelongsToMany<Team, $this>
      */
-    public function team(): BelongsTo
+    public function team(): BelongsToMany
     {
-        return $this->belongsTo(Team::class, 'current_team_id');
+        return $this->teams();
     }
 
     /**
-     * @return BelongsTo<Team, $this>
+     * @return BelongsToMany<Team, $this>
      */
-    public function organization(): BelongsTo
+    public function organization(): BelongsToMany
     {
-        return $this->team();
+        return $this->teams();
     }
 }

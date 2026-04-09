@@ -4,67 +4,66 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Schedule;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class SchedulePolicy
+final class SchedulePolicy
 {
     use HandlesAuthorization;
-    
-    public function viewAny(AuthUser $authUser): bool
+
+    public function viewAny(User $user): bool
     {
-        return $authUser->can('ViewAny:Schedule');
+        return $user->checkPermissionTo('ViewAny:Schedule');
     }
 
-    public function view(AuthUser $authUser, Schedule $schedule): bool
+    public function view(User $user, Schedule $schedule): bool
     {
-        return $authUser->can('View:Schedule');
+        return $user->checkPermissionTo('View:Schedule');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(User $user): bool
     {
-        return $authUser->can('Create:Schedule');
+        return $user->checkPermissionTo('Create:Schedule');
     }
 
-    public function update(AuthUser $authUser, Schedule $schedule): bool
+    public function update(User $user, Schedule $schedule): bool
     {
-        return $authUser->can('Update:Schedule');
+        return $user->checkPermissionTo('Update:Schedule');
     }
 
-    public function delete(AuthUser $authUser, Schedule $schedule): bool
+    public function delete(User $user, Schedule $schedule): bool
     {
-        return $authUser->can('Delete:Schedule');
+        return $user->checkPermissionTo('Delete:Schedule');
     }
 
-    public function restore(AuthUser $authUser, Schedule $schedule): bool
+    public function restore(User $user, Schedule $schedule): bool
     {
-        return $authUser->can('Restore:Schedule');
+        return $user->checkPermissionTo('Restore:Schedule');
     }
 
-    public function forceDelete(AuthUser $authUser, Schedule $schedule): bool
+    public function forceDelete(User $user, Schedule $schedule): bool
     {
-        return $authUser->can('ForceDelete:Schedule');
+        return $user->checkPermissionTo('ForceDelete:Schedule');
     }
 
-    public function forceDeleteAny(AuthUser $authUser): bool
+    public function forceDeleteAny(User $user): bool
     {
-        return $authUser->can('ForceDeleteAny:Schedule');
+        return $user->checkPermissionTo('ForceDeleteAny:Schedule');
     }
 
-    public function restoreAny(AuthUser $authUser): bool
+    public function restoreAny(User $user): bool
     {
-        return $authUser->can('RestoreAny:Schedule');
+        return $user->checkPermissionTo('RestoreAny:Schedule');
     }
 
-    public function replicate(AuthUser $authUser, Schedule $schedule): bool
+    public function replicate(User $user, Schedule $schedule): bool
     {
-        return $authUser->can('Replicate:Schedule');
+        return $user->checkPermissionTo('Replicate:Schedule');
     }
 
-    public function reorder(AuthUser $authUser): bool
+    public function reorder(User $user): bool
     {
-        return $authUser->can('Reorder:Schedule');
+        return $user->checkPermissionTo('Reorder:Schedule');
     }
-
 }

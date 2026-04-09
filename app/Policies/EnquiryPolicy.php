@@ -4,67 +4,66 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Enquiry;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class EnquiryPolicy
+final class EnquiryPolicy
 {
     use HandlesAuthorization;
-    
-    public function viewAny(AuthUser $authUser): bool
+
+    public function viewAny(User $user): bool
     {
-        return $authUser->can('ViewAny:Enquiry');
+        return $user->checkPermissionTo('ViewAny:Enquiry');
     }
 
-    public function view(AuthUser $authUser, Enquiry $enquiry): bool
+    public function view(User $user, Enquiry $enquiry): bool
     {
-        return $authUser->can('View:Enquiry');
+        return $user->checkPermissionTo('View:Enquiry');
     }
 
-    public function create(AuthUser $authUser): bool
+    public function create(User $user): bool
     {
-        return $authUser->can('Create:Enquiry');
+        return $user->checkPermissionTo('Create:Enquiry');
     }
 
-    public function update(AuthUser $authUser, Enquiry $enquiry): bool
+    public function update(User $user, Enquiry $enquiry): bool
     {
-        return $authUser->can('Update:Enquiry');
+        return $user->checkPermissionTo('Update:Enquiry');
     }
 
-    public function delete(AuthUser $authUser, Enquiry $enquiry): bool
+    public function delete(User $user, Enquiry $enquiry): bool
     {
-        return $authUser->can('Delete:Enquiry');
+        return $user->checkPermissionTo('Delete:Enquiry');
     }
 
-    public function restore(AuthUser $authUser, Enquiry $enquiry): bool
+    public function restore(User $user, Enquiry $enquiry): bool
     {
-        return $authUser->can('Restore:Enquiry');
+        return $user->checkPermissionTo('Restore:Enquiry');
     }
 
-    public function forceDelete(AuthUser $authUser, Enquiry $enquiry): bool
+    public function forceDelete(User $user, Enquiry $enquiry): bool
     {
-        return $authUser->can('ForceDelete:Enquiry');
+        return $user->checkPermissionTo('ForceDelete:Enquiry');
     }
 
-    public function forceDeleteAny(AuthUser $authUser): bool
+    public function forceDeleteAny(User $user): bool
     {
-        return $authUser->can('ForceDeleteAny:Enquiry');
+        return $user->checkPermissionTo('ForceDeleteAny:Enquiry');
     }
 
-    public function restoreAny(AuthUser $authUser): bool
+    public function restoreAny(User $user): bool
     {
-        return $authUser->can('RestoreAny:Enquiry');
+        return $user->checkPermissionTo('RestoreAny:Enquiry');
     }
 
-    public function replicate(AuthUser $authUser, Enquiry $enquiry): bool
+    public function replicate(User $user, Enquiry $enquiry): bool
     {
-        return $authUser->can('Replicate:Enquiry');
+        return $user->checkPermissionTo('Replicate:Enquiry');
     }
 
-    public function reorder(AuthUser $authUser): bool
+    public function reorder(User $user): bool
     {
-        return $authUser->can('Reorder:Enquiry');
+        return $user->checkPermissionTo('Reorder:Enquiry');
     }
-
 }

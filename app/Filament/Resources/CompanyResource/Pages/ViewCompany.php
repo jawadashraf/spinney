@@ -7,6 +7,7 @@ namespace App\Filament\Resources\CompanyResource\Pages;
 use App\Enums\CustomFields\CompanyField;
 use App\Filament\Actions\GenerateRecordSummaryAction;
 use App\Filament\Components\Infolists\AvatarName;
+use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\CompanyResource;
 use App\Filament\Resources\CompanyResource\RelationManagers\NotesRelationManager;
 use App\Filament\Resources\CompanyResource\RelationManagers\PeopleRelationManager;
@@ -25,6 +26,8 @@ use Filament\Schemas\Schema;
 
 final class ViewCompany extends ViewRecord
 {
+    use SyncsPermissionTeamId;
+
     protected static string $resource = CompanyResource::class;
 
     protected function getHeaderActions(): array

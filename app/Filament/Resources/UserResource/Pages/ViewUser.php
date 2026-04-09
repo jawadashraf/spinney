@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\UserResource;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
@@ -16,6 +17,8 @@ use STS\FilamentImpersonate\Actions\Impersonate;
 
 final class ViewUser extends ViewRecord
 {
+    use SyncsPermissionTeamId;
+
     protected static string $resource = UserResource::class;
 
     protected function getHeaderActions(): array

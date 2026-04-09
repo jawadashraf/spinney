@@ -93,5 +93,9 @@ final class Opportunity extends Model implements HasCustomFieldsContract
         return $this->morphToMany(Task::class, 'taskable');
     }
 
-
+    /** @return BelongsTo<Team, self> */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
 }
