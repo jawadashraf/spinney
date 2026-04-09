@@ -235,8 +235,16 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     /**
      * @return BelongsTo<Team, $this>
      */
-    public function organization(): BelongsTo
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class, 'current_team_id');
+    }
+
+    /**
+     * @return BelongsTo<Team, $this>
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->team();
     }
 }

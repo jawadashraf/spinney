@@ -14,7 +14,7 @@ trait HasTeam
      */
     public function team(): BelongsTo
     {
-        return $this->belongsTo(Team::class);
+        return $this->belongsTo(Team::class, 'team_id');
     }
 
     /**

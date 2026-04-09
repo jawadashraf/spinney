@@ -23,8 +23,8 @@ use Laravel\Jetstream\Http\Controllers\TeamInvitationController;
 // Guest routes are handled by Filament/Fortify on the same domain.
 // We manually define the Filament route names that are expected by the app panel.
 // We use a different URI to avoid conflicts with existing routes while providing the names.
-// Route::livewire('/filament/login', App\Filament\Pages\Auth\Login::class)->name('filament.app.auth.login');
-// Route::post('/filament/login', [Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])->name('filament.app.auth.login.store');
+Route::livewire('/filament/login', App\Filament\Pages\Auth\Login::class)->name('filament.app.auth.login');
+Route::post('/filament/login', [Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])->name('filament.app.auth.login.store');
 // Route::livewire('/filament/register', App\Filament\Pages\Auth\Register::class)->name('filament.app.auth.register');
 // Route::post('/filament/register', [Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])->name('filament.app.auth.register.store');
 Route::post('/filament/logout', [Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])->name('filament.app.auth.logout');

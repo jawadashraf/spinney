@@ -116,10 +116,10 @@ final class Team extends JetstreamTeam implements HasAvatar
         return $this->hasMany(Department::class);
     }
 
-    /** @return HasMany<\Spatie\Permission\Models\Role, self> */
+    /** @return HasMany<\App\Models\Role, self> */
     public function organization(): HasMany
     {
-        return $this->hasMany(\Spatie\Permission\Models\Role::class);
+        return $this->hasMany(\App\Models\Role::class);
     }
 
 

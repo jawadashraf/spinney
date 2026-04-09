@@ -42,6 +42,11 @@ final class AppServiceProvider extends ServiceProvider
             if ($user->is_system_admin) {
                 return true;
             }
+
+            // Check if user has the super_admin role assigned for any team (global access)
+            if ($user->roles()->where('roles.name', 'super_admin')->exists()) {
+                return true;
+            }
         });
 
         $this->configurePolicies();

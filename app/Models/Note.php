@@ -89,4 +89,5 @@ final class Note extends Model implements HasCustomFieldsContract
         return $this->morphedByMany(Opportunity::class, 'noteable');
     }
 
+
 }

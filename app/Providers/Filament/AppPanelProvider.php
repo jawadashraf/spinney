@@ -69,14 +69,14 @@ final class AppPanelProvider extends PanelProvider
             // ->domain('app.'.parse_url((string) config('app.url'))['host'])
             ->homeUrl(fn (): string => Filament::getTenant() ? CompanyResource::getUrl('index') : url('/'))
             ->brandName('Spinneyhill')
-            ->tenant(Team::class, ownershipRelationship: 'organization')
+            ->tenant(Team::class, ownershipRelationship: 'team')
             // ->tenantRegistration(RegisterOrganization::class)
             // ->tenantProfile(EditOrganization::class)
             ->plugins([
                 FilamentShieldPlugin::make()
                     ->scopeToTenant(true)
-                    ->tenantRelationshipName('organization')
-                    ->tenantOwnershipRelationshipName('organization'),
+                    ->tenantRelationshipName('team')
+                    ->tenantOwnershipRelationshipName('team'),
                 AuthUIEnhancerPlugin::make()
                     ->showEmptyPanelOnMobile(true)
                     ->formPanelPosition('right')

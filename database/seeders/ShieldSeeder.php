@@ -10,7 +10,7 @@ use App\Models\User;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 final class ShieldSeeder extends Seeder
@@ -33,7 +33,7 @@ final class ShieldSeeder extends Seeder
         setPermissionsTeamId(null);
 
         $superAdminRole = Role::firstOrCreate(
-            ['name' => Utils::getSuperAdminName()],
+            ['name' => Utils::getSuperAdminName(), 'team_id' => null],
             ['guard_name' => 'web'],
         );
 
@@ -80,7 +80,7 @@ final class ShieldSeeder extends Seeder
                 $user->assignRole($role);
             }
 
-            $user->teams()->attach($team, ['role' => 'member']);
+            $user->teams()->syncWithoutDetaching([$team->id => ['role' => 'member']]);
             $user->switchTeam($team);
 
             // Attach to matching team if it exists and user isn't already on it.
@@ -90,12 +90,16 @@ final class ShieldSeeder extends Seeder
             }
         }
 
-        User::query()
-            ->where('is_system_admin', true)
-            ->each(function (User $user) use ($superAdminRole): void {
-                if (! $user->hasRole($superAdminRole)) {
-                    $user->assignRole($superAdminRole);
-                }
-            });
+        // Assign the super_admin role to system administrators for the primary team.
+        if ($team) {
+            setPermissionsTeamId($team->id);
+            User::query()
+                ->where('is_system_admin', true)
+                ->each(function (User $user) use ($superAdminRole): void {
+                    if (! $user->hasRole($superAdminRole)) {
+                        $user->assignRole($superAdminRole);
+                    }
+                });
+        }
     }
 }
