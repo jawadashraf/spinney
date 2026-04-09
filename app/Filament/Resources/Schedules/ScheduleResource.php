@@ -20,7 +20,9 @@ final class ScheduleResource extends Resource
 {
     protected static ?string $model = Schedule::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Clock;
+    protected static string|\UnitEnum|null $navigationGroup = 'Appointments';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

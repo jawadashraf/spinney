@@ -65,7 +65,7 @@ final class AppPanelProvider extends PanelProvider
         $panel
             ->default()
             ->id('app')
-            ->path('app')
+            // ->path('app')
             // ->domain('app.'.parse_url((string) config('app.url'))['host'])
             ->homeUrl(fn (): string => Filament::getTenant() ? CompanyResource::getUrl('index') : url('/'))
             ->brandName('Spinneyhill')
@@ -94,10 +94,10 @@ final class AppPanelProvider extends PanelProvider
                 // KnowledgeBaseCompanionPlugin::make()
                 //     ->knowledgeBasePanelId('knowledge-base'), // TODO: Re-enable when guava/filament-knowledge-base supports Laravel 13
             ])
-            ->login(Login::class)
-            // ->registration(Register::class)
-            ->passwordReset()
-            ->emailVerification()
+           ->login(Login::class)
+//            ->registration(Register::class)
+           ->passwordReset()
+        //    ->emailVerification()
             ->databaseNotifications()
             ->brandLogoHeight('2.6rem')
             // ->brandLogo(fn (): View|Factory => view('filament.app.logo'))
