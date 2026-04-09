@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Pages;
+namespace App\Filament\Pages\Tenancy;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Tenancy\RegisterTenant;
@@ -10,12 +10,12 @@ use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 
-final class CreateTeam extends RegisterTenant
+final class RegisterOrganization extends RegisterTenant
 {
     #[Override]
     public static function getLabel(): string
     {
-        return 'Create Team';
+        return 'Create Organization';
     }
 
     #[Override]

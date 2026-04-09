@@ -10,8 +10,8 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Resources\CompanyResource;
-use App\Filament\Resources\TeamResource\Pages\CreateTeam;
-use App\Filament\Resources\TeamResource\Pages\EditTeam;
+use App\Filament\Pages\Tenancy\RegisterOrganization;
+use App\Filament\Pages\Tenancy\EditOrganization;
 use App\Models\Team;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
@@ -65,12 +65,13 @@ final class AppPanelProvider extends PanelProvider
         $panel
             ->default()
             ->id('app')
+            ->path('app')
             // ->domain('app.'.parse_url((string) config('app.url'))['host'])
             ->homeUrl(fn (): string => Filament::getTenant() ? CompanyResource::getUrl('index') : url('/'))
             ->brandName('Spinneyhill')
             ->tenant(Team::class, ownershipRelationship: 'organization')
-            ->tenantRegistration(CreateTeam::class)
-            ->tenantProfile(EditTeam::class)
+            // ->tenantRegistration(RegisterOrganization::class)
+            // ->tenantProfile(EditOrganization::class)
             ->plugins([
                 FilamentShieldPlugin::make()
                     ->scopeToTenant(true)
