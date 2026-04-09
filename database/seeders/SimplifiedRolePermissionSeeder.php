@@ -7,11 +7,13 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use App\Models\Team;
 
 final class SimplifiedRolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
+        $teamId = Team::first()->id;
         // Define roles with their permissions
         $rolePermissions = [
             'liaison' => [
@@ -58,16 +60,17 @@ final class SimplifiedRolePermissionSeeder extends Seeder
             ],
         ];
 
+        setPermissionsTeamId($teamId);
+
         foreach ($rolePermissions as $roleName => $config) {
             $role = Role::firstOrCreate(
-                ['name' => $roleName],
-                ['guard_name' => 'web']
+                ['name' => $roleName, 'guard_name' => 'web'],
             );
 
             if ($config['permissions'] === '*') {
-                $role->givePermissionTo(Permission::all());
+                $role->syncPermissions(Permission::all());
             } else {
-                $role->givePermissionTo($config['permissions']);
+                $role->syncPermissions($config['permissions']);
             }
 
             $this->command->info("Role '{$roleName}' created with permissions.");

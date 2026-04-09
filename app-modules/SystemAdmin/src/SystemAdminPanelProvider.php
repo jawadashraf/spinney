@@ -6,6 +6,7 @@ namespace Relaticle\SystemAdmin;
 
 use Awcodes\Overlook\OverlookPlugin;
 use Awcodes\Overlook\Widgets\OverlookWidget;
+use AlizHarb\ActivityLog\ActivityLogPlugin;
 use Exception;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -21,6 +22,8 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Relaticle\SystemAdmin\Filament\Pages\Dashboard;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+
 
 final class SystemAdminPanelProvider extends PanelProvider
 {
@@ -31,18 +34,12 @@ final class SystemAdminPanelProvider extends PanelProvider
     {
         $panel = $panel->id('sysadmin');
 
-        // Configure domain or path based on environment
-        if ($domain = config('app.sysadmin_domain')) {
-            $panel->domain($domain);
-        } else {
-            $panel->path(config('app.sysadmin_path', 'sysadmin'));
-        }
+        $panel->path(config('app.sysadmin_path', 'sysadmin'));
 
         return $panel
             ->login()
             ->emailVerification()
             ->authGuard('web')
-            ->strictAuthorization()
             ->spa()
             ->colors([
                 'primary' => Color::Indigo,
@@ -83,6 +80,10 @@ final class SystemAdminPanelProvider extends PanelProvider
                         'xl' => 5,
                         '2xl' => null,
                     ]),
+                ActivityLogPlugin::make()
+                    ->label('Log')
+                    ->pluralLabel('Logs')
+                    ->navigationGroup('System'),
             ])
             ->databaseNotifications()
             ->middleware([
@@ -91,7 +92,7 @@ final class SystemAdminPanelProvider extends PanelProvider
                 StartSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
-                PreventRequestForgery::class,
+                \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,

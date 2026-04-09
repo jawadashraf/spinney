@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table): void {
             $table->uuid('id')->primary();
+            $table->foreignId('team_id')->nullable()->index();
             $table->string('type');
             $table->morphs('notifiable');
             $table->json('data');

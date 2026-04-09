@@ -10,6 +10,9 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Resources\CompanyResource;
+use App\Filament\Resources\TeamResource\Pages\CreateTeam;
+use App\Filament\Resources\TeamResource\Pages\EditTeam;
+use App\Models\Team;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
 use Exception;
@@ -63,10 +66,16 @@ final class AppPanelProvider extends PanelProvider
             ->default()
             ->id('app')
             // ->domain('app.'.parse_url((string) config('app.url'))['host'])
-            ->homeUrl(fn (): string => CompanyResource::getUrl('index'))
+            ->homeUrl(fn (): string => Filament::getTenant() ? CompanyResource::getUrl('index') : url('/'))
             ->brandName('Spinneyhill')
+            ->tenant(Team::class, ownershipRelationship: 'organization')
+            ->tenantRegistration(CreateTeam::class)
+            ->tenantProfile(EditTeam::class)
             ->plugins([
-                FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make()
+                    ->scopeToTenant(true)
+                    ->tenantRelationshipName('organization')
+                    ->tenantOwnershipRelationshipName('organization'),
                 AuthUIEnhancerPlugin::make()
                     ->showEmptyPanelOnMobile(true)
                     ->formPanelPosition('right')
@@ -74,10 +83,6 @@ final class AppPanelProvider extends PanelProvider
             // ->emptyPanelBackgroundImageOpacity('100%')
             // ->emptyPanelBackgroundImageUrl('https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')
                     ->emptyPanelBackgroundImageUrl(asset('images/spinney_bg.png')),
-                ActivityLogPlugin::make()
-                    ->label('Log')
-                    ->pluralLabel('Logs')
-                    ->navigationGroup('System'),
                 FilamentGeneralSettingsPlugin::make()
                     ->canAccess(fn (): bool => auth()->user()->id === 1)
                     ->setSort(3)
@@ -155,6 +160,9 @@ final class AppPanelProvider extends PanelProvider
             ->authPasswordBroker('users')
             ->authMiddleware([
                 Authenticate::class,
+            ])
+            ->tenantMiddleware([
+                \App\Http\Middleware\SyncSpatiePermissionsTeamId::class,
             ])
             ->renderHook(
                 PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,

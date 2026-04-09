@@ -15,6 +15,8 @@ return new class extends Migration
     {
         Schema::create('noteables', function (Blueprint $table): void {
             $table->id();
+            $table->foreignId('team_id')->constrained('teams')->cascadeOnDelete();
+            $table->index('team_id');
 
             $table->foreignId('note_id');
 

@@ -5,15 +5,18 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CounselorType;
+use App\Models\Department;
 use App\Models\Concerns\HasProfilePhoto;
 use Database\Factories\UserFactory;
 use Exception;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
+use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -39,7 +42,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 use Zap\Models\Concerns\HasSchedules;
 
-final class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
+final class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenants, MustVerifyEmail
 {
     use HasApiTokens;
 
@@ -165,6 +168,14 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
     }
 
     /**
+     * @return BelongsToMany<Department, $this>
+     */
+    public function departments(): BelongsToMany
+    {
+        return $this->belongsToMany(Department::class);
+    }
+
+    /**
      * Determine if this user can impersonate other users.
      */
     public function canImpersonate(): bool
@@ -198,5 +209,34 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Mus
         }
 
         return false;
+    }
+
+    /**
+     * @return array<\Illuminate\Database\Eloquent\Model>|\Illuminate\Support\Collection<\Illuminate\Database\Eloquent\Model>
+     */
+    public function getTenants(Panel $panel): array|\Illuminate\Support\Collection
+    {
+        if ($this->is_system_admin) {
+            return Team::all();
+        }
+
+        return $this->allTeams();
+    }
+
+    public function canAccessTenant(Model $tenant): bool
+    {
+        if ($this->is_system_admin) {
+            return true;
+        }
+
+        return $this->allTeams()->pluck('id')->contains($tenant->id);
+    }
+
+    /**
+     * @return BelongsTo<Team, $this>
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'current_team_id');
     }
 }

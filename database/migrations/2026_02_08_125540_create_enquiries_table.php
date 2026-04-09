@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('referral_destination')->nullable();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamp('occurred_at');
-            $table->foreignId('team_id')->nullable()->constrained('teams')->cascadeOnDelete();
+            $table->foreignId('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignId('creator_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });

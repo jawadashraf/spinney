@@ -119,4 +119,5 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
     {
         return $this->morphToMany(Task::class, 'taskable');
     }
+
 }

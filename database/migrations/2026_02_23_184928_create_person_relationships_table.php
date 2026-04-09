@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('person_relationships', function (Blueprint $table): void {
             $table->id();
+            $table->foreignId('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignId('person_id')->constrained('people')->cascadeOnDelete();
             $table->foreignId('related_person_id')->constrained('people')->cascadeOnDelete();
             $table->string('relation_type'); // e.g., parent, next_of_kin, etc.

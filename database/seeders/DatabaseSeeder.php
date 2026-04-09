@@ -15,8 +15,9 @@ final class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            ThirdPartyCarePlanCustomFieldSeeder::class,
             LocalSeeder::class,
+            DepartmentSeeder::class,
+            ThirdPartyCarePlanCustomFieldSeeder::class,
         ]);
     }
 }

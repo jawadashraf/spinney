@@ -32,7 +32,7 @@ use Parental\HasChildren;
  * @property CreationSource $creation_source
  */
 #[ObservedBy(PeopleObserver::class)]
-final class People extends Model implements HasCustomFieldsContract
+class People extends Model implements HasCustomFieldsContract
 {
     use HasAiSummary;
     use HasChildren;
@@ -232,4 +232,5 @@ final class People extends Model implements HasCustomFieldsContract
         // Appointments are accessed via Schedule metadata
         // This is a convenience method for querying
     }
+
 }

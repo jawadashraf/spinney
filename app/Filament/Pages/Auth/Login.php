@@ -17,9 +17,25 @@ final class Login extends \Filament\Auth\Pages\Login
     public function mount(): void
     {
         if (Auth::check()) {
-            redirect()->intended(
-                CompanyResource::getUrl('index')
-            );
+            $user = Auth::user();
+
+            if ($user->is_system_admin) {
+                redirect('/sysadmin');
+
+                return;
+            }
+
+            $tenant = $user->currentTeam ?? $user->allTeams()->first();
+
+            if ($tenant) {
+                 redirect(
+                    route('filament.app.home', ['tenant' => $tenant])
+                 );
+
+                 return;
+            }
+
+            redirect('/');
 
             return;
         }

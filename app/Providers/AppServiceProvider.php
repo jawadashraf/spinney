@@ -38,6 +38,12 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::before(function (User $user) {
+            if ($user->is_system_admin) {
+                return true;
+            }
+        });
+
         $this->configurePolicies();
         $this->configureModels();
         $this->configureFilament();

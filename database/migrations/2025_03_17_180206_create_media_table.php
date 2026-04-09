@@ -12,6 +12,7 @@ return new class extends Migration
     {
         Schema::create('media', function (Blueprint $table): void {
             $table->id();
+            $table->foreignId('team_id')->nullable()->index();
 
             $table->morphs('model');
             $table->uuid()->nullable()->unique();

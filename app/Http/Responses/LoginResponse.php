@@ -18,15 +18,25 @@ final readonly class LoginResponse implements \Filament\Auth\Http\Responses\Cont
 
         // For system admin panel, use default Filament behavior
         if ($panel?->getId() === 'sysadmin') {
-            return redirect()->intended($panel->getUrl());
+            return redirect($panel->getUrl());
         }
 
-        // For app panel, redirect to companies
+        // For app panel, redirect based on user role and tenants
         $user = $request->user('web');
         if ($user) {
-            return redirect()->intended(CompanyResource::getUrl('index'));
+            if ($user->is_system_admin) {
+                return redirect('/sysadmin');
+            }
+
+            $currentTeam = $user->currentTeam ?? $user->allTeams()->first();
+
+            if ($currentTeam) {
+                return redirect(
+                    route('filament.app.home', ['tenant' => $currentTeam])
+                );
+            }
         }
 
-        return redirect()->intended(Filament::getUrl());
+        return redirect(Filament::getUrl() ?? '/');
     }
 }

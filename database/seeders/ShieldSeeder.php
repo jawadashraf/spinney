@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\Team;
+use App\Models\Department;
 use App\Models\User;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Illuminate\Database\Seeder;
@@ -29,10 +30,17 @@ final class ShieldSeeder extends Seeder
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
+        setPermissionsTeamId(null);
+
         $superAdminRole = Role::firstOrCreate(
             ['name' => Utils::getSuperAdminName()],
             ['guard_name' => 'web'],
         );
+
+        $team = Team::where('name', 'Spinney Hill')->first();
+        if ($team) {
+            setPermissionsTeamId($team->id);
+        }
 
         // Application roles from the Phase 1 Handoff Permissions Matrix.
         // Maps role name => matching team name for team assignment.
@@ -50,9 +58,9 @@ final class ShieldSeeder extends Seeder
             'admin' => 'Management',
         ];
 
-        foreach ($applicationRoles as $roleName => $teamName) {
+        foreach ($applicationRoles as $roleName => $departmentName) {
             $role = Role::firstOrCreate(
-                ['name' => $roleName],
+                ['name' => $roleName, 'team_id' => $team?->id],
                 ['guard_name' => 'web'],
             );
 
@@ -72,11 +80,13 @@ final class ShieldSeeder extends Seeder
                 $user->assignRole($role);
             }
 
+            $user->teams()->attach($team, ['role' => 'member']);
+            $user->switchTeam($team);
+
             // Attach to matching team if it exists and user isn't already on it.
-            $team = Team::where('name', $teamName)->first();
-            if ($team && ! $user->belongsToTeam($team)) {
-                $user->teams()->attach($team, ['role' => 'member']);
-                $user->switchTeam($team);
+            $department = Department::where('name', $departmentName)->first();
+            if ($department) {
+                $user->departments()->attach($department);
             }
         }
 

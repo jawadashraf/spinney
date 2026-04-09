@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Jetstream\Events\TeamCreated;
 use Laravel\Jetstream\Events\TeamDeleted;
 use Laravel\Jetstream\Events\TeamUpdated;
+use App\Models\Department;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Laravel\Jetstream\Team as JetstreamTeam;
 
@@ -106,4 +107,54 @@ final class Team extends JetstreamTeam implements HasAvatar
     {
         return $this->hasMany(Note::class);
     }
+
+    /**
+     * @return HasMany<Department, $this>
+     */
+    public function departments(): HasMany
+    {
+        return $this->hasMany(Department::class);
+    }
+
+    /** @return HasMany<\Spatie\Permission\Models\Role, self> */
+    public function organization(): HasMany
+    {
+        return $this->hasMany(\Spatie\Permission\Models\Role::class);
+    }
+
+
+    /** @return HasMany<\App\Models\CustomFieldSection, self> */
+    public function customFieldSections(): HasMany
+    {
+        return $this->hasMany(\App\Models\CustomFieldSection::class);
+    }
+
+
+    /** @return HasMany<\App\Models\CustomField, self> */
+    public function customFields(): HasMany
+    {
+        return $this->hasMany(\App\Models\CustomField::class);
+    }
+
+
+    /** @return HasMany<\App\Models\Enquiry, self> */
+    public function enquiries(): HasMany
+    {
+        return $this->hasMany(\App\Models\Enquiry::class);
+    }
+
+
+    /** @return HasMany<\App\Models\ThirdPartyCarePlan, self> */
+    public function thirdPartyCarePlans(): HasMany
+    {
+        return $this->hasMany(\App\Models\ThirdPartyCarePlan::class);
+    }
+
+
+    /** @return HasMany<\App\Models\Schedule, self> */
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(\App\Models\Schedule::class);
+    }
+
 }

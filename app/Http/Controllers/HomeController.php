@@ -12,9 +12,19 @@ final readonly class HomeController
     public function __invoke(): mixed
     {
         if (Auth::check()) {
-            return redirect()->intended(
-                CompanyResource::getUrl('index')
-            );
+            $user = Auth::user();
+
+            if ($user->is_system_admin) {
+                return redirect('/sysadmin');
+            }
+
+            $currentTeam = $user->currentTeam ?? $user->allTeams()->first();
+
+            if ($currentTeam) {
+                return redirect(
+                    route('filament.app.home', ['tenant' => $currentTeam])
+                );
+            }
         }
 
         return view('home.index2');

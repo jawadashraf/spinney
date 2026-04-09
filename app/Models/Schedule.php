@@ -6,11 +6,13 @@ namespace App\Models;
 
 use App\Enums\AttendeeType;
 use App\Enums\PaymentType;
+use App\Models\Concerns\HasTeam;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Zap\Models\Schedule as ZapSchedule;
 
 final class Schedule extends ZapSchedule
 {
+    use HasTeam;
     /**
      * Get the service user for this appointment.
      *
@@ -76,4 +78,7 @@ final class Schedule extends ZapSchedule
     {
         return $this->metadata['care_plan_id'] ?? null;
     }
+
+
+
 }

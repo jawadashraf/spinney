@@ -28,13 +28,17 @@ final class TeamResource extends Resource
 {
     protected static ?string $model = Team::class;
 
+    protected static ?string $label = 'Organization';
+
+    protected static ?string $pluralLabel = 'Organizations';
+
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 100;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Workspace';
+    protected static string|\UnitEnum|null $navigationGroup = 'Settings';
 
     public static function form(Schema $schema): Schema
     {

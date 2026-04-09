@@ -70,4 +70,7 @@ final class Enquiry extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+
+
 }

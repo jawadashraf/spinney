@@ -16,4 +16,12 @@ trait HasTeam
     {
         return $this->belongsTo(Team::class);
     }
+
+    /**
+     * @return BelongsTo<Team, $this>
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->team();
+    }
 }

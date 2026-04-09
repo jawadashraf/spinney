@@ -92,4 +92,5 @@ final class Opportunity extends Model implements HasCustomFieldsContract
     {
         return $this->morphToMany(Task::class, 'taskable');
     }
+
 }

@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\Department;
 use App\Models\Opportunity;
 use App\Models\People;
 use App\Models\Team;
@@ -39,10 +40,15 @@ final class LocalSeeder extends Seeder
         );
 
         if ($user->wasRecentlyCreated && ! $user->currentTeam) {
-            $managementTeam = Team::where('name', 'Management')->first();
+            $managementTeam = Team::where('name', 'Spinney Hill')->first();
             if ($managementTeam) {
                 $user->teams()->attach($managementTeam, ['role' => 'admin']);
                 $user->switchTeam($managementTeam);
+            }
+
+            $managementDepartment = Department::where('name', 'Management')->first();
+            if ($managementDepartment) {
+                $user->departments()->attach($managementDepartment);
             }
         }
 
