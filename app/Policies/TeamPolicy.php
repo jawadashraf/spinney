@@ -4,66 +4,67 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Team;
-use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class TeamPolicy
+class TeamPolicy
 {
     use HandlesAuthorization;
-
-    public function viewAny(User $user): bool
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('ViewAny:Team');
+        return $authUser->can('ViewAny:Team');
     }
 
-    public function view(User $user, Team $team): bool
+    public function view(AuthUser $authUser, Team $team): bool
     {
-        return $user->checkPermissionTo('View:Team');
+        return $authUser->can('View:Team');
     }
 
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('Create:Team');
+        return $authUser->can('Create:Team');
     }
 
-    public function update(User $user, Team $team): bool
+    public function update(AuthUser $authUser, Team $team): bool
     {
-        return $user->checkPermissionTo('Update:Team');
+        return $authUser->can('Update:Team');
     }
 
-    public function delete(User $user, Team $team): bool
+    public function delete(AuthUser $authUser, Team $team): bool
     {
-        return $user->checkPermissionTo('Delete:Team');
+        return $authUser->can('Delete:Team');
     }
 
-    public function restore(User $user, Team $team): bool
+    public function restore(AuthUser $authUser, Team $team): bool
     {
-        return $user->checkPermissionTo('Restore:Team');
+        return $authUser->can('Restore:Team');
     }
 
-    public function forceDelete(User $user, Team $team): bool
+    public function forceDelete(AuthUser $authUser, Team $team): bool
     {
-        return $user->checkPermissionTo('ForceDelete:Team');
+        return $authUser->can('ForceDelete:Team');
     }
 
-    public function forceDeleteAny(User $user): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('ForceDeleteAny:Team');
+        return $authUser->can('ForceDeleteAny:Team');
     }
 
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('RestoreAny:Team');
+        return $authUser->can('RestoreAny:Team');
     }
 
-    public function replicate(User $user, Team $team): bool
+    public function replicate(AuthUser $authUser, Team $team): bool
     {
-        return $user->checkPermissionTo('Replicate:Team');
+        return $authUser->can('Replicate:Team');
     }
 
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('Reorder:Team');
+        return $authUser->can('Reorder:Team');
     }
+
 }

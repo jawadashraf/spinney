@@ -4,66 +4,67 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\ThirdPartyCarePlan;
-use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class ThirdPartyCarePlanPolicy
+class ThirdPartyCarePlanPolicy
 {
     use HandlesAuthorization;
-
-    public function viewAny(User $user): bool
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('ViewAny:ThirdPartyCarePlan');
+        return $authUser->can('ViewAny:ThirdPartyCarePlan');
     }
 
-    public function view(User $user, ThirdPartyCarePlan $thirdPartyCarePlan): bool
+    public function view(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
-        return $user->checkPermissionTo('View:ThirdPartyCarePlan');
+        return $authUser->can('View:ThirdPartyCarePlan');
     }
 
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('Create:ThirdPartyCarePlan');
+        return $authUser->can('Create:ThirdPartyCarePlan');
     }
 
-    public function update(User $user, ThirdPartyCarePlan $thirdPartyCarePlan): bool
+    public function update(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
-        return $user->checkPermissionTo('Update:ThirdPartyCarePlan');
+        return $authUser->can('Update:ThirdPartyCarePlan');
     }
 
-    public function delete(User $user, ThirdPartyCarePlan $thirdPartyCarePlan): bool
+    public function delete(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
-        return $user->checkPermissionTo('Delete:ThirdPartyCarePlan');
+        return $authUser->can('Delete:ThirdPartyCarePlan');
     }
 
-    public function restore(User $user, ThirdPartyCarePlan $thirdPartyCarePlan): bool
+    public function restore(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
-        return $user->checkPermissionTo('Restore:ThirdPartyCarePlan');
+        return $authUser->can('Restore:ThirdPartyCarePlan');
     }
 
-    public function forceDelete(User $user, ThirdPartyCarePlan $thirdPartyCarePlan): bool
+    public function forceDelete(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
-        return $user->checkPermissionTo('ForceDelete:ThirdPartyCarePlan');
+        return $authUser->can('ForceDelete:ThirdPartyCarePlan');
     }
 
-    public function forceDeleteAny(User $user): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('ForceDeleteAny:ThirdPartyCarePlan');
+        return $authUser->can('ForceDeleteAny:ThirdPartyCarePlan');
     }
 
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('RestoreAny:ThirdPartyCarePlan');
+        return $authUser->can('RestoreAny:ThirdPartyCarePlan');
     }
 
-    public function replicate(User $user, ThirdPartyCarePlan $thirdPartyCarePlan): bool
+    public function replicate(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
-        return $user->checkPermissionTo('Replicate:ThirdPartyCarePlan');
+        return $authUser->can('Replicate:ThirdPartyCarePlan');
     }
 
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('Reorder:ThirdPartyCarePlan');
+        return $authUser->can('Reorder:ThirdPartyCarePlan');
     }
+
 }

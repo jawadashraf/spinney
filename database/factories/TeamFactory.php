@@ -7,6 +7,7 @@ namespace Database\Factories;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\Sequence;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Team>
@@ -20,8 +21,11 @@ final class TeamFactory extends Factory
      */
     public function definition(): array
     {
+        $name = $this->faker->unique()->company();
+
         return [
-            'name' => $this->faker->unique()->company(),
+            'name' => $name,
+            'slug' => Str::slug($name),
             'user_id' => User::factory(),
             'personal_team' => true,
         ];

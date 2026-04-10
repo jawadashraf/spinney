@@ -4,66 +4,67 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Company;
-use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class CompanyPolicy
+class CompanyPolicy
 {
     use HandlesAuthorization;
-
-    public function viewAny(User $user): bool
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('ViewAny:Company');
+        return $authUser->can('ViewAny:Company');
     }
 
-    public function view(User $user, Company $company): bool
+    public function view(AuthUser $authUser, Company $company): bool
     {
-        return $user->checkPermissionTo('View:Company');
+        return $authUser->can('View:Company');
     }
 
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('Create:Company');
+        return $authUser->can('Create:Company');
     }
 
-    public function update(User $user, Company $company): bool
+    public function update(AuthUser $authUser, Company $company): bool
     {
-        return $user->checkPermissionTo('Update:Company');
+        return $authUser->can('Update:Company');
     }
 
-    public function delete(User $user, Company $company): bool
+    public function delete(AuthUser $authUser, Company $company): bool
     {
-        return $user->checkPermissionTo('Delete:Company');
+        return $authUser->can('Delete:Company');
     }
 
-    public function restore(User $user, Company $company): bool
+    public function restore(AuthUser $authUser, Company $company): bool
     {
-        return $user->checkPermissionTo('Restore:Company');
+        return $authUser->can('Restore:Company');
     }
 
-    public function forceDelete(User $user, Company $company): bool
+    public function forceDelete(AuthUser $authUser, Company $company): bool
     {
-        return $user->checkPermissionTo('ForceDelete:Company');
+        return $authUser->can('ForceDelete:Company');
     }
 
-    public function forceDeleteAny(User $user): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('ForceDeleteAny:Company');
+        return $authUser->can('ForceDeleteAny:Company');
     }
 
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('RestoreAny:Company');
+        return $authUser->can('RestoreAny:Company');
     }
 
-    public function replicate(User $user, Company $company): bool
+    public function replicate(AuthUser $authUser, Company $company): bool
     {
-        return $user->checkPermissionTo('Replicate:Company');
+        return $authUser->can('Replicate:Company');
     }
 
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('Reorder:Company');
+        return $authUser->can('Reorder:Company');
     }
+
 }

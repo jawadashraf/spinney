@@ -4,66 +4,67 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Opportunity;
-use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class OpportunityPolicy
+class OpportunityPolicy
 {
     use HandlesAuthorization;
-
-    public function viewAny(User $user): bool
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('ViewAny:Opportunity');
+        return $authUser->can('ViewAny:Opportunity');
     }
 
-    public function view(User $user, Opportunity $opportunity): bool
+    public function view(AuthUser $authUser, Opportunity $opportunity): bool
     {
-        return $user->checkPermissionTo('View:Opportunity');
+        return $authUser->can('View:Opportunity');
     }
 
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('Create:Opportunity');
+        return $authUser->can('Create:Opportunity');
     }
 
-    public function update(User $user, Opportunity $opportunity): bool
+    public function update(AuthUser $authUser, Opportunity $opportunity): bool
     {
-        return $user->checkPermissionTo('Update:Opportunity');
+        return $authUser->can('Update:Opportunity');
     }
 
-    public function delete(User $user, Opportunity $opportunity): bool
+    public function delete(AuthUser $authUser, Opportunity $opportunity): bool
     {
-        return $user->checkPermissionTo('Delete:Opportunity');
+        return $authUser->can('Delete:Opportunity');
     }
 
-    public function restore(User $user, Opportunity $opportunity): bool
+    public function restore(AuthUser $authUser, Opportunity $opportunity): bool
     {
-        return $user->checkPermissionTo('Restore:Opportunity');
+        return $authUser->can('Restore:Opportunity');
     }
 
-    public function forceDelete(User $user, Opportunity $opportunity): bool
+    public function forceDelete(AuthUser $authUser, Opportunity $opportunity): bool
     {
-        return $user->checkPermissionTo('ForceDelete:Opportunity');
+        return $authUser->can('ForceDelete:Opportunity');
     }
 
-    public function forceDeleteAny(User $user): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('ForceDeleteAny:Opportunity');
+        return $authUser->can('ForceDeleteAny:Opportunity');
     }
 
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('RestoreAny:Opportunity');
+        return $authUser->can('RestoreAny:Opportunity');
     }
 
-    public function replicate(User $user, Opportunity $opportunity): bool
+    public function replicate(AuthUser $authUser, Opportunity $opportunity): bool
     {
-        return $user->checkPermissionTo('Replicate:Opportunity');
+        return $authUser->can('Replicate:Opportunity');
     }
 
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('Reorder:Opportunity');
+        return $authUser->can('Reorder:Opportunity');
     }
+
 }

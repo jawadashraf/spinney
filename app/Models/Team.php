@@ -15,6 +15,7 @@ use Laravel\Jetstream\Events\TeamUpdated;
 use App\Models\Department;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Laravel\Jetstream\Team as JetstreamTeam;
+use Illuminate\Support\Str;
 
 /**
  * @property string $name
@@ -25,6 +26,20 @@ final class Team extends JetstreamTeam implements HasAvatar
     /** @use HasFactory<TeamFactory> */
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::creating(function (Team $team): void {
+            if (empty($team->slug)) {
+                $team->slug = Str::slug($team->name);
+            }
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -32,6 +47,7 @@ final class Team extends JetstreamTeam implements HasAvatar
      */
     protected $fillable = [
         'name',
+        'slug',
         'personal_team',
     ];
 

@@ -69,7 +69,10 @@ final class AppPanelProvider extends PanelProvider
             // ->domain('app.'.parse_url((string) config('app.url'))['host'])
             ->homeUrl(fn (): string => Filament::getTenant() ? CompanyResource::getUrl('index') : url('/'))
             ->brandName('Spinneyhill')
-            ->tenant(Team::class, ownershipRelationship: 'team')
+            ->tenant(Team::class, ownershipRelationship: 'team', slugAttribute: 'slug')
+            ->tenantMiddleware([
+                \App\Http\Middleware\SyncSpatiePermissionsTeamId::class,
+            ], isPersistent: true)
             // ->tenantRegistration(RegisterOrganization::class)
             // ->tenantProfile(EditOrganization::class)
             ->plugins([
@@ -161,9 +164,6 @@ final class AppPanelProvider extends PanelProvider
             ->authPasswordBroker('users')
             ->authMiddleware([
                 Authenticate::class,
-            ])
-            ->tenantMiddleware([
-                \App\Http\Middleware\SyncSpatiePermissionsTeamId::class,
             ])
             ->renderHook(
                 PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
