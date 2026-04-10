@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Services\AI;
 
 use App\Enums\CustomFields\CompanyField;
-use App\Enums\CustomFields\NoteField;
 use App\Enums\CustomFields\OpportunityField;
 use App\Enums\CustomFields\PeopleField;
 use App\Enums\CustomFields\TaskField;
 use App\Models\Company;
+use App\Models\CustomFieldValue;
 use App\Models\Note;
 use App\Models\Opportunity;
 use App\Models\People;
@@ -188,7 +188,7 @@ final readonly class RecordContextBuilder
     {
         $formatted = $notes->map(fn (Note $note): array => [
             'title' => $note->title,
-            'content' => $this->stripHtml((string) $this->getCustomFieldValue($note, NoteField::BODY->value)),
+            'content' => $this->stripHtml((string) $note->body),
             'created' => $note->created_at?->diffForHumans(),
         ])->values()->all();
 
@@ -251,10 +251,10 @@ final readonly class RecordContextBuilder
             return null;
         }
 
-        /** @var Collection<int, \App\Models\CustomFieldValue> $customFieldValues */
+        /** @var Collection<int, CustomFieldValue> $customFieldValues */
         $customFieldValues = $model->customFieldValues; // @phpstan-ignore property.notFound
 
-        $customFieldValue = $customFieldValues->filter(fn (\App\Models\CustomFieldValue $cfv): bool => $cfv->customField && $cfv->customField->code === $code)->first();
+        $customFieldValue = $customFieldValues->filter(fn (CustomFieldValue $cfv): bool => $cfv->customField && $cfv->customField->code === $code)->first();
 
         if ($customFieldValue === null) {
             return null;

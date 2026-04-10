@@ -27,6 +27,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 use Override;
 
 final class NoteResource extends Resource
@@ -52,6 +53,11 @@ final class NoteResource extends Resource
             ->columns([
                 TextColumn::make('title')
                     ->searchable(),
+                TextColumn::make('body')
+                    ->formatStateUsing(fn (string $state): HtmlString => new HtmlString($state))
+                    ->limit(50)
+                    ->tooltip(fn (Note $record): string => strip_tags((string) $record->body))
+                    ->toggleable(),
                 TextColumn::make('companies.name')
                     ->label('Companies')
                     ->toggleable(),

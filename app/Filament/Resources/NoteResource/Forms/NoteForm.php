@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\NoteResource\Forms;
 
 use App\Support\CustomFields;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -25,6 +26,11 @@ final class NoteForm
                 ->rules(['max:255'])
                 ->columnSpanFull()
                 ->required(),
+
+            RichEditor::make('body')
+                ->label('Body')
+                ->columnSpanFull()
+                ->required(),
         ];
 
         if (! in_array('companies', $excludeFields)) {
@@ -42,9 +48,9 @@ final class NoteForm
                 ->nullable();
         }
 
-        $components[] = CustomFields::form()->forSchema($schema)->build()
-            ->columnSpanFull()
-            ->columns(1);
+        // $components[] = CustomFields::form()->forSchema($schema)->build()
+        //     ->columnSpanFull()
+        //     ->columns(1);
 
         return $schema
             ->components($components)

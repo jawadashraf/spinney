@@ -10,12 +10,12 @@ use App\Models\Concerns\HasCustomFields;
 use App\Models\Concerns\HasTeam;
 use App\Models\Concerns\InvalidatesRelatedAiSummaries;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
+use App\Models\Pivots\Noteable;
 use App\Observers\NoteObserver;
 use Database\Factories\NoteFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -42,9 +42,12 @@ final class Note extends Model implements HasCustomFieldsContract
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'creation_source',
-    ];
+    // protected $fillable = [
+    //     'team_id',
+    //     'creator_id',
+    //     'creation_source',
+    //     'title',
+    // ];
 
     /**
      * @var array<string, mixed>
@@ -70,7 +73,10 @@ final class Note extends Model implements HasCustomFieldsContract
      */
     public function companies(): MorphToMany
     {
-        return $this->morphedByMany(Company::class, 'noteable');
+        return $this->morphedByMany(Company::class, 'noteable')
+            ->using(Noteable::class)
+            ->withPivot(['team_id'])
+            ->withTimestamps();
     }
 
     /**
@@ -78,7 +84,10 @@ final class Note extends Model implements HasCustomFieldsContract
      */
     public function people(): MorphToMany
     {
-        return $this->morphedByMany(People::class, 'noteable');
+        return $this->morphedByMany(People::class, 'noteable')
+            ->using(Noteable::class)
+            ->withPivot(['team_id'])
+            ->withTimestamps();
     }
 
     /**
@@ -86,12 +95,9 @@ final class Note extends Model implements HasCustomFieldsContract
      */
     public function opportunities(): MorphToMany
     {
-        return $this->morphedByMany(Opportunity::class, 'noteable');
-    }
-
-    /** @return BelongsTo<Team, self> */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class);
+        return $this->morphedByMany(Opportunity::class, 'noteable')
+            ->using(Noteable::class)
+            ->withPivot(['team_id'])
+            ->withTimestamps();
     }
 }
