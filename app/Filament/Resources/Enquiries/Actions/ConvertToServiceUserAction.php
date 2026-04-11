@@ -12,25 +12,19 @@ use App\Models\User;
 use App\Notifications\ServiceUserPromotedNotification;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Spatie\Permission\Models\Role;
 
-final class ConvertToServiceUserAction extends Action
+final class ConvertToServiceUserAction
 {
-    public static function getDefaultName(): string
+    public static function make(): Action
     {
-        return 'convertToServiceUser';
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->label('Promote to Service User')
+        return Action::make('convertToServiceUser')
+            ->label('Promote to Service User')
             ->icon('heroicon-o-user-plus')
             ->color(Color::Blue)
             ->authorize('convertToServiceUser')
@@ -38,7 +32,7 @@ final class ConvertToServiceUserAction extends Action
             ->modalHeading('Convert Enquiry to Service User')
             ->modalDescription('This will promote the caller to a formal Service User record and capture essential case file details.')
             ->modalWidth('4xl')
-            ->schema(fn (Enquiry $record): array => ServiceUserForm::getComponents(''))
+            ->schema(fn (Schema $schema): Schema => $schema->components(ServiceUserForm::getComponents('')))
             ->action(function (array $data, Enquiry $record): void {
                 DB::transaction(function () use ($data, $record): void {
                     /** @var People $person */

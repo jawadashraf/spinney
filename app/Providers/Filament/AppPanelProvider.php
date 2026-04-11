@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
-use AlizHarb\ActivityLog\ActivityLogPlugin;
 use App\Filament\Pages\ApiTokens;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\EditProfile;
-use App\Filament\Resources\CompanyResource;
-use App\Filament\Pages\Tenancy\RegisterOrganization;
 use App\Filament\Pages\Tenancy\EditOrganization;
+use App\Filament\Pages\Tenancy\RegisterOrganization;
+use App\Filament\Resources\CompanyResource;
+use App\Http\Middleware\SyncSpatiePermissionsTeamId;
 use App\Models\Team;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
@@ -71,7 +71,7 @@ final class AppPanelProvider extends PanelProvider
             ->brandName('Spinneyhill')
             ->tenant(Team::class, ownershipRelationship: 'team', slugAttribute: 'slug')
             ->tenantMiddleware([
-                \App\Http\Middleware\SyncSpatiePermissionsTeamId::class,
+                SyncSpatiePermissionsTeamId::class,
             ], isPersistent: true)
             // ->tenantRegistration(RegisterOrganization::class)
             // ->tenantProfile(EditOrganization::class)
@@ -79,7 +79,8 @@ final class AppPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make()
                     ->scopeToTenant(true)
                     ->tenantRelationshipName('team')
-                    ->tenantOwnershipRelationshipName('team'),
+                    ->tenantOwnershipRelationshipName('team')
+                    ->navigationGroup('Settings'),
                 AuthUIEnhancerPlugin::make()
                     ->showEmptyPanelOnMobile(true)
                     ->formPanelPosition('right')
@@ -97,9 +98,9 @@ final class AppPanelProvider extends PanelProvider
                 // KnowledgeBaseCompanionPlugin::make()
                 //     ->knowledgeBasePanelId('knowledge-base'), // TODO: Re-enable when guava/filament-knowledge-base supports Laravel 13
             ])
-           ->login(Login::class)
+            ->login(Login::class)
 //            ->registration(Register::class)
-           ->passwordReset()
+            ->passwordReset()
         //    ->emailVerification()
             ->databaseNotifications()
             ->brandLogoHeight('2.6rem')
