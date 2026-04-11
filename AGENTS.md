@@ -179,6 +179,29 @@ This project has domain-specific skills available. You MUST activate the relevan
 - Run tests: `php artisan test --compact` or filter: `php artisan test --compact --filter=testName`.
 - Do NOT delete tests without approval.
 
+## CRITICAL: Database Safety for Tests
+
+**ALWAYS run `php artisan config:clear` before running tests.**
+
+Cached configuration files (`bootstrap/cache/config.php`) contain the production database name (`spinney`). If config is cached, PHPUnit's `phpunit.xml` environment variables DO NOT override cached values, causing tests to run against the main database and wipe it via `RefreshDatabase` migrations.
+
+### Before Running Tests
+
+1. Clear config cache: `php artisan config:clear`
+2. Verify test database: The `phpunit.xml` sets `DB_DATABASE=spinney_test` with `force="true"`
+3. A safety check exists in `tests/Pest.php` that throws an exception if the database is `spinney` - if you see this error, STOP and run `php artisan config:clear`
+
+### Why This Happens
+
+- `phpunit.xml` env vars override `.env` values ONLY when config is not cached
+- Cached config is loaded before env vars are processed
+- `RefreshDatabase` trait uses `config('database.connections.mysql.database')` which returns cached values
+- The `force="true"` attribute on env vars in `phpunit.xml` ensures they override, but cached config bypasses this entirely
+
+### Prevention
+
+The safety check in `tests/Pest.php` will catch this, but only if config is not cached. Always clear config before tests.
+
 === filament/filament rules ===
 
 ## Filament

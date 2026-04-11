@@ -49,7 +49,7 @@
         <env name="DB_PORT" value="3306"/>
         <server name="DB_PORT" value="3306"/>
 
-        <env name="DB_DATABASE" value="spinney_test"/>
+        <env name="DB_DATABASE" value="spinney_test" force="true"/>
         <server name="DB_DATABASE" value="spinney_test"/>
 
         <env name="DB_USERNAME" value="root"/>
