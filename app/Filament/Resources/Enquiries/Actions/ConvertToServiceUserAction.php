@@ -28,6 +28,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Colors\Color;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -265,11 +266,29 @@ final class ConvertToServiceUserAction extends Action
                     $user->assignRole('service_user');
 
                     // 3. Link Person to User and update details
-                    $person->update(array_merge($data, [
+                    $profileFields = [
+                        'addictions', 'substances_used', 'frequency_of_use', 'amount_of_use',
+                        'route_of_use', 'age_first_used', 'overdosed_last_month', 'injection_history',
+                        'registered_with_gp', 'gp_name', 'gp_address',
+                        'referral_type', 'referral_source_specify', 'previous_input', 'other_issues',
+                        'reason_for_referral', 'target_service_team', 'engagement_status',
+                        'referral_targets', 'referral_agency_specify', 'intervention_offered',
+                        'treatment_outcome', 'internal_notes',
+                    ];
+
+                    $profileData = Arr::only($data, $profileFields);
+                    $identityData = Arr::except($data, array_merge($profileFields, ['password']));
+
+                    $person->update(array_merge($identityData, [
                         'user_id' => $user->id,
                         'is_service_user' => true,
                         'type' => 'service_user',
                     ]));
+
+                    $person->serviceUserProfile()->updateOrCreate(
+                        ['team_id' => $person->team_id],
+                        $profileData
+                    );
 
                     // 4. Update Enquiry Status
                     $record->update([

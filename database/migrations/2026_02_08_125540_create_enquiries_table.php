@@ -28,6 +28,10 @@ return new class extends Migration
             $table->timestamp('occurred_at');
             $table->foreignId('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignId('creator_id')->nullable()->constrained('users')->cascadeOnDelete();
+
+            $table->string('status')->default('open');
+            $table->timestamp('converted_at')->nullable();
+
             $table->timestamps();
         });
     }

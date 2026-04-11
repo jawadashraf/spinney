@@ -49,65 +49,9 @@ class People extends Model implements HasCustomFieldsContract
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'creation_source',
-        'is_service_user',
-        'user_id',
-        'is_locked',
-        'type',
-
-        // Demographics
-        'date_of_birth',
-        'gender',
-        'ethnicity',
-        'address',
-        'postcode',
-        'no_fixed_address',
-
-        // Contact
-        'phone',
-        'availability',
-        'emergency_contact_name',
-        'emergency_contact_number',
-
-        // Substance Use History
-        'addictions',
-        'substances_used',
-        'frequency_of_use',
-        'amount_of_use',
-        'route_of_use',
-        'age_first_used',
-        'overdosed_last_month',
-        'injection_history',
-
-        // GP & Health
-        'registered_with_gp',
-        'gp_name',
-        'gp_address',
-
-        // Referral & Additional Info
-        'referral_type',
-        'referral_source_specify',
-        'previous_input',
-        'other_issues',
-        'reason_for_referral',
-
-        // Next Steps & Outcomes
-        'referral_targets',
-        'referral_agency_specify',
-        'intervention_offered',
-        'treatment_outcome',
-        'internal_notes',
-
-        // Consent & GDPR
-        'consent_data_storage',
-        'consent_referrals',
-        'consent_communications',
-    ];
+    protected $guarded = [];
 
     protected $childTypes = [
         'service_user' => ServiceUser::class,
@@ -139,22 +83,20 @@ class People extends Model implements HasCustomFieldsContract
             'creation_source' => CreationSource::class,
             'is_service_user' => 'boolean',
             'is_locked' => 'boolean',
-
             'date_of_birth' => 'date',
             'no_fixed_address' => 'boolean',
-            'addictions' => 'array',
-            'substances_used' => 'array',
-            'route_of_use' => 'array',
-            'overdosed_last_month' => 'boolean',
-            'registered_with_gp' => 'boolean',
-            'previous_input' => 'array',
-            'other_issues' => 'array',
-            'referral_targets' => 'array',
-            'intervention_offered' => 'array',
             'consent_data_storage' => 'boolean',
             'consent_referrals' => 'boolean',
             'consent_communications' => 'boolean',
         ];
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<ServiceUserProfile, $this>
+     */
+    public function serviceUserProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ServiceUserProfile::class, 'person_id');
     }
 
     /**
@@ -231,11 +173,5 @@ class People extends Model implements HasCustomFieldsContract
     {
         // Appointments are accessed via Schedule metadata
         // This is a convenience method for querying
-    }
-
-    /** @return BelongsTo<Team, self> */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class);
     }
 }
