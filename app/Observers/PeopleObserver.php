@@ -27,4 +27,25 @@ final readonly class PeopleObserver
             $people->saveCustomFields($people->custom_fields);
         }
     }
+
+    public function deleted(People $people): void
+    {
+        if ($people->is_service_user) {
+            $people->serviceUserProfile()->delete();
+        }
+    }
+
+    public function restored(People $people): void
+    {
+        if ($people->is_service_user) {
+            $people->serviceUserProfile()->withTrashed()->restore();
+        }
+    }
+
+    public function forceDeleted(People $people): void
+    {
+        if ($people->is_service_user) {
+            $people->serviceUserProfile()->withTrashed()->forceDelete();
+        }
+    }
 }

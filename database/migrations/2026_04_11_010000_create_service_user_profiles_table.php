@@ -50,6 +50,7 @@ return new class extends Migration
             $table->text('internal_notes')->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

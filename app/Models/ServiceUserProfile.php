@@ -10,6 +10,7 @@ use App\Models\Concerns\HasTeam;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ServiceUserProfile extends Model
 {
@@ -17,6 +18,8 @@ class ServiceUserProfile extends Model
     use HasFactory;
 
     use HasTeam;
+
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

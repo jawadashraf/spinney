@@ -57,6 +57,17 @@ final class ServiceUserResource extends Resource
         ];
     }
 
+    /**
+     * @return Builder<ServiceUser>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
