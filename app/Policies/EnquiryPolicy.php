@@ -67,4 +67,9 @@ class EnquiryPolicy
         return $authUser->can('Reorder:Enquiry');
     }
 
+    public function convertToServiceUser(AuthUser $authUser, Enquiry $enquiry): bool
+    {
+        return $authUser->can('ConvertToServiceUser:Enquiry');
+    }
+
 }

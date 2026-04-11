@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Pivots\DepartmentUser;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -171,7 +172,10 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
      */
     public function departments(): BelongsToMany
     {
-        return $this->belongsToMany(Department::class);
+        return $this->belongsToMany(Department::class)
+            ->using(DepartmentUser::class)
+            ->withPivot('team_id')
+            ->withTimestamps();
     }
 
     /**

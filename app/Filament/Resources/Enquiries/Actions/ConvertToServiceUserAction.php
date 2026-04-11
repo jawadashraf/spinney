@@ -52,7 +52,7 @@ final class ConvertToServiceUserAction extends Action
             ->modalHeading('Convert Enquiry to Service User')
             ->modalDescription('This will promote the caller to a formal Service User record and capture essential case file details.')
             ->modalWidth('4xl')
-            ->form([
+            ->schema([
                 Tabs::make('Profile Information')
                     ->tabs([
                         Tab::make('Profile & Consent')
@@ -160,10 +160,10 @@ final class ConvertToServiceUserAction extends Action
                                         Toggle::make('registered_with_gp')
                                             ->live(),
                                         TextInput::make('gp_name')
-                                            ->visible(fn (array $state) => $state['registered_with_gp'] ?? false),
+                                            ->visible(fn ($get) => $get('registered_with_gp') ?? false),
                                         Textarea::make('gp_address')
                                             ->rows(2)
-                                            ->visible(fn (array $state) => $state['registered_with_gp'] ?? false)
+                                            ->visible(fn ($get) => $get('registered_with_gp') ?? false)
                                             ->columnSpanFull(),
                                     ])->columns(2),
                             ]),

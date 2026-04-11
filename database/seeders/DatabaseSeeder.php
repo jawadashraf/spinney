@@ -16,7 +16,6 @@ final class DatabaseSeeder extends Seeder
     {
         $this->call([
             LocalSeeder::class,
-            DepartmentSeeder::class,
             ThirdPartyCarePlanCustomFieldSeeder::class,
         ]);
     }

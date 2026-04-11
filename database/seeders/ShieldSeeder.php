@@ -43,10 +43,23 @@ final class ShieldSeeder extends Seeder
             setPermissionsTeamId($team->id);
         }
 
+        $departmentNames = ['Management', 'Liaison', 'Counselor'];
+
+        foreach ($departmentNames as $departmentName) {
+            Department::firstOrCreate(
+                ['name' => $departmentName],
+                ['team_id' => $team->id],
+            );
+        }
+
         // Application roles from the Phase 1 Handoff Permissions Matrix.
         // Maps role name => matching team name for team assignment.
         $applicationRoles = [
+            'admin' => 'Management',
+            'manager' => 'Management',
             'liaison' => 'Liaison',
+            'counselor' => 'Counselor',
+            'service_user' => '',
             //            'assessor' => 'Assessment',
             //            'drug_alcohol' => 'Drug & Alcohol',
             //            'spiritual' => 'Spiritual Counselling',
@@ -54,9 +67,6 @@ final class ShieldSeeder extends Seeder
             //            'aftercare' => 'Aftercare',
             //            'safeguarding' => 'Safeguarding',
             //            'fundraising' => 'Fundraising',
-            'counselor' => 'Counselor',
-            'manager' => 'Management',
-            'admin' => 'Management',
         ];
 
         foreach ($applicationRoles as $roleName => $departmentName) {
@@ -87,7 +97,7 @@ final class ShieldSeeder extends Seeder
             // Attach to matching team if it exists and user isn't already on it.
             $department = Department::where('name', $departmentName)->first();
             if ($department) {
-                $user->departments()->attach($department);
+                $user->departments()->attach($department, ['team_id' => $team->id]);
             }
         }
 

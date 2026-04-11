@@ -10,4 +10,9 @@ namespace App\Enums\CustomFields;
 enum NoteField: string
 {
     use CustomFieldTrait;
+
+    public function getFieldType(): string
+    {
+        return 'note';
+    }
 }

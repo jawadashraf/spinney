@@ -172,6 +172,9 @@ return [
                 'update',
                 'delete',
             ],
+            \App\Filament\Resources\Enquiries\EnquiryResource::class => [
+                'convertToServiceUser',
+            ],
         ],
         'exclude' => [
             //
