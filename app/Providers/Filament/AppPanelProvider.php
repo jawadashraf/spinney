@@ -122,6 +122,13 @@ final class AppPanelProvider extends PanelProvider
                 // ],
                 'primary' => Color::Default,
             ])
+            ->navigationGroups([
+                'Workspace',
+                'Liaison',
+                'Service Users',
+                'Appointments',
+                'Settings',
+            ])
             ->viteTheme('resources/css/filament/app/theme.css')
             ->font('Inter')
             ->userMenuItems([

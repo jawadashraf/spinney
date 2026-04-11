@@ -12,7 +12,8 @@ php artisan migrate:fresh --no-interaction
 php artisan db:seed --no-interaction
 
 echo "🔑 Generating Shield permissions for app panel..."
-php artisan shield:generate --all --panel=app --no-interaction --relationships
+# php artisan shield:generate --all --panel=app --no-interaction --relationships
+php artisan shield:generate --all --panel=app --no-interaction
 
 php artisan db:seed --class=SimplifiedRolePermissionSeeder --no-interaction
 

@@ -38,6 +38,7 @@ use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -157,6 +158,16 @@ final class PeopleResource extends Resource
                     ->label('Creation Source')
                     ->options(CreationSource::class)
                     ->multiple(),
+                TernaryFilter::make('is_service_user')
+                    ->label('Include Service Users')
+                    ->placeholder('General People Only')
+                    ->trueLabel('Service Users Only')
+                    ->falseLabel('General People Only')
+                    ->queries(
+                        true: fn (Builder $query) => $query->where('is_service_user', true),
+                        false: fn (Builder $query) => $query->where('is_service_user', false),
+                        blank: fn (Builder $query) => $query->where('is_service_user', false), // Hide by default
+                    ),
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -230,6 +241,7 @@ final class PeopleResource extends Resource
         $user = Auth::user();
 
         return parent::getEloquentQuery()
+            ->where('is_service_user', false)
             ->when($user?->hasRole('service_user'), fn (Builder $query) => $query->where('user_id', Auth::id()))
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,

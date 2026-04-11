@@ -24,7 +24,7 @@ final class EnquiryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInboxArrowDown;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Front Door';
+    protected static string|\UnitEnum|null $navigationGroup = 'Liaison';
 
     protected static ?int $navigationSort = 1;
 
