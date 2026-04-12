@@ -72,7 +72,8 @@ final class ServiceUserForm
                                                 ]),
                                             TextInput::make('ethnicity'),
                                             TextInput::make('phone')
-                                                ->tel(),
+                                                ->tel()
+                                                ->mask('(999) 999-9999)'),
                                             TextInput::make('postcode'),
                                             Toggle::make('no_fixed_address')
                                                 ->label('No current fixed address'),
