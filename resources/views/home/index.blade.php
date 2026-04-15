@@ -1,8 +1,8 @@
 <x-guest-layout 
-    :title="config('app.name') . ' - ' . __('The Next-Generation Open-Source CRM Platform')"
-    description="Relaticle is an open-source CRM platform designed for modern businesses. Manage your customers, leads, and opportunities with ease."
-    :ogTitle="config('app.name') . ' - Open-Source CRM Platform'"
-    ogDescription="Discover Relaticle, the next-generation open-source CRM platform. Powerful, flexible, and built for modern businesses."
+    :title="config('app.name') . ' - ' . __('Support, Hope and Recovery')"
+    description="Spinney Hill is a place of support, hope and recovery. We provide a safe and caring environment for people who are struggling with addiction and mental health issues."
+    :ogTitle="config('app.name') . ' - Support, Hope and Recovery'"
+    ogDescription="Discover Spinney Hill, a place of support, hope and recovery. We provide a safe and caring environment for people who are struggling with addiction and mental health issues."
     :ogImage="url('/images/og-image.png')">
     @include('home.partials.hero')
     @include('home.partials.features')

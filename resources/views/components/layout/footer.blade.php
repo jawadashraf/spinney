@@ -9,11 +9,11 @@
                     <div class="relative overflow-hidden">
                         <img class="h-8 w-auto" src="{{ asset('relaticle-logo.svg') }}" alt="Relaticle Logo">
                     </div>
-                    <span class="font-semibold text-lg text-black dark:text-white">Relaticle</span>
+                    <span class="font-semibold text-lg text-black dark:text-white">Spinney Hill</span>
                 </div>
                 <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-md">
-                    The Next-Generation Open-Source CRM Platform designed to streamline your customer relationships.
-                    Built with modern technologies for businesses of all sizes.
+                    Spinney Hill is a place of support, hope and recovery. We provide a safe and caring environment for
+                    people who are struggling with addiction and mental health issues.
                 </p>
 
                 <!-- Social links - Simplified -->

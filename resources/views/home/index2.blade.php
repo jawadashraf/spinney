@@ -1,6 +1,6 @@
-<x-layout.plain :title="config('app.name') . ' - ' . __('The Next-Generation Open-Source CRM Platform')"
+<x-layout.plain :title="config('app.name') . ' - ' . __('Support, Hope and Recovery')"
     description="Spinney Hill Support Centre is an CRM platform designed for modern businesses."
-    :ogTitle="config('app.name') . ' - CRM Platform'"
+    :ogTitle="config('app.name') . ' - Support, Hope and Recovery'"
     ogDescription="Discover Spinney Hill Support Centre, CRM platform." :ogImage="url('/images/og-image.png')">
     <div class="flex flex-col items-center justify-end min-h-screen p-4 pb-20 bg-cover bg-center bg-no-repeat"
         style="background-image: url('{{ asset('images/spinney_bg.png') }}')">
