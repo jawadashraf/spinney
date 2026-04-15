@@ -7,7 +7,11 @@ Scope: Phase 1 MVP only
 **Project Context**
 Goal: deliver a secure, role-based CRM that centralizes enquiries, case files, appointments, collaboration, aftercare, directories, safeguarding, and baseline reporting.
 Tech stack: Laravel 12, Filament 4, Livewire 3, Filament Shield (Spatie Permissions), Pest 4, Tailwind CSS 4, PHP 8.4.
-Tenancy model: team-based, enforced via global scopes.
+
+### Organizational Model
+- **Team** = Tenant/Organization (multi-tenancy boundary). Enforced via global scopes.
+- **Department** = Functional team within an organization. Users belong to departments for role-based access.
+- **ServiceTeam** = Service type classification (Assessment, Drug & Alcohol, Spiritual, Education & Outreach, Aftercare). Used for service user assignment.
 
 **Success Criteria**
 - All enquiries are logged in one place.
@@ -55,9 +59,10 @@ Acceptance Criteria
 Scope
 - Register service users, maintain a single shared record.
 - Capture consent and GDPR status, presenting issues, risks.
+- Assign to ServiceTeam for case management.
 Data
-- Reuse `People` model.
-- Add custom fields: consent_data_storage, consent_referrals, consent_communications, presenting_issues, risk_summary, faith_cultural_sensitivity, service_team, engagement_status.
+- Use `ServiceUser` model (extends `People`) with `ServiceUserProfile`.
+- `ServiceUserProfile` includes: addictions, substances_used, target_service_team (ServiceTeam enum), engagement_status (EngagementStatus enum), consent fields.
 Permissions
 - All case-working teams can view assigned service users.
 - Safeguarding leads can view all service users.
@@ -165,7 +170,12 @@ Acceptability Criteria
 **Permissions Matrix**
 Role definitions are Spatie Permission roles managed via Filament Shield. Roles are seeded and permissions assigned through the Shield admin UI or programmatically.
 
-| Role | Access Summary |
+### Organizational Model
+- **Team (Tenant)**: Organization boundary. Data is isolated per Team.
+- **Department**: Functional team grouping. Users can belong to multiple departments.
+- **ServiceTeam**: Service type for service user classification and assignment.
+
+| Department/Role | Access Summary |
 | --- | --- |
 | Frontline | Enquiries create/read, appointments book, service users read, standard notes create/read |
 | Assessment | Assigned service users read/write, appointments read/write, standard notes create/read |

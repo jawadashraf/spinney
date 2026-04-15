@@ -18,6 +18,12 @@ Develop a secure, role‑based CRM system that:
 The CRM should become the digital backbone of Spinney Hill.
 
 ## 3. Key Users
+### Organizational Structure
+- **Team** = Tenant/Organization (multi-tenancy boundary, e.g., "Spinney Hill")
+- **Department** = Functional team within an organization (user grouping by role)
+- **ServiceTeam** = Service type classification (Assessment, Drug & Alcohol, Spiritual, Education & Outreach, Aftercare)
+
+### Departments (Functional Teams)
 - Telephone / Frontline Enquiry Team
 - Assessment Team
 - Drug & Alcohol Workers
@@ -132,11 +138,16 @@ Donor management capturing:
 Supports compliance, reporting, and fundraising strategy.
 
 ## 10. Access Levels & Permissions
-Role‑based access examples:
-- Telephone team: enquiries, bookings, check‑ins
+### Organizational Model
+- **Team (Tenant)**: Organization boundary for multi-tenancy. Each organization has its own data isolation.
+- **Department (Functional Team)**: Groups users by role within an organization (e.g., Assessment, Drug & Alcohol, Spiritual, Aftercare).
+- **ServiceTeam**: Service type classification for service users and case assignment.
+
+### Role‑based access examples:
+- Telephone department: enquiries, bookings, check‑ins
 - Practitioners: assigned service users and notes
 - Safeguarding leads: full access and risk alerts
-- Fundraising/Admin: donors and partners only
+- Fundraising/Admin department: donors and partners only
 
 Ensures confidentiality, compliance, and safety.
 
@@ -165,13 +176,19 @@ Dashboards for leadership and exportable reports for funders and trustees are hi
 - Task features: attention, alerts, and due time approaching notifications.
 - Integrated Team management module.
 
-### 13.2 Specialized Care Roles
-- **Check-In Worker**: Regular logs of sessions and timeline access.
-- **Spiritual Counselor**: Regular logs of sessions and timeline access.
+### 13.2 Specialized Care Roles (ServiceTeam)
+- **Check-In Worker** (Aftercare ServiceTeam): Regular logs of sessions and timeline access.
+- **Spiritual Counselor** (Spiritual ServiceTeam): Regular logs of sessions and timeline access.
 - **Therapist**: 
   - Access to all notes.
   - Suggest actions for the service user.
   - Sessions can be charged (online/offline payments).
+
+### 13.3 Departments (Functional Teams)
+Organizational units within a Team (tenant):
+- Users belong to one or more Departments
+- Departments define role-based permissions
+- Department membership controls access to resources
 
 ### 13.3 Dynamic Scheduled Forms
 - Dynamic forms (surveys) generated for each service user.

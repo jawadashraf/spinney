@@ -38,6 +38,7 @@ Date: 2026-02-08
 | 2026-02-08 | Used modular schemas for `EnquiryResource` | Improved maintainability and clarity for complex forms/tables | Antigravity |
 | 2026-02-08 | Proposed explicit `EnquiryStatus` and Service User fields for `People` | Ensures compliance with handoff requirements for consent and case management | Antigravity |
 | 2026-02-08 | Use `array_values()` in `CreateTeamCustomFields` listener | Resolves package bug where string keys were intermittently used as `sort_order` for custom field options. | Antigravity |
+| 2026-04-12 | **Clarified organizational model**: Team= Tenant/Organization, Department = Functional Team, ServiceTeam = Service Type | Corrects terminology for multi-tenancy and role-based access | Product |
 
 ## Risks and Blockers
 - **Pending**: Automated high-risk notifications for safeguarding team.

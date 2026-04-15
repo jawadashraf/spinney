@@ -1,6 +1,12 @@
 # Module Checklist (Definition of Done)
 
 Date: 2026-02-05
+Updated: 2026-04-12
+
+**Terminology**
+- **Team** = Tenant/Organization (multi-tenancy boundary)
+- **Department** = Functional team within an organization
+- **ServiceTeam** = Service type classification
 
 **Legend**
 - [ ] Not started
