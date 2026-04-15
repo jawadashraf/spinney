@@ -1,125 +1,110 @@
-# Project Proposal: Spinney Hill CRM (Phase 1)
+# Project Proposal: Spinney Hill CRM (Charity / Equity)
 
 **Client:** Spinney Hill  
-**Project:** Customer Relationship Management System  
-**Date:** April 3, 2026  
-**Valid Until:** May 31, 2026  
+**Provider:** Jawad Ashraf  
+**Date:** April 15, 2026  
+
+This version of the proposal is tailored for **Spinney Hill**. It features a significantly reduced fixed fee, delivered over a focused timeline, with a future profit-sharing agreement.
 
 ---
 
-## Executive Summary
+## 1. Development Cost Summary
 
-We are pleased to submit this proposal for the development of a comprehensive Customer Relationship Management (CRM) system for Spinney Hill. This proposal has been specially priced for the charitable sector to support your mission-critical work with Enquiries, Case Files, Directory services, and Donor management.
+The development is divided into three distinct phases to ensure rapid value delivery and a focus on the Minimum Viable Product (MVP).
 
-This proposal covers Phase 1 development over a 6-week timeline, with additional features available to be added as your needs evolve.
+| Phase | Duration | Scope | Estimate |
+| :--- | :--- | :--- | :--- |
+| **Phase 1: Foundation & Core** | Weeks 1–2 | Setup, Auth, Enquiries Management, Client Records | **£1,800** |
+| **Phase 2: Practice Management** | Weeks 3–4 | Care Plans, Appointments, Notes System, Partners Directory | **£900** |
+| **Phase 3: Engagement & Ops** | Weeks 5–6 | Donation Tracking, Outreach, Reporting, Dashboards, Landing Pages | **£900** |
+| **TOTAL** | **6 Weeks** | (Approx. 240 Hours total @ **£15/hr**) | **£3,600** |
 
----
-
-## Scope of Work
-
-### Phase 1: Setup & Foundations (Week 1)
-
-**Environment & Configuration**
-- Laravel / Filament v5
-- Production-ready configuration
-- Database architecture and migrations
-
-**Authentication & Authorization**
-- User registration and login system
-- Role-based access control (RBAC)
-- Permission management
+> [!IMPORTANT]
+> This model is provided at an **81% discount** (approx. £15,900 in "sweat equity") compared to the Consultancy model, in exchange for a **Future Revenue Share**. This reduces the effective rate from the standard £81.25/hr to **£15/hr**.
 
 ---
 
-### Phase 2: Core Development (Weeks 2-4)
+## 2. Detailed Breakdown by System Module
 
-**Enquiries Management**
-- Enquiry intake forms
-- Status tracking and assignments
-- Communication logging
-- Follow-up calls
-- Automated notifications
+### Phase 1: Foundation & Core CRM
+*   **Environment & Foundations:** Laravel / Filament v5, Auth, RBAC, Database Architecture.
+*   **Enquiries System:** Intake forms, status tracking, communications logging, automated notifications.
 
-**Care Plan System**
-- Third Party Care plan management
-- Third Party Notes and timelines Integration
-- Status workflows
-- Internal Care plan management
-  - Assessment and plan creation (appointments with counsellors)
-  - Internal Care plan history and audit trail
+### Phase 2: Practice Management
+*   **Clinical/Care System:** Care Plan management (Internal/External), Assessments, Counsellor appointments.
+*   **Notes & Scheduling:** Interaction notes (categorized/searchable), Availability management, Reminder system.
+*   **Partnership:** Partners Organization Profiles and contact management.
 
-**Notes System**
-- Client interaction notes
-- Note categorization
-- Search and filter capabilities
-
-**Appointments**
-- Appointment management
-- Availability management
-- Appointment scheduling
-- Reminder system
+### Phase 3: Engagement & Enterprise
+*   **Donations & Outreach:** Donation transaction tracking, Outreach program engagement metrics.
+*   **Intelligence:** Role-specific Dashboards, Data Exports (CSV/PDF), System Admin.
+*   **Digital Presence:** Public landing pages (Home, About, Contact, How we work).
 
 ---
 
-### Phase 3: Directory & Donors (Week 5)
+## 3. Operational Costs (SaaS & Hosting) Recommended
 
-**Partners Directory**
-- Partner organization profiles
-- Contact management
-- Service category tagging
-
-**Outreach Tracking**
-- Outreach program management
-- Engagement metrics
-
-**Donation Management**
-- Donation transaction tracking
+| Item | Service | Purpose | Monthly Estimate |
+| :--- | :--- | :--- | :--- |
+| **Cloud Hosting** | Hostinger | Application & Database | £10 - £15 |
+| **Email Gateway** | Postmark | Transactional notifications | £10 - £15 |
+| **SMS/OTP** | Twilio | Two-factor auth & alerts | £10 - £15 |
+| **TOTAL MONTHLY OPS** | | | **£30 - £45** |
 
 ---
 
-### Phase 4: Reporting & User Acceptance Testing (UAT) (Week 6)
+## 4. Post-Launch Support & Maintenance (Optional)
 
-**Landing Pages**
-- Home
-- About us
-- Contact us
-- How we work
+Maintenance pricing is adjusted to reflect the non-profit nature of the client.
 
-**Dashboards**
-- Role-specific dashboards
-- Key performance indicators
-- Visual data representation
-
-**Data Exports**
-- Standard report exports
-- Custom date range exports
-- CSV and PDF formats
-
-**Quality Assurance (QA) & Training**
-- User acceptance testing
-- Bug fixes and refinements
-- User training documentation
-- System handover
+*   **Standard Maintenance (SLA):** **£1,800 / year**
+    *   Security patching (Laravel/Filament).
+    *   Bug fixes (Standard priority).
+    *   Next-day business support response.
+    *   Cloud infrastructure management.
 
 ---
 
-## Budget Summary
+## 5. Revenue Share & Commercial Partnership
 
-### Total Cost: £3,600
+Given the significant reduction in upfront development costs (£15,900 labor investment) and the collaborative nature of this initiative, the following commercial terms apply:
 
-*This pricing has been provided at a reduced rate for the charity sector.*
+*   **Intellectual Property (IP):** The software framework and architecture are **Jointly Owned**. Spinney Hill is guaranteed permanent, irrevocable access to the source code and their specific instance.
+*   **Distribution & Sales:**
+    *   **Primary Platform:** Spinney Hill may utilize the system as a platform for their own sector-specific initiatives.
+    *   **Revenue Share:** On any subsequent sale, license, or subscription of the software to third-party organizations (whether led by Spinney Hill or the Developer), a **30% Gross Revenue Share** will be paid to the non-leading partner.
+*   **Strategic Alignment:** This ensures both parties are incentivized to see the platform grow, with Spinney Hill maintaining control over their instance while benefiting from the Developer's broader commercial reach.
 
-### Payment Schedule
+---
+
+## 6. Market Rate Comparison & Benchmarking
+
+To ensure transparency, this model benchmarks the discounted charity rate against standard professional engineering rates for the same 240-hour roadmap:
+
+| Model | Hourly Rate | Total Development Value | Discount Applied |
+| :--- | :--- | :--- | :--- |
+| **Charity / Equity** | **£15.00** | **£3,600** (Current Proposal) | **81.5% (Max Discount)** |
+| Developer | £50.00 | £12,000 | 38.5% |
+| Consultancy (Full) | £81.25 | £19,500 | 0% |
+
+> [!TIP]
+> This arrangement allows Spinney Hill to retain **£15,900 in capital** during the critical development phase, with the Developer assuming the risk in exchange for the long-term partnership outlined in Section 5.
+
+---
+
+## 7. Payment Schedule
 
 | Milestone | Amount | Due |
 | :--- | :--- | :--- |
 | **Initial Payment** | £1,800 | Upon proposal acceptance (50%) |
-| **Completion Payment** | £1,800 | Upon Phase 1 delivery & acceptance (50%) |
+| **Completion Payment** | £1,800 | Upon completion |
 | **Total** | **£3,600** | |
 
 ---
 
-### Additional Features
+---
+
+## 9. Additional Features
 
 As the project evolves, you may identify additional features to be added. These will be:
 - Scoped and quoted separately
@@ -130,47 +115,22 @@ Additional feature requests will be documented with clear specifications and agr
 
 ---
 
-## Excluded Items
+## 10. Excluded Items
 
 The following are not included in the Phase 1 investment and will be handled separately:
 
 **Infrastructure & Hosting**
-- Hosting subscription
 - Domain registration
 - SSL certificates
 
-**Ongoing Maintenance (Optional)**
-- Retainer for ongoing support
-- Minor updates and bug fixes
-- Priority response
-
-*Hosting and maintenance options can be discussed and priced based on your preferred approach.*
 
 ---
 
-## Timeline
-
-**Project Duration:** 6-7 Weeks
-
-| Week | Phase | Key Deliverables                             |
-| :--- | :--- |:---------------------------------------------|
-| 1 | Setup & Foundations | Auth, RBAC                                   |
-| 2 | Core Development | Enquiries System                             |
-| 3 | Core Development | Care Plan Management, Notes, Task Management |
-| 4 | Core Development | Appointments, Final Core                     |
-| 5 | Directory & Donors | Partners, Donations                          |
-| 6 | Reporting & UAT | Dashboards, Exports, Training                |
-
-**Commencement:** Upon receipt of initial payment  
-**Estimated Completion:** 6-7 weeks from project start date
-
----
-
-## Terms & Conditions
+## 11. Terms & Conditions
 
 ### Payment Terms
 - 50% initial payment required to commence development
-- Remaining 50% due upon Phase 1 delivery and acceptance
+- Remaining 50% due upon completion
 - Payment accepted via bank transfer
 
 ### Change Requests
@@ -183,14 +143,9 @@ The following are not included in the Phase 1 investment and will be handled sep
 - Support excludes new feature requests
 - Training documentation provided
 
-### Intellectual Property
-- Custom code developed for this project becomes client property
-- Third-party packages remain under their respective licenses
-- Client data remains confidential
-
 ---
 
-## Acceptance
+## 12. Acceptance & Sign-off
 
 We are committed to delivering a high-quality CRM system that meets your needs and supports your charitable mission. This proposal represents our understanding of your requirements and our commitment to professional delivery.
 
@@ -206,7 +161,7 @@ Date: ________________________________
 
 ---
 
-**For Development Team:**
+**For Jawad Ashraf:**
 
 Signature: ________________________________  
 Name: ________________________________  
@@ -214,18 +169,7 @@ Date: ________________________________
 
 ---
 
-## Acronyms & Abbreviations
-
-| Acronym | Definition |
-| :--- | :--- |
-| **CRM** | Customer Relationship Management |
-| **RBAC** | Role-Based Access Control |
-| **UAT** | User Acceptance Testing |
-| **QA** | Quality Assurance |
-| **SSL** | Secure Sockets Layer |
-| **CSV** | Comma-Separated Values |
-| **PDF** | Portable Document Format |
-
----
-
-*Thank you for considering us for this project. We look forward to partnering with you to build a system that truly serves the community.*
+### Exclusions & Assumptions
+*   **Third-Party Costs:** Hosting and API fees are billed directly to the client.
+*   **Data Migration:** No legacy data migration is included in this phase.
+*   **Commercial Agreement:** The terms in Section 5 reflect the baseline requirement for the discounted fee and will be formalized in a final Partnership Agreement.
