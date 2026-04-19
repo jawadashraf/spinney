@@ -10,6 +10,8 @@ use App\Models\Concerns\HasCustomFields;
 use App\Models\Concerns\HasTeam;
 use App\Models\Concerns\InvalidatesRelatedAiSummaries;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
+use App\Models\Pivots\Taskable;
+use App\Models\Pivots\TaskUser;
 use App\Observers\TaskObserver;
 use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -85,7 +87,7 @@ final class Task extends Model implements HasCustomFieldsContract
      */
     public function assignees(): BelongsToMany
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class)->using(TaskUser::class);
     }
 
     /**
@@ -93,7 +95,7 @@ final class Task extends Model implements HasCustomFieldsContract
      */
     public function companies(): MorphToMany
     {
-        return $this->morphedByMany(Company::class, 'taskable');
+        return $this->morphedByMany(Company::class, 'taskable')->using(Taskable::class);
     }
 
     /**
@@ -101,7 +103,7 @@ final class Task extends Model implements HasCustomFieldsContract
      */
     public function opportunities(): MorphToMany
     {
-        return $this->morphedByMany(Opportunity::class, 'taskable');
+        return $this->morphedByMany(Opportunity::class, 'taskable')->using(Taskable::class);
     }
 
     /**
@@ -109,7 +111,7 @@ final class Task extends Model implements HasCustomFieldsContract
      */
     public function people(): MorphToMany
     {
-        return $this->morphedByMany(People::class, 'taskable');
+        return $this->morphedByMany(People::class, 'taskable')->using(Taskable::class);
     }
 
     public function user(): BelongsTo
