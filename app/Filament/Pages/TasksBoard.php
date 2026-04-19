@@ -86,7 +86,6 @@ final class TasksBoard extends BoardPage
                 $components = [
                     TextEntry::make('type')
                         ->badge()
-                        ->color(fn ($state) => TaskType::from($state)->getColor())
                         ->hiddenLabel(),
                 ];
 

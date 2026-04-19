@@ -69,10 +69,10 @@ trait HasCustomFields
     protected function getValueColumnForType(string $type): string
     {
         return match ($type) {
-            'text', 'string', 'url', 'email', 'select' => 'string_value',
+            'text', 'string', 'url', 'email' => 'string_value',
             'longText', 'richtext', 'textarea' => 'text_value',
             'boolean', 'toggle' => 'boolean_value',
-            'integer', 'number' => 'integer_value',
+            'integer', 'number', 'select' => 'integer_value',
             'float', 'decimal' => 'float_value',
             'date' => 'date_value',
             'datetime' => 'datetime_value',
