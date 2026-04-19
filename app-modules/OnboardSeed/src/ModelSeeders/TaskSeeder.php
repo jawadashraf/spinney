@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Relaticle\OnboardSeed\ModelSeeders;
 
 use App\Enums\CustomFields\TaskField as TaskCustomField;
+use App\Enums\TaskType;
 use App\Models\Task;
 use App\Models\Team;
 use App\Models\User;
@@ -24,9 +25,9 @@ final class TaskSeeder extends BaseModelSeeder
 
     protected array $fieldCodes = [
         TaskCustomField::DESCRIPTION->value,
-        TaskCustomField::DUE_DATE->value,
         TaskCustomField::STATUS->value,
         TaskCustomField::PRIORITY->value,
+        TaskCustomField::CALL_NOTES->value,
     ];
 
     /**
@@ -96,17 +97,17 @@ final class TaskSeeder extends BaseModelSeeder
         $attributes = [
             'title' => $data['title'],
             'team_id' => $team->id,
+            'type' => $data['type'] ?? TaskType::GeneralTask->value,
+            'department_id' => $data['department_id'] ?? null,
         ];
 
         $customFields = $data['custom_fields'] ?? [];
 
         // Define field mappings for custom processing
         $fieldMappings = [
-            TaskCustomField::DUE_DATE->value => fn (mixed $value): mixed => is_string($value)
-                ? $this->formatDate($this->evaluateTemplateExpression($value))
-                : $value,
             TaskCustomField::STATUS->value => 'option',
             TaskCustomField::PRIORITY->value => 'option',
+            TaskCustomField::CALL_NOTES->value => 'text',
         ];
 
         // Process custom fields using utility method

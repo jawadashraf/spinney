@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\CustomFields;
 
+use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Models\CustomField;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -50,6 +51,7 @@ final class TableBuilder
     {
         $column = TextColumn::make($field->code)
             ->label($field->name)
+            ->getStateUsing(fn (HasCustomFieldsContract $record): mixed => app(ValueResolver::class)->resolve($record, $field))
             ->toggleable($field->settings->list_toggleable_hidden ?? true);
 
         // Add specific formatting based on type if needed

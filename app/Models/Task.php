@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CreationSource;
+use App\Enums\TaskType;
 use App\Models\Concerns\HasCreator;
 use App\Models\Concerns\HasCustomFields;
 use App\Models\Concerns\HasTeam;
@@ -15,6 +16,7 @@ use App\Models\Pivots\TaskUser;
 use App\Observers\TaskObserver;
 use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Spatie\EloquentSortable\SortableTrait;
 
 /**
@@ -53,6 +56,9 @@ final class Task extends Model implements HasCustomFieldsContract
         'status',
         'priority',
         'creation_source',
+        'type',
+        'department_id',
+        'due_date',
     ];
 
     /**
@@ -60,6 +66,7 @@ final class Task extends Model implements HasCustomFieldsContract
      */
     protected $attributes = [
         'creation_source' => CreationSource::WEB,
+        'type' => TaskType::GeneralTask,
     ];
 
     /**
@@ -71,6 +78,8 @@ final class Task extends Model implements HasCustomFieldsContract
     {
         return [
             'creation_source' => CreationSource::class,
+            'type' => TaskType::class,
+            'due_date' => 'datetime',
         ];
     }
 
@@ -128,5 +137,26 @@ final class Task extends Model implements HasCustomFieldsContract
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    /** @return BelongsTo<Department, self> */
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    /** @param Builder<Task> $query */
+    public function scopeForDepartments(Builder $query, Collection $departmentIds): Builder
+    {
+        return $query->where(function (Builder $q) use ($departmentIds) {
+            $q->whereIn('department_id', $departmentIds)
+                ->orWhereDoesntHave('assignees')
+                ->orWhereHas('assignees', fn (Builder $sub) => $sub->where('users.id', auth()->id()));
+        });
+    }
+
+    public function isFollowUpCall(): bool
+    {
+        return $this->type === TaskType::FollowUpCall;
     }
 }

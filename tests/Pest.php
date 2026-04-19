@@ -30,6 +30,14 @@ pest()->extend(Tests\TestCase::class)
             \Laravel\Jetstream\Events\TeamCreated::class,
         ]);
 
+        // Create a default team and owner for the seeder to use if it doesn't exist
+        $user = \App\Models\User::factory()->create(['email' => 'system@spinney.test']);
+        \App\Models\Team::factory()->create([
+            'name' => 'Spinney Hill',
+            'user_id' => $user->id,
+            'personal_team' => false,
+        ]);
+
         // Seed Shield roles so permission-based policies can function in tests.
         $this->seed(\Database\Seeders\ShieldSeeder::class);
     })

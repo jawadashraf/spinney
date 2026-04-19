@@ -18,10 +18,21 @@ return new class extends Migration
 
             $table->string('title');
 
+            
+            $table->string('type', 50)->default('general_task')->index();
+            $table->foreignId('department_id')
+            ->nullable()
+            ->constrained('departments')
+            ->nullOnDelete();
+            
+            $table->dateTime('due_date')->nullable()->index();
             $table->unsignedBigInteger('order_column')->nullable();
+            
 
             $table->timestamps();
             $table->softDeletes();
+            
+            $table->index('department_id');
         });
     }
 

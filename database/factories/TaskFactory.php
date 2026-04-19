@@ -22,6 +22,8 @@ final class TaskFactory extends Factory
     {
         return [
             'title' => $this->faker->sentence(3),
+            'type' => \App\Enums\TaskType::GeneralTask,
+            'department_id' => null,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
             'team_id' => Team::factory(),

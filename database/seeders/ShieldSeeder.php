@@ -38,18 +38,18 @@ final class ShieldSeeder extends Seeder
             ['guard_name' => 'web'],
         );
 
-        $team = Team::where('name', 'Spinney Hill')->first();
+        $team = Team::where('name', 'Spinney Hill')->first() ?? Team::firstOrCreate(['name' => 'Spinney Hill'], ['personal_team' => false]);
+
         if ($team) {
             setPermissionsTeamId($team->id);
-        }
 
-        $departmentNames = ['Management', 'Liaison', 'Counselor'];
+            $departmentNames = ['Management', 'Liaison', 'Counselor'];
 
-        foreach ($departmentNames as $departmentName) {
-            Department::firstOrCreate(
-                ['name' => $departmentName],
-                ['team_id' => $team->id],
-            );
+            foreach ($departmentNames as $departmentName) {
+                Department::firstOrCreate(
+                    ['name' => $departmentName, 'team_id' => $team->id],
+                );
+            }
         }
 
         // Application roles from the Phase 1 Handoff Permissions Matrix.
@@ -91,13 +91,15 @@ final class ShieldSeeder extends Seeder
                 $user->assignRole($role);
             }
 
-            $user->teams()->syncWithoutDetaching([$team->id => ['role' => 'member']]);
-            $user->switchTeam($team);
+            if ($team) {
+                $user->teams()->syncWithoutDetaching([$team->id => ['role' => 'member']]);
+                $user->switchTeam($team);
 
-            // Attach to matching team if it exists and user isn't already on it.
-            $department = Department::where('name', $departmentName)->first();
-            if ($department) {
-                $user->departments()->attach($department, ['team_id' => $team->id]);
+                // Attach to matching team if it exists and user isn't already on it.
+                $department = Department::where('name', $departmentName)->first();
+                if ($department) {
+                    $user->departments()->attach($department, ['team_id' => $team->id]);
+                }
             }
         }
 

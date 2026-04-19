@@ -205,7 +205,7 @@ final readonly class RecordContextBuilder
             'title' => $task->title,
             'status' => $this->getCustomFieldValue($task, TaskField::STATUS->value),
             'priority' => $this->getCustomFieldValue($task, TaskField::PRIORITY->value),
-            'due_date' => $this->formatDate($this->getCustomFieldValue($task, TaskField::DUE_DATE->value)),
+            'due_date' => $this->formatDate($task->due_date),
         ])->values()->all();
 
         return $this->withPaginationInfo($formatted, $totalCount);

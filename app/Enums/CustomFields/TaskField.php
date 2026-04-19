@@ -26,9 +26,9 @@ enum TaskField: string
     case DESCRIPTION = 'description';
 
     /**
-     * Task due date and time
+     * Outcome notes for a follow-up call
      */
-    case DUE_DATE = 'due_date';
+    case CALL_NOTES = 'call_notes';
 
     /**
      * Get the display name for the field
@@ -41,7 +41,7 @@ enum TaskField: string
             self::STATUS => 'Status',
             self::PRIORITY => 'Priority',
             self::DESCRIPTION => 'Description',
-            self::DUE_DATE => 'Due Date',
+            self::CALL_NOTES => 'Call Notes',
         };
     }
 
@@ -54,8 +54,7 @@ enum TaskField: string
     {
         return match ($this) {
             self::STATUS, self::PRIORITY => CustomFieldType::SELECT->value,
-            self::DESCRIPTION => CustomFieldType::RICH_EDITOR->value,
-            self::DUE_DATE => CustomFieldType::DATE_TIME->value,
+            self::DESCRIPTION, self::CALL_NOTES => CustomFieldType::RICH_EDITOR->value,
         };
     }
 
@@ -66,10 +65,7 @@ enum TaskField: string
      */
     public function isSystemDefined(): bool
     {
-        return match ($this) {
-            self::STATUS, self::PRIORITY => true,
-            default => false,
-        };
+        return $this === self::STATUS || $this === self::PRIORITY;
     }
 
     /**
@@ -80,7 +76,7 @@ enum TaskField: string
     public function isListToggleableHidden(): bool
     {
         return match ($this) {
-            self::STATUS, self::PRIORITY, self::DUE_DATE => false,
+            self::STATUS, self::PRIORITY => false,
             default => true,
         };
     }
@@ -157,7 +153,7 @@ enum TaskField: string
             self::STATUS => 'Current status of the task',
             self::PRIORITY => 'Priority level for this task',
             self::DESCRIPTION => 'Detailed description of what needs to be done',
-            self::DUE_DATE => 'When this task needs to be completed by',
+            self::CALL_NOTES => 'Outcome notes for a follow-up call',
         };
     }
 }

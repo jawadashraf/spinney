@@ -8,8 +8,11 @@ use App\Models\Concerns\HasTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 final class CustomFieldOption extends Model
 {
+    use HasFactory;
     use HasTeam;
 
     protected $fillable = [

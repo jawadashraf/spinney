@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\CreationSource;
+use App\Enums\TaskType;
 use App\Filament\Resources\TaskResource\Forms\TaskForm;
 use App\Filament\Resources\TaskResource\Pages\ManageTasks;
+use App\Filament\Resources\Tasks\Actions\RecordOutcomeAction;
 use App\Models\CustomField;
 use App\Models\Task;
 use App\Models\User;
@@ -34,6 +36,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -58,7 +61,7 @@ final class TaskResource extends Resource
 
     public static function table(Table $table): Table
     {
-        /** @var \Illuminate\Database\Eloquent\Collection<int, CustomField> $customFields */
+        /** @var Collection<int, CustomField> $customFields */
         $customFields = CustomField::query()->whereIn('code', ['status', 'priority'])->get()->keyBy('code');
         /** @var ValueResolver $valueResolver */
         $valueResolver = app(ValueResolver::class);
@@ -70,6 +73,16 @@ final class TaskResource extends Resource
                     ->wrap()
                     ->limit(50)
                     ->weight('medium'),
+                TextColumn::make('type')
+                    ->badge()
+                    ->label('Type')
+                    ->sortable(),
+                TextColumn::make('department.name')
+                    ->label('Department')
+                    ->badge()
+                    ->color('gray')
+                    ->toggleable(isToggledHiddenByDefault: false)
+                    ->placeholder('—'),
                 TextColumn::make('assignees.name')
                     ->label('Assignee')
                     ->badge()
@@ -83,6 +96,12 @@ final class TaskResource extends Resource
                     ->toggleable()
                     ->getStateUsing(fn (Task $record): string => $record->createdBy)
                     ->color(fn (Task $record): string => $record->isSystemCreated() ? 'secondary' : 'primary'),
+                TextColumn::make('due_date')
+                    ->label('Due Date')
+                    ->dateTime('d M Y')
+                    ->sortable()
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -104,7 +123,7 @@ final class TaskResource extends Resource
                 Filter::make('assigned_to_me')
                     ->label('Assigned to me')
                     ->query(fn (Builder $query): Builder => $query->whereHas('assignees', function (Builder $query): void {
-                        $query->where('users.id', \Illuminate\Support\Facades\Auth::id());
+                        $query->where('users.id', Auth::id());
                     }))
                     ->toggle(),
                 SelectFilter::make('assignees')
@@ -117,6 +136,21 @@ final class TaskResource extends Resource
                     ->options(CreationSource::class)
                     ->multiple(),
                 TrashedFilter::make(),
+                SelectFilter::make('type')
+                    ->label('Type')
+                    ->options(TaskType::class)
+                    ->multiple(),
+                SelectFilter::make('department_id')
+                    ->label('Department')
+                    ->relationship('department', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->visible(fn (): bool => auth()->user()->hasAnyRole(['super_admin', 'admin', 'manager'])),
+                Filter::make('due_this_week')
+                    ->label('Due this week')
+                    ->toggle()
+                    ->default(true)
+                    ->query(fn (Builder $query): Builder => $query->whereBetween('due_date', [now()->startOfWeek(), now()->endOfWeek()])),
             ])
             ->groups(array_filter([
                 ...collect(['status', 'priority'])->map(fn (string $fieldCode): ?\Filament\Tables\Grouping\Group => $customFields->contains('code', $fieldCode) ? self::makeCustomFieldGroup($fieldCode, $customFields, $valueResolver) : null
@@ -138,7 +172,7 @@ final class TaskResource extends Resource
                                 // Send notifications to assignees if they haven't been notified about this task yet
                                 if ($assignees->isNotEmpty()) {
                                     $assignees->each(function (User $recipient) use ($record): void {
-                                        /** @var \App\Models\User $recipient */
+                                        /** @var User $recipient */
                                         // Check if a notification for this task already exists for this user
                                         $notificationExists = $recipient->notifications()
                                             ->where('data->viewData->task_id', $record->id)
@@ -172,6 +206,7 @@ final class TaskResource extends Resource
                             return $record;
                         }),
                     RestoreAction::make(),
+                    RecordOutcomeAction::make(),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),
                 ]),
@@ -240,9 +275,23 @@ final class TaskResource extends Resource
      */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+
+        $user = auth()->user();
+
+        if (! $user) {
+            return $query->whereRaw('0=1');
+        }
+
+        if ($user->hasAnyRole(['super_admin', 'admin', 'manager'])) {
+            return $query;
+        }
+
+        $departmentIds = $user->departments()->pluck('departments.id');
+
+        return $query->forDepartments($departmentIds);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Enums\TaskType;
 use App\Enums\CustomFields\TaskField as TaskCustomField;
 use App\Filament\Resources\TaskResource\Forms\TaskForm;
 use App\Models\CustomField;
@@ -16,6 +17,7 @@ use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Filters\SelectFilter;
@@ -48,14 +50,24 @@ final class TasksBoard extends BoardPage
     public function board(Board $board): Board
     {
         return $board
-            ->query(
-                fn () => Task::query()
+            ->query(function () {
+                $query = Task::query()
                     ->leftJoin('custom_field_values as cfv', function (\Illuminate\Database\Query\JoinClause $join): void {
                         $join->on('tasks.id', '=', 'cfv.entity_id')
                             ->where('cfv.custom_field_id', '=', $this->statusCustomField()?->getKey());
                     })
-                    ->select('tasks.*', 'cfv.integer_value')
-            )
+                    ->select('tasks.*', 'cfv.integer_value');
+
+                $user = auth()->user();
+
+                if ($user->hasAnyRole(['super_admin', 'admin', 'manager'])) {
+                    return $query;
+                }
+
+                $departmentIds = $user->departments()->pluck('departments.id');
+
+                return $query->forDepartments($departmentIds);
+            })
             ->recordTitleAttribute('title')
             ->columnIdentifier('cfv.integer_value')
             ->positionIdentifier('order_column')
@@ -71,7 +83,12 @@ final class TasksBoard extends BoardPage
                     ->values()
                     ->first();
 
-                $components = [];
+                $components = [
+                    TextEntry::make('type')
+                        ->badge()
+                        ->color(fn ($state) => TaskType::from($state)->getColor())
+                        ->hiddenLabel(),
+                ];
 
                 if ($descriptionCustomField) {
                     $components[] = $descriptionCustomField
@@ -139,6 +156,14 @@ final class TasksBoard extends BoardPage
                     ->label('Assignee')
                     ->relationship('assignees', 'name')
                     ->multiple(),
+                SelectFilter::make('type')
+                    ->label('Type')
+                    ->options(TaskType::class)
+                    ->attribute('type'),
+                SelectFilter::make('department')
+                    ->label('Department')
+                    ->relationship('department', 'name')
+                    ->visible(fn (): bool => auth()->user()->hasAnyRole(['super_admin', 'admin', 'manager'])),
             ])
             ->filtersFormWidth(Width::Medium);
     }

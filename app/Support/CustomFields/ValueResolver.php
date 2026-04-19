@@ -12,9 +12,11 @@ final class ValueResolver
     public function resolve(HasCustomFieldsContract $record, CustomField $customField): mixed
     {
         /** @var \App\Models\CustomFieldValue|null $valueModel */
-        $valueModel = $record->customFieldValues()
-            ->where('custom_field_id', $customField->id)
-            ->first();
+        $valueModel = $record->relationLoaded('customFieldValues')
+            ? $record->customFieldValues->where('custom_field_id', $customField->id)->first()
+            : $record->customFieldValues()
+                ->where('custom_field_id', $customField->id)
+                ->first();
 
         if (! $valueModel) {
             return null;
