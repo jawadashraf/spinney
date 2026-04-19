@@ -6,6 +6,7 @@ namespace App\Support\CustomFields;
 
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Models\CustomField;
+use Filament\Support\Colors\Color;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 
@@ -24,7 +25,8 @@ final class TableBuilder
     {
         $query = CustomField::query()
             ->where('active', true)
-            ->orderBy('sort_order');
+            ->orderBy('sort_order')
+            ->with('options');
 
         if ($this->model) {
             $query->where('entity_type', $this->model);
@@ -59,6 +61,20 @@ final class TableBuilder
             $column->date();
         } elseif ($field->type === 'datetime') {
             $column->dateTime();
+        }
+
+        if ($field->settings->enable_option_colors ?? false) {
+            $column->badge()
+                ->color(function (HasCustomFieldsContract $record) use ($field): string|array|null {
+                    $option = app(ValueResolver::class)->resolveOption($record, $field);
+                    $color = $option?->settings->color;
+
+                    if ($color && str_starts_with($color, '#')) {
+                        return Color::hex($color);
+                    }
+
+                    return $color;
+                });
         }
 
         return $column;

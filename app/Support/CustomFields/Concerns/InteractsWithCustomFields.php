@@ -27,7 +27,7 @@ trait InteractsWithCustomFields
         $filters = CustomFields::table()->forModel($model)->filters();
 
         return $table->modifyQueryUsing(function (Builder $query): void {
-            $query->with('customFieldValues.customField');
+            $query->with('customFieldValues.customField.options');
         })
             ->deferFilters(false)
             ->pushColumns($columns)
