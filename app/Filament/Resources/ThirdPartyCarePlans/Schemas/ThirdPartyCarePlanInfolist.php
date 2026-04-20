@@ -8,9 +8,11 @@ use App\Enums\ThirdPartyCarePlanStatus;
 use App\Models\ThirdPartyCarePlan;
 use App\Support\CustomFields;
 use Filament\Infolists\Components\TextEntry;
+
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
+use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 
 final class ThirdPartyCarePlanInfolist
 {
@@ -40,13 +42,14 @@ final class ThirdPartyCarePlanInfolist
                     ->schema([
                         TextEntry::make('serviceUser.name')
                             ->label('Service User'),
-                        TextEntry::make('serviceUser.email')
+                        TextEntry::make('service_user_email')
                             ->label('Email')
                             ->placeholder('Not provided'),
-                        TextEntry::make('serviceUser.phone')
+                        TextEntry::make('service_user_phone')
                             ->label('Phone')
                             ->placeholder('Not provided'),
                     ])
+
                     ->columns(2)
                     ->collapsible(),
 
@@ -85,18 +88,37 @@ final class ThirdPartyCarePlanInfolist
                     ->schema([
                         TextEntry::make('notes')
                             ->label('Notes')
+                            ->html()
                             ->prose()
                             ->placeholder('No notes'),
                         TextEntry::make('internal_notes')
                             ->label('Internal Notes')
+                            ->html()
                             ->prose()
                             ->placeholder('No internal notes')
                             ->visible(fn (): bool => Auth::user()->can('viewInternalNotes:ThirdPartyCarePlan')),
                     ])
+
                     ->columns(1)
                     ->collapsible(),
 
+                 Section::make('Attachments')
+                    ->schema([
+                        // TextEntry::make('attachments')
+                        //     ->label('Attached Files')
+                        //     ->state(fn (ThirdPartyCarePlan $record): array => $record->getMedia('attachments')->pluck('name')->toArray())
+                        //     ->listWithLineBreaks()
+                        //     ->bulleted()
+                        //     ->placeholder('No attachments'),
+
+                            SpatieMediaLibraryImageEntry::make('attachments')
+                            ->collection('attachments')
+                    ])
+                    ->collapsible(),
+
+
                 Section::make('Metadata')
+
                     ->schema([
                         TextEntry::make('creator.name')
                             ->label('Created By'),

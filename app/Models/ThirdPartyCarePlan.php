@@ -17,21 +17,28 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
 
 #[ObservedBy(ThirdPartyCarePlanObserver::class)]
-final class ThirdPartyCarePlan extends Model implements HasCustomFieldsContract
+final class ThirdPartyCarePlan extends Model implements HasCustomFieldsContract, HasMedia
 {
     use HasCreator;
     use HasCustomFields;
     use HasFactory;
     use HasTeam;
+    use InteractsWithMedia;
     use SoftDeletes;
+
 
     /** @use HasFactory<ThirdPartyCarePlanFactory> */
     protected $fillable = [
         'team_id',
         'creator_id',
         'people_id',
+        'service_user_email',
+        'service_user_phone',
         'provider_name',
         'provider_contact',
         'status',
@@ -41,6 +48,7 @@ final class ThirdPartyCarePlan extends Model implements HasCustomFieldsContract
         'notes',
         'internal_notes',
     ];
+
 
     protected function casts(): array
     {
@@ -79,7 +87,10 @@ final class ThirdPartyCarePlan extends Model implements HasCustomFieldsContract
         return $this->status !== ThirdPartyCarePlanStatus::COMPLETED;
     }
 
+    public function registerMediaCollections(): void
 
-
-
+    {
+        $this->addMediaCollection('attachments');
+    }
 }
+

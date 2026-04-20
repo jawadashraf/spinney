@@ -8,14 +8,18 @@ use App\Enums\ThirdPartyCarePlanStatus;
 use App\Models\People;
 use App\Support\CustomFields;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\TextEntry;
+
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+
 use Filament\Support\Icons\Heroicon;
 
 final class ThirdPartyCarePlanForm
@@ -72,19 +76,22 @@ final class ThirdPartyCarePlanForm
                             ->required()
                             ->live()
                             ->reactive()
+                            ->afterStateUpdated(fn (Set $set, ?string $state) => self::updateServiceUserDetails($set, $state))
                             ->getOptionLabelFromRecordUsing(fn (People $record) => $record->name),
-                        TextEntry::make('service_user_details')
-                            ->label('Service User Contact Details')
+                        TextInput::make('service_user_email')
+                            ->label('Service User Email')
+                            ->email()
+                            ->nullable()
                             ->visible(fn (Get $get): bool => filled($get('people_id')))
-                            ->state(function (Get $get) {
-                                $person = People::find($get('people_id'));
-                                if (! $person) {
-                                    return '-';
-                                }
-
-                                return "Email: {$person->email} | Phone: {$person->phone}";
-                            }),
+                            ->columnSpan(1),
+                        TextInput::make('service_user_phone')
+                            ->label('Service User Phone')
+                            ->tel()
+                            ->nullable()
+                            ->visible(fn (Get $get): bool => filled($get('people_id')))
+                            ->columnSpan(1),
                     ])
+
                     ->columns(2)
                     ->columnSpanFull()
                     ->collapsible()
@@ -130,15 +137,13 @@ final class ThirdPartyCarePlanForm
 
                 Section::make('Notes')
                     ->schema([
-                        Textarea::make('notes')
+                        RichEditor::make('notes')
                             ->label('Notes')
-                            ->rows(3)
                             ->nullable()
                             ->helperText('Visible to service user if shared')
                             ->columnSpanFull(),
-                        Textarea::make('internal_notes')
+                        RichEditor::make('internal_notes')
                             ->label('Internal Notes')
-                            ->rows(3)
                             ->nullable()
                             ->helperText('Visible only to staff')
                             ->columnSpanFull(),
@@ -147,6 +152,36 @@ final class ThirdPartyCarePlanForm
                     ->columnSpanFull()
                     ->collapsible()
                     ->icon(Heroicon::PencilSquare),
+
+                Section::make('Attachments')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('attachments')
+                            ->collection('attachments')
+                            ->multiple()
+                            ->reorderable()
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpanFull()
+                    ->collapsible()
+                    ->icon(Heroicon::PaperClip),
             ]);
     }
+
+    public static function updateServiceUserDetails(Set $set, ?string $state): void
+    {
+        if (! $state) {
+            $set('service_user_email', null);
+            $set('service_user_phone', null);
+
+            return;
+        }
+
+        $person = People::find($state);
+
+        if ($person) {
+            $set('service_user_email', $person->email);
+            $set('service_user_phone', $person->phone);
+        }
+    }
 }
+
