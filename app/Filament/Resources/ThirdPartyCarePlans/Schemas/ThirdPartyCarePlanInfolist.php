@@ -102,17 +102,13 @@ final class ThirdPartyCarePlanInfolist
                     ->columns(1)
                     ->collapsible(),
 
-                 Section::make('Attachments')
+                 Section::make('Attachments Summary')
+                    ->description('Detailed file management is available in the Attachments tab.')
                     ->schema([
-                        // TextEntry::make('attachments')
-                        //     ->label('Attached Files')
-                        //     ->state(fn (ThirdPartyCarePlan $record): array => $record->getMedia('attachments')->pluck('name')->toArray())
-                        //     ->listWithLineBreaks()
-                        //     ->bulleted()
-                        //     ->placeholder('No attachments'),
-
-                            SpatieMediaLibraryImageEntry::make('attachments')
-                            ->collection('attachments')
+                        TextEntry::make('attachments_count')
+                            ->label('Total Attachments')
+                            ->state(fn (ThirdPartyCarePlan $record): int => $record->media()->where('collection_name', 'attachments')->count())
+                            ->badge(),
                     ])
                     ->collapsible(),
 

@@ -38,8 +38,7 @@ final class ThirdPartyCarePlanForm
                                 'Other' => 'Other',
                             ])
                             ->required()
-                            ->live()
-                            ->reactive(),
+                            ->live(),
                         TextInput::make('provider_name_other')
                             ->label('Provider Name')
                             ->required(fn (Get $get): bool => $get('provider_name') === 'Other')
@@ -75,7 +74,8 @@ final class ThirdPartyCarePlanForm
                             ->preload()
                             ->required()
                             ->live()
-                            ->reactive()
+                            ->disabled(fn (string $operation): bool => $operation !== 'create')
+                            ->helperText(fn (string $operation): ?string => $operation !== 'create' ? 'The service user cannot be changed once the care plan is created.' : null)
                             ->afterStateUpdated(fn (Set $set, ?string $state) => self::updateServiceUserDetails($set, $state))
                             ->getOptionLabelFromRecordUsing(fn (People $record) => $record->name),
                         TextInput::make('service_user_email')
@@ -103,8 +103,7 @@ final class ThirdPartyCarePlanForm
                             ->options(ThirdPartyCarePlanStatus::class)
                             ->default(ThirdPartyCarePlanStatus::PENDING)
                             ->required()
-                            ->live()
-                            ->reactive(),
+                            ->live(),
                         DatePicker::make('referral_date')
                             ->required()
                             ->default(now())
@@ -141,11 +140,13 @@ final class ThirdPartyCarePlanForm
                             ->label('Notes')
                             ->nullable()
                             ->helperText('Visible to service user if shared')
+                            ->extraInputAttributes(['style' => 'min-height: 400px;'])
                             ->columnSpanFull(),
                         RichEditor::make('internal_notes')
                             ->label('Internal Notes')
                             ->nullable()
                             ->helperText('Visible only to staff')
+                            ->extraInputAttributes(['style' => 'min-height: 400px;'])
                             ->columnSpanFull(),
                     ])
                     ->columns(1)
@@ -153,7 +154,8 @@ final class ThirdPartyCarePlanForm
                     ->collapsible()
                     ->icon(Heroicon::PencilSquare),
 
-                Section::make('Attachments')
+                Section::make('Quick Upload Attachments')
+                    ->description('Quickly add files here. Use the Attachments tab for detailed categorization and tags.')
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('attachments')
                             ->collection('attachments')
