@@ -1,6 +1,6 @@
 # Project Proposal: Spinney Hill CRM (Charity / Equity)
 
-**Client:** Spinney Hill  
+**Client:** Spinney Hill Support Centre  
 **Provider:** Jawad Ashraf  
 **Date:** April 15, 2026  
 
@@ -53,19 +53,7 @@ The development is divided into three distinct phases to ensure rapid value deli
 
 ---
 
-## 4. Post-Launch Support & Maintenance (Optional)
-
-Maintenance pricing is adjusted to reflect the non-profit nature of the client.
-
-*   **Standard Maintenance (SLA):** **£1,800 / year**
-    *   Security patching (Laravel/Filament).
-    *   Bug fixes (Standard priority).
-    *   Next-day business support response.
-    *   Cloud infrastructure management.
-
----
-
-## 5. Revenue Share & Commercial Partnership
+## 4. Revenue Share & Commercial Partnership
 
 Given the significant reduction in upfront development costs (£15,900 labor investment) and the collaborative nature of this initiative, the following commercial terms apply:
 
@@ -77,7 +65,7 @@ Given the significant reduction in upfront development costs (£15,900 labor inv
 
 ---
 
-## 6. Market Rate Comparison & Benchmarking
+## 5. Market Rate Comparison & Benchmarking
 
 To ensure transparency, this model benchmarks the discounted charity rate against standard professional engineering rates for the same 240-hour roadmap:
 
@@ -92,7 +80,7 @@ To ensure transparency, this model benchmarks the discounted charity rate agains
 
 ---
 
-## 7. Payment Schedule
+## 6. Payment Schedule
 
 | Milestone | Amount | Due |
 | :--- | :--- | :--- |
@@ -102,9 +90,7 @@ To ensure transparency, this model benchmarks the discounted charity rate agains
 
 ---
 
----
-
-## 9. Additional Features
+## 7. Additional Features
 
 As the project evolves, you may identify additional features to be added. These will be:
 - Scoped and quoted separately
@@ -115,7 +101,7 @@ Additional feature requests will be documented with clear specifications and agr
 
 ---
 
-## 10. Excluded Items
+## 8. Excluded Items
 
 The following are not included in the Phase 1 investment and will be handled separately:
 
@@ -126,7 +112,7 @@ The following are not included in the Phase 1 investment and will be handled sep
 
 ---
 
-## 11. Terms & Conditions
+## 9. Terms & Conditions
 
 ### Payment Terms
 - 50% initial payment required to commence development
@@ -138,14 +124,33 @@ The following are not included in the Phase 1 investment and will be handled sep
 - Additional features priced separately and require approval before implementation
 - Timeline adjustments quoted based on complexity
 
-### Support Period
-- 30 days post-launch support included for bug fixes
-- Support excludes new feature requests
-- Training documentation provided
+### Support Period & SLA
+- **Hypercare Period (Months 1-3):** 3 months of comprehensive post-launch support is included for bug fixes and minor optimizations. We guarantee a response within **1 business day**.
+- **Extended Support (Months 4-12):** For the following 9 months, we provide continued maintenance with a focus on stability:
+    - **Critical Issues:** Same business day response for urgent system interruptions.
+    - **Standard Requests:** 2-3 business days response for non-critical items.
+- **Handover:** Comprehensive training documentation and system manuals are provided as standard.
 
 ---
 
-## 12. Acceptance & Sign-off
+## 10. Client Responsibilities & Technical Provisioning
+
+To maintain the 6-week delivery timeline, the following technical assets must be provisioned by the Client according to the schedule below:
+
+### Priority 1: Immediate (Required for Phase 1 Commencement)
+- **Hosting Environment:** Hostinger Cloud Hosting access (Application & Database).
+- **Identity:** Primary Domain Name registration and DNS access.
+- **Communications:** Postmark account setup (Essential for transactional emails and system alerts).
+
+### Priority 2: Secondary (Required by Phase 3)
+- **Payment Processing:** Stripe account (Sandbox/Test mode) for class session payments and donations integration.
+- **AI Intelligence:** OpenAI (ChatGPT) or Google Cloud (Gemini) API access. 
+    - *Note: Gemini integration requires a configured Google Cloud Project.*
+- **Security:** Twilio account (required only if SMS-based Two-Factor Authentication is enabled).
+
+---
+
+## 11. Acceptance & Sign-off
 
 We are committed to delivering a high-quality CRM system that meets your needs and supports your charitable mission. This proposal represents our understanding of your requirements and our commitment to professional delivery.
 
@@ -153,10 +158,12 @@ We are committed to delivering a high-quality CRM system that meets your needs a
 
 ---
 
-**For Spinney Hill:**
+**For Spinney Hill Support Centre:**
 
 Signature: ________________________________  
+
 Name: ________________________________  
+
 Date: ________________________________  
 
 ---
@@ -164,7 +171,9 @@ Date: ________________________________
 **For Jawad Ashraf:**
 
 Signature: ________________________________  
+
 Name: ________________________________  
+
 Date: ________________________________  
 
 ---
