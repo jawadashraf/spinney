@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+ini_set('memory_limit', '1024M');
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -13,33 +15,38 @@ declare(strict_types=1);
 |
 */
 
+use App\Models\Team;
+use App\Models\User;
+use Database\Seeders\ShieldSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Laravel\Jetstream\Events\TeamCreated;
+use Tests\TestCase;
 
-pest()->extend(Tests\TestCase::class)
+pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->beforeEach(function () {
-        // Safety check to prevent wiping the main database
-        if (config('database.connections.mysql.database') === 'spinney') {
-            throw new \Exception('CRITICAL: Testing database is pointing to "spinney". Aborting to prevent data loss. Run "php artisan config:clear" and try again.');
+        $dbDatabase = config('database.connections.mysql.database') ?? env('DB_DATABASE');
+        if ($dbDatabase === 'spinney') {
+            throw new Exception('CRITICAL: Test DB is "spinney" (production). Aborting to prevent data wipe. Run "php artisan config:clear" first.');
         }
 
         // Globally disable TeamCreated event to prevent demo record creation during tests
         // while allowing model observers to function.
         Event::fake([
-            \Laravel\Jetstream\Events\TeamCreated::class,
+            TeamCreated::class,
         ]);
 
         // Create a default team and owner for the seeder to use if it doesn't exist
-        $user = \App\Models\User::factory()->create(['email' => 'system@spinney.test']);
-        \App\Models\Team::factory()->create([
+        $user = User::factory()->create(['email' => 'system@spinney.test']);
+        Team::factory()->create([
             'name' => 'Spinney Hill',
             'user_id' => $user->id,
             'personal_team' => false,
         ]);
 
         // Seed Shield roles so permission-based policies can function in tests.
-        $this->seed(\Database\Seeders\ShieldSeeder::class);
+        $this->seed(ShieldSeeder::class);
     })
     ->in('Feature', 'Unit');
 
