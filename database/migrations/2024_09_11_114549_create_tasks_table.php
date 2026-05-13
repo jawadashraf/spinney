@@ -18,26 +18,38 @@ return new class extends Migration
 
             $table->string('title');
 
-            
             $table->string('type', 50)->default('general_task')->index();
             $table->foreignId('department_id')
-            ->nullable()
-            ->constrained('departments')
-            ->nullOnDelete();
-            
+                ->nullable()
+                ->constrained('departments')
+                ->nullOnDelete();
+
             $table->dateTime('due_date')->nullable()->index();
-            $table->unsignedBigInteger('order_column')->nullable();
-            
+            $table->flowforgePositionColumn('order_column');
+            $table->string('creation_source', 50)->nullable();
 
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index('department_id');
+        });
+
+        Schema::create('taskables', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('team_id')->constrained('teams')->cascadeOnDelete();
+            $table->index('team_id');
+
+            $table->foreignId('task_id')->constrained()->cascadeOnDelete();
+
+            $table->morphs('taskable');
+
+            $table->timestamps();
         });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('taskables');
         Schema::dropIfExists('tasks');
     }
 };

@@ -44,6 +44,8 @@ return new class extends Migration
             $table->boolean('consent_referrals')->default(false);
             $table->boolean('consent_communications')->default(false);
 
+            $table->string('creation_source', 50)->nullable();
+
             $table->timestamps();
             $table->softDeletes();
         });

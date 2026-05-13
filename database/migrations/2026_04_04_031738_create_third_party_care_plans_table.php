@@ -15,6 +15,8 @@ return new class extends Migration
             $table->foreignId('team_id')->constrained()->cascadeOnDelete();
             $table->foreignId('creator_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('people_id')->constrained()->cascadeOnDelete();
+            $table->string('service_user_email')->nullable();
+            $table->string('service_user_phone')->nullable();
 
             $table->string('provider_name');
             $table->json('provider_contact')->nullable();

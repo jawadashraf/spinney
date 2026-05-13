@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('account_owner_id')->nullable()->constrained('users')->onDelete('set null');
 
             $table->string('name');
+            $table->string('creation_source', 50)->nullable();
 
             $table->timestamps();
             $table->softDeletes();

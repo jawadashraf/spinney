@@ -28,6 +28,33 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
+
+        Schema::create('exports', function (Blueprint $table): void {
+            $table->id();
+
+            $table->foreignId('team_id')->nullable()->constrained('teams')->cascadeOnDelete();
+
+            $table->timestamp('completed_at')->nullable();
+            $table->string('file_disk');
+            $table->string('file_name')->nullable();
+            $table->string('exporter');
+            $table->unsignedInteger('processed_rows')->default(0);
+            $table->unsignedInteger('total_rows');
+            $table->unsignedInteger('successful_rows')->default(0);
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->timestamps();
+        });
+
+        Schema::create('failed_import_rows', function (Blueprint $table): void {
+            $table->id();
+
+            $table->foreignId('team_id')->nullable()->constrained('teams')->cascadeOnDelete();
+
+            $table->json('data');
+            $table->foreignId('import_id')->constrained()->cascadeOnDelete();
+            $table->text('validation_error')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -35,6 +62,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('failed_import_rows');
+        Schema::dropIfExists('exports');
         Schema::dropIfExists('imports');
     }
 };

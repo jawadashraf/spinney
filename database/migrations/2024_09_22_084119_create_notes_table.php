@@ -21,9 +21,22 @@ return new class extends Migration
 
             $table->string('title');
             $table->longText('body');
+            $table->string('creation_source', 50)->nullable();
 
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        Schema::create('noteables', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('team_id')->constrained('teams')->cascadeOnDelete();
+            $table->index('team_id');
+
+            $table->foreignId('note_id')->constrained()->cascadeOnDelete();
+
+            $table->morphs('noteable');
+
+            $table->timestamps();
         });
     }
 
@@ -32,6 +45,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('noteables');
         Schema::dropIfExists('notes');
     }
 };

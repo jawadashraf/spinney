@@ -23,7 +23,8 @@ return new class extends Migration
 
             $table->string('name');
 
-            $table->unsignedBigInteger('order_column')->nullable();
+            $table->flowforgePositionColumn('order_column');
+            $table->string('creation_source', 50)->nullable();
 
             $table->timestamps();
             $table->softDeletes();

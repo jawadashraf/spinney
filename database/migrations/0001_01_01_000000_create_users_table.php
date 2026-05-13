@@ -19,7 +19,18 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
+
+            $table->boolean('is_system_admin')->default(false);
+
+            $table->text('two_factor_secret')->nullable();
+            $table->text('two_factor_recovery_codes')->nullable();
+            if (class_exists(\Laravel\Fortify\Fortify::class) && \Laravel\Fortify\Fortify::confirmsTwoFactorAuthentication()) {
+                $table->timestamp('two_factor_confirmed_at')->nullable();
+            }
+
             $table->rememberToken();
+            $table->json('counselor_types')->nullable();
+
             $table->foreignId('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();
             $table->timestamps();
