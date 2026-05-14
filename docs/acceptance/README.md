@@ -26,6 +26,7 @@ Each module has its own acceptance criteria file:
 | [09-reporting.md](09-reporting.md) | Reporting & Exports | RP-001 to RP-005 |
 | [10-audit-trail.md](10-audit-trail.md) | Audit Trail | AT-001 to AT-004 |
 | [11-non-functional.md](11-non-functional.md) | Non-Functional (Performance, Security, Browsers) | NF-001 to NF-006 |
+| [12-classes.md](12-classes.md) | Classes & Group Sessions | CL-001 to CL-020 |
 
 ---
 
@@ -68,6 +69,8 @@ Each module has its own acceptance criteria file:
 | UAT-008 | Donation recorded with Gift Aid status visible in donor reporting | DN-001, DN-002, DN-003 |
 | UAT-009 | Each role sees only the navigation items, data, and actions they are authorised for | CC-004, all module permission ACs |
 | UAT-010 | Two organisations on the same CRM instance cannot see each other's data | CC-003, NF-003 |
+| UAT-011 | Counselor creates a class, manager publishes it, and a service user books a free drop-in session | CL-001, CL-003, CL-005, CL-008, CL-009 |
+| UAT-012 | Outsider books a paid class online, pays via Stripe, and attendance is marked after the session | CL-010, CL-013, CL-014, CL-017 |
 
 ---
 
@@ -89,6 +92,7 @@ Each module has its own acceptance criteria file:
 | Reporting & Exports | RP-001 to RP-005 | | | | |
 | Audit Trail | AT-001 to AT-004 | | | | |
 | Non-Functional | NF-001 to NF-006 | | | | |
+| Classes & Group Sessions | CL-001 to CL-020 | | | | |
 
 ### Overall Phase 1 Sign-off
 
@@ -117,7 +121,8 @@ Each module has its own acceptance criteria file:
 | §11 — Safeguarding & Consent | SG | SG-001 to SG-007 |
 | §12 — Reporting | RP | RP-001 to RP-005 |
 | §11 — Audit Trail | AT | AT-001 to AT-004 |
-| §10 — Permissions Matrix | CC-004, all module permission ACs | Per-module |
+| §13.2 — Specialized Care Roles | CL | CL-001 to CL-020 |
+| §13.5 — Payment Tracking | CL | CL-001 to CL-020 |
 
 ---
 
