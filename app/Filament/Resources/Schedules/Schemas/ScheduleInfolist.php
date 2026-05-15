@@ -8,12 +8,12 @@ use App\Enums\AttendeeType;
 use App\Enums\CounselorType;
 use App\Enums\PaymentType;
 use App\Enums\ScheduleFrequency;
-use App\Enums\ScheduleType;
 use App\Enums\SessionType;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Zap\Enums\ScheduleTypes;
 
 final class ScheduleInfolist
 {
@@ -26,13 +26,13 @@ final class ScheduleInfolist
                     ->schema([
                         TextEntry::make('schedule_type')
                             ->badge()
-                            ->color(fn (string $state): string => match ($state) {
-                                ScheduleType::AVAILABILITY->value => 'success',
-                                ScheduleType::APPOINTMENT->value => 'info',
-                                ScheduleType::BLOCKED->value => 'danger',
+                            ->color(fn (ScheduleTypes $state): string => match ($state) {
+                                ScheduleTypes::AVAILABILITY => 'success',
+                                ScheduleTypes::APPOINTMENT => 'info',
+                                ScheduleTypes::BLOCKED => 'danger',
                                 default => 'gray',
                             })
-                            ->formatStateUsing(fn (string $state): string => ScheduleType::from($state)->getLabel()),
+                            ->formatStateUsing(fn (ScheduleTypes $state): string => $state->name),
                         TextEntry::make('schedulable.name')
                             ->label('Assigned To'),
                         TextEntry::make('name')
@@ -79,7 +79,7 @@ final class ScheduleInfolist
                             ->label('Locked'),
                     ])
                     ->columns(2)
-                    ->visible(fn ($record): bool => ($record->schedule_type->value ?? '') === ScheduleType::AVAILABILITY->value),
+                    ->visible(fn ($record): bool => ($record->schedule_type->value ?? '') === ScheduleTypes::AVAILABILITY->value),
 
                 Section::make('Appointment Info')
                     ->schema([
@@ -113,7 +113,7 @@ final class ScheduleInfolist
                             ->placeholder('—'),
                     ])
                     ->columns(2)
-                    ->visible(fn ($record): bool => ($record->schedule_type->value ?? '') === ScheduleType::APPOINTMENT->value),
+                    ->visible(fn ($record): bool => ($record->schedule_type->value ?? '') === ScheduleTypes::APPOINTMENT->value),
 
                 Section::make('Blocked Time')
                     ->schema([
@@ -122,7 +122,7 @@ final class ScheduleInfolist
                             ->placeholder('No reason provided')
                             ->columnSpanFull(),
                     ])
-                    ->visible(fn ($record): bool => ($record->schedule_type->value ?? '') === ScheduleType::BLOCKED->value),
+                    ->visible(fn ($record): bool => ($record->schedule_type->value ?? '') === ScheduleTypes::BLOCKED->value),
 
                 Section::make('Time Slots')
                     ->schema([

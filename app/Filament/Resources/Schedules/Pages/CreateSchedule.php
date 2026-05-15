@@ -11,6 +11,7 @@ use App\Models\Schedule;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Zap\Enums\Frequency;
 use Zap\Exceptions\InvalidScheduleException;
 use Zap\Exceptions\ScheduleConflictException;
@@ -24,11 +25,10 @@ final class CreateSchedule extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        $schedulableType = $data['schedulable_type'];
-        $schedulableId = $data['schedulable_id'];
-        $schedulable = $schedulableType::findOrFail($schedulableId);
+        $schedulableClass = Relation::getMorphedModel($data['schedulable_type']) ?? $data['schedulable_type'];
+        $schedulable = $schedulableClass::findOrFail($data['schedulable_id']);
 
-        $scheduleType = ScheduleType::from($data['schedule_type']);
+        $scheduleType = $data['schedule_type'] instanceof ScheduleType ? $data['schedule_type'] : ScheduleType::from($data['schedule_type']);
         $metadata = $data['metadata'] ?? [];
 
         unset($data['schedulable_type'], $data['schedulable_id'], $data['metadata'], $data['period_start_time'], $data['period_end_time']);
@@ -73,6 +73,9 @@ final class CreateSchedule extends CreateRecord
             $builder->withMetadata($metadata);
         }
 
+        $teamId = $data['team_id'] ?? auth()->user()?->current_team_id;
+        unset($data['team_id']);
+
         $periodStartTime = request()->input('period_start_time') ?? request()->input('data.period_start_time') ?? '09:00';
         $periodEndTime = request()->input('period_end_time') ?? request()->input('data.period_end_time') ?? '17:00';
 
@@ -81,7 +84,14 @@ final class CreateSchedule extends CreateRecord
         }
 
         try {
-            return $builder->save();
+            $schedule = $builder->save();
+
+            if ($teamId) {
+                $schedule->team_id = $teamId;
+                $schedule->save();
+            }
+
+            return $schedule;
         } catch (ScheduleConflictException $e) {
             Notification::make()
                 ->title('Schedule Conflict')

@@ -34,20 +34,24 @@ final class Schedule extends ZapSchedule
         'is_active',
     ];
 
-    protected static function booted(): void
-    {
-        self::creating(function (self $schedule): void {
-            if ($schedule->isDirty('metadata') && is_array($schedule->metadata)) {
-                $schedule->metadata = array_filter($schedule->metadata, fn ($value): bool => $value !== null && $value !== '');
-            }
-        });
-
-        self::updating(function (self $schedule): void {
-            if ($schedule->isDirty('metadata') && is_array($schedule->metadata)) {
-                $schedule->metadata = array_filter($schedule->metadata, fn ($value): bool => $value !== null && $value !== '');
-            }
-        });
-    }
+    //    protected static function booted(): void
+    //    {
+    //        self::creating(function (self $schedule): void {
+    //            if (auth()->check()) {
+    //                $user = auth()->user();
+    //                $schedule->team_id = $user->currentTeam?->getKey();
+    //            }
+    //            if ($schedule->isDirty('metadata') && is_array($schedule->metadata)) {
+    //                $schedule->metadata = array_filter($schedule->metadata, fn ($value): bool => $value !== null && $value !== '');
+    //            }
+    //        });
+    //
+    //        self::updating(function (self $schedule): void {
+    //            if ($schedule->isDirty('metadata') && is_array($schedule->metadata)) {
+    //                $schedule->metadata = array_filter($schedule->metadata, fn ($value): bool => $value !== null && $value !== '');
+    //            }
+    //        });
+    //    }
 
     public function schedulable(): MorphTo
     {
