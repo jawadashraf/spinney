@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -92,9 +94,9 @@ class People extends Model implements HasCustomFieldsContract
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne<ServiceUserProfile, $this>
+     * @return HasOne<ServiceUserProfile, $this>
      */
-    public function serviceUserProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function serviceUserProfile(): HasOne
     {
         return $this->hasOne(ServiceUserProfile::class, 'person_id');
     }
@@ -169,9 +171,11 @@ class People extends Model implements HasCustomFieldsContract
             ->whereIn('status', ['pending', 'in_progress']);
     }
 
-    public function appointments()
+    /**
+     * @return MorphMany<Schedule, $this>
+     */
+    public function appointments(): MorphMany
     {
-        // Appointments are accessed via Schedule metadata
-        // This is a convenience method for querying
+        return $this->morphMany(Schedule::class, 'schedulable');
     }
 }

@@ -7,7 +7,10 @@ namespace App\Filament\Resources\Schedules;
 use App\Filament\Resources\Schedules\Pages\CreateSchedule;
 use App\Filament\Resources\Schedules\Pages\EditSchedule;
 use App\Filament\Resources\Schedules\Pages\ListSchedules;
+use App\Filament\Resources\Schedules\Pages\ViewSchedule;
+use App\Filament\Resources\Schedules\RelationManagers\SchedulePeriodsRelationManager;
 use App\Filament\Resources\Schedules\Schemas\ScheduleForm;
+use App\Filament\Resources\Schedules\Schemas\ScheduleInfolist;
 use App\Filament\Resources\Schedules\Tables\SchedulesTable;
 use App\Models\Schedule;
 use BackedEnum;
@@ -20,13 +23,22 @@ final class ScheduleResource extends Resource
 {
     protected static ?string $model = Schedule::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Clock;
+
     protected static string|\UnitEnum|null $navigationGroup = 'Appointments';
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {
         return ScheduleForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return ScheduleInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -37,7 +49,7 @@ final class ScheduleResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            SchedulePeriodsRelationManager::class,
         ];
     }
 
@@ -46,6 +58,7 @@ final class ScheduleResource extends Resource
         return [
             'index' => ListSchedules::route('/'),
             'create' => CreateSchedule::route('/create'),
+            'view' => ViewSchedule::route('/{record}'),
             'edit' => EditSchedule::route('/{record}/edit'),
         ];
     }

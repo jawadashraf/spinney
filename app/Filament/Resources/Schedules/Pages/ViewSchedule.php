@@ -12,9 +12,10 @@ use App\Filament\Resources\Schedules\Actions\LockAvailabilityAction;
 use App\Filament\Resources\Schedules\Actions\UnlockAvailabilityAction;
 use App\Filament\Resources\Schedules\ScheduleResource;
 use Filament\Actions\DeleteAction;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Actions\EditAction;
+use Filament\Resources\Pages\ViewRecord;
 
-final class EditSchedule extends EditRecord
+final class ViewSchedule extends ViewRecord
 {
     use SyncsPermissionTeamId;
 
@@ -28,6 +29,7 @@ final class EditSchedule extends EditRecord
             ConfirmAppointmentAction::make('confirm_appointment'),
             CompleteAppointmentAction::make('complete_appointment'),
             CancelAppointmentAction::make('cancel_appointment'),
+            EditAction::make(),
             DeleteAction::make(),
         ];
     }
