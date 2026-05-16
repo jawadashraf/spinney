@@ -99,7 +99,7 @@ final class CreateSchedule extends CreateRecord
                 ->danger()
                 ->send();
 
-            $this->halt();
+//            $this->halt();
 
             return new Schedule;
         } catch (InvalidScheduleException $e) {
@@ -109,7 +109,7 @@ final class CreateSchedule extends CreateRecord
                 ->danger()
                 ->send();
 
-            $this->halt();
+//            $this->halt();
 
             return new Schedule;
         }

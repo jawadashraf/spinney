@@ -20,6 +20,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Zap\Enums\ScheduleTypes;
 
 final class SchedulesTable
 {
@@ -29,13 +30,13 @@ final class SchedulesTable
             ->columns([
                 TextColumn::make('schedule_type')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        ScheduleType::AVAILABILITY->value => 'success',
-                        ScheduleType::APPOINTMENT->value => 'info',
-                        ScheduleType::BLOCKED->value => 'danger',
+                    ->color(fn ($state): string => match ($state) {
+                        ScheduleTypes::AVAILABILITY => 'success',
+                        ScheduleTypes::APPOINTMENT => 'info',
+                        ScheduleTypes::BLOCKED => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => ScheduleType::from($state)->getLabel())
+                    ->formatStateUsing(fn (ScheduleTypes $state): string => $state->name)
                     ->sortable()
                     ->label('Type'),
                 TextColumn::make('name')
