@@ -17,6 +17,16 @@ final class EditServiceUser extends EditRecord
 {
     protected static string $resource = ServiceUserResource::class;
 
+    public function hasCombinedRelationManagerTabsWithContent(): bool
+    {
+        return true;
+    }
+
+    public function getContentTabLabel(): ?string
+    {
+        return 'Details & Profile';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
