@@ -7,8 +7,8 @@ namespace App\Filament\Resources\Schedules\Schemas;
 use App\Enums\AttendeeType;
 use App\Enums\CounselorType;
 use App\Enums\PaymentType;
-use App\Enums\ScheduleFrequency;
 use App\Enums\SessionType;
+use Carbon\Carbon;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -56,9 +56,112 @@ final class ScheduleInfolist
                         IconEntry::make('is_recurring')
                             ->boolean()
                             ->label('Recurring'),
-                        TextEntry::make('frequency')
-                            ->formatStateUsing(fn (?string $state): string => $state ? ScheduleFrequency::tryFrom($state)?->getLabel() ?? $state : '—')
-                            ->visible(fn ($record): bool => $record->is_recurring)
+                        TextEntry::make('metadata.timezone')
+                            ->label('Timezone')
+                            ->visible(fn ($record): bool => (bool) $record->is_recurring && ! empty($record->metadata['timezone'] ?? null))
+                            ->placeholder('—'),
+                        TextEntry::make('recurrence_summary')
+                            ->label('Recurrence Pattern')
+                            ->visible(fn ($record): bool => (bool) $record->is_recurring)
+                            ->state(function ($record): string {
+                                $frequency = $record->frequency;
+                                $config = $record->frequency_config;
+
+                                if (! $frequency) {
+                                    return '—';
+                                }
+
+                                $freqStr = $frequency instanceof \BackedEnum ? (string) $frequency->value : (string) $frequency;
+                                $configArr = is_object($config) ? json_decode(json_encode($config), true) : (is_array($config) ? $config : []);
+
+                                if ($freqStr === 'daily') {
+                                    return 'Repeats daily';
+                                }
+
+                                if ($freqStr === 'weekly') {
+                                    $days = array_map('ucfirst', $configArr['days'] ?? []);
+
+                                    return 'Repeats weekly'.(! empty($days) ? ' on '.implode(', ', $days) : '');
+                                }
+
+                                if ($freqStr === 'biweekly') {
+                                    $days = array_map('ucfirst', $configArr['days'] ?? []);
+
+                                    return 'Repeats bi-weekly'.(! empty($days) ? ' on '.implode(', ', $days) : '');
+                                }
+
+                                if (preg_match('/^every_(\d+)_weeks$/', $freqStr, $matches)) {
+                                    $weeks = $matches[1];
+                                    $days = array_map('ucfirst', $configArr['days'] ?? []);
+
+                                    return "Repeats every {$weeks} weeks".(! empty($days) ? ' on '.implode(', ', $days) : '');
+                                }
+
+                                if ($freqStr === 'monthly') {
+                                    $days = $configArr['days_of_month'] ?? [];
+
+                                    return 'Repeats monthly'.(! empty($days) ? ' on day(s) '.implode(', ', $days) : '');
+                                }
+
+                                if ($freqStr === 'bimonthly') {
+                                    $days = $configArr['days_of_month'] ?? [];
+
+                                    return 'Repeats every 2 months'.(! empty($days) ? ' on day(s) '.implode(', ', $days) : '');
+                                }
+
+                                if ($freqStr === 'quarterly') {
+                                    $days = $configArr['days_of_month'] ?? [];
+
+                                    return 'Repeats quarterly'.(! empty($days) ? ' on day(s) '.implode(', ', $days) : '');
+                                }
+
+                                if ($freqStr === 'semiannually') {
+                                    $days = $configArr['days_of_month'] ?? [];
+
+                                    return 'Repeats every 6 months'.(! empty($days) ? ' on day(s) '.implode(', ', $days) : '');
+                                }
+
+                                if (preg_match('/^every_(\d+)_months$/', $freqStr, $matches)) {
+                                    $months = $matches[1];
+                                    $days = $configArr['days_of_month'] ?? [];
+
+                                    return "Repeats every {$months} months".(! empty($days) ? ' on day(s) '.implode(', ', $days) : '');
+                                }
+
+                                if ($freqStr === 'annually') {
+                                    $months = array_map('ucfirst', $record->metadata['recurring_months'] ?? []);
+
+                                    return 'Repeats annually'.(! empty($months) ? ' in '.implode(', ', $months) : '');
+                                }
+
+                                if ($freqStr === 'monthly_ordinal_weekday') {
+                                    $ordinal = $configArr['ordinal'] ?? 1;
+                                    $dayName = ucfirst($configArr['day'] ?? 'Monday');
+                                    $ordinalWords = [1 => 'first', 2 => 'second', 3 => 'third', 4 => 'fourth', 5 => 'last'];
+                                    $ordinalWord = $ordinalWords[$ordinal] ?? 'first';
+
+                                    return "Repeats monthly on the {$ordinalWord} {$dayName}";
+                                }
+
+                                return $freqStr;
+                            })
+                            ->placeholder('—'),
+                        TextEntry::make('end_type_summary')
+                            ->label('Ends')
+                            ->visible(fn ($record): bool => (bool) $record->is_recurring)
+                            ->state(function ($record): string {
+                                $endType = $record->metadata['end_type'] ?? null;
+                                if ($endType === 'after_occurrences') {
+                                    $occurrences = $record->metadata['occurrences'] ?? 10;
+
+                                    return "After {$occurrences} occurrences";
+                                }
+                                if ($record->end_date) {
+                                    return 'On '.Carbon::parse($record->end_date)->format('M j, Y');
+                                }
+
+                                return 'Never';
+                            })
                             ->placeholder('—'),
                     ])
                     ->columns(2),

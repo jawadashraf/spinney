@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Schedules\Pages;
 use App\Enums\ScheduleType;
 use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\Schedules\ScheduleResource;
+use App\Filament\Resources\Schedules\Schemas\ScheduleForm;
 use App\Models\Schedule;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -25,6 +26,8 @@ final class CreateSchedule extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
+        $data = ScheduleForm::mutateFormDataBeforeSave($data);
+
         $schedulableClass = Relation::getMorphedModel($data['schedulable_type']) ?? $data['schedulable_type'];
         $schedulable = $schedulableClass::findOrFail($data['schedulable_id']);
 
@@ -63,10 +66,9 @@ final class CreateSchedule extends CreateRecord
         }
 
         if ($data['is_recurring'] ?? false) {
-            $frequency = Frequency::tryFrom($data['frequency'] ?? '');
-            if ($frequency) {
-                $builder->recurring($frequency, $data['frequency_config'] ?? []);
-            }
+            $frequency = $data['frequency'] ?? '';
+            $frequencyEnum = Frequency::tryFrom($frequency);
+            $builder->recurring($frequencyEnum ?? $frequency, $data['frequency_config'] ?? []);
         }
 
         if (! empty($metadata)) {
@@ -99,7 +101,7 @@ final class CreateSchedule extends CreateRecord
                 ->danger()
                 ->send();
 
-//            $this->halt();
+            //            $this->halt();
 
             return new Schedule;
         } catch (InvalidScheduleException $e) {
@@ -109,7 +111,7 @@ final class CreateSchedule extends CreateRecord
                 ->danger()
                 ->send();
 
-//            $this->halt();
+            //            $this->halt();
 
             return new Schedule;
         }
