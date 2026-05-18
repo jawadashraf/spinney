@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 final class ThirdPartyCarePlanResource extends Resource
 {
     protected static ?string $model = ThirdPartyCarePlan::class;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 

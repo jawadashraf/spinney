@@ -52,6 +52,7 @@ final class PeopleResource extends Resource
     protected static ?string $modelLabel = 'person';
 
     protected static ?string $recordTitleAttribute = 'name';
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user';
 
