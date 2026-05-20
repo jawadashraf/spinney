@@ -53,6 +53,7 @@ final class PeopleResource extends Resource
     protected static ?string $modelLabel = 'person';
 
     protected static ?string $recordTitleAttribute = 'name';
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static bool $shouldRegisterNavigation = false;
 
