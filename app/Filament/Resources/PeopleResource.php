@@ -11,6 +11,7 @@ use App\Filament\Resources\PeopleResource\Pages\ViewPeople;
 use App\Filament\Resources\PeopleResource\RelationManagers\NotesRelationManager;
 use App\Filament\Resources\PeopleResource\RelationManagers\RelatedPeopleRelationManager;
 use App\Filament\Resources\PeopleResource\RelationManagers\TasksRelationManager;
+use App\Filament\Resources\PeopleResource\RelationManagers\ThirdPartyCarePlansRelationManager;
 use App\Models\Company;
 use App\Models\People;
 use App\Models\User;
@@ -52,6 +53,7 @@ final class PeopleResource extends Resource
     protected static ?string $modelLabel = 'person';
 
     protected static ?string $recordTitleAttribute = 'name';
+
     protected static bool $shouldRegisterNavigation = false;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user';

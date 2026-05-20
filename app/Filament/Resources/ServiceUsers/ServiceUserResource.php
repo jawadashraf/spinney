@@ -8,6 +8,7 @@ use App\Filament\Resources\ServiceUsers\Pages\CreateServiceUser;
 use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
 use App\Filament\Resources\ServiceUsers\Pages\ListServiceUsers;
 use App\Filament\Resources\ServiceUsers\RelationManagers\NotesRelationManager;
+use App\Filament\Resources\ServiceUsers\RelationManagers\ServiceUserAppointmentsRelationManager;
 use App\Filament\Resources\ServiceUsers\RelationManagers\ThirdPartyCarePlansRelationManager;
 use App\Filament\Resources\ServiceUsers\Schemas\ServiceUserForm;
 use App\Filament\Resources\ServiceUsers\Tables\ServiceUsersTable;
@@ -48,6 +49,7 @@ final class ServiceUserResource extends Resource
         return [
             NotesRelationManager::class,
             ThirdPartyCarePlansRelationManager::class,
+            ServiceUserAppointmentsRelationManager::class,
         ];
     }
 

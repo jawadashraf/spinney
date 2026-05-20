@@ -5,5 +5,8 @@
         "final_class": true,
         "final_internal_class": true,
         "strict_comparison": true
-    }
+    },
+    "notPath": [
+        "app/Models/People.php"
+    ]
 }

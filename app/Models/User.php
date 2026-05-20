@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Enums\CounselorType;
 use App\Models\Concerns\HasProfilePhoto;
+use App\Models\Pivots\DepartmentUser;
+use App\Models\Pivots\TaskUser;
 use Database\Factories\UserFactory;
 use Exception;
 use Filament\Models\Contracts\FilamentUser;
@@ -20,7 +22,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Pivots\DepartmentUser;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -148,7 +149,10 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
      */
     public function tasks(): BelongsToMany
     {
-        return $this->belongsToMany(Task::class);
+        return $this->belongsToMany(Task::class)
+            ->using(TaskUser::class)
+            ->withPivot('team_id')
+            ->withTimestamps();
     }
 
     /**

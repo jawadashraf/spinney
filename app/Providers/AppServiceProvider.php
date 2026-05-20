@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Filament\Resources\Appointments\AppointmentResource;
 use App\Http\Responses\LoginResponse;
 use App\Models\Company;
 use App\Models\Import;
@@ -15,6 +16,7 @@ use App\Models\Team;
 use App\Models\ThirdPartyCarePlan;
 use App\Models\User;
 use App\Services\GitHubService;
+use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
@@ -22,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -67,6 +70,38 @@ final class AppServiceProvider extends ServiceProvider
         $this->configureFilament();
         $this->configureGitHubStars();
         $this->configureLivewire();
+        $this->configureShield();
+    }
+
+    private function configureShield(): void
+    {
+        if (class_exists(FilamentShield::class)) {
+            FilamentShield::buildPermissionKeyUsing(function ($entity, $affix, $subject, $case, $separator) {
+                if ($entity === AppointmentResource::class) {
+                    $subject = 'Appointment';
+                }
+
+                $affixFormatted = match ($case) {
+                    'kebab' => Str::kebab($affix),
+                    'pascal' => Str::studly($affix),
+                    'upper_snake' => Str::upper(Str::snake($affix)),
+                    'lower_snake' => Str::lower(Str::snake($affix)),
+                    'camel' => Str::camel($affix),
+                    default => Str::snake($affix),
+                };
+
+                $subjectFormatted = match ($case) {
+                    'kebab' => Str::kebab($subject),
+                    'pascal' => Str::studly($subject),
+                    'upper_snake' => Str::upper(Str::snake($subject)),
+                    'lower_snake' => Str::lower(Str::snake($subject)),
+                    'camel' => Str::camel($subject),
+                    default => Str::snake($subject),
+                };
+
+                return $affixFormatted.$separator.$subjectFormatted;
+            });
+        }
     }
 
     private function configurePolicies(): void

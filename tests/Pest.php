@@ -39,11 +39,36 @@ pest()->extend(TestCase::class)
 
         // Create a default team and owner for the seeder to use if it doesn't exist
         $user = User::factory()->create(['email' => 'system@spinney.test']);
-        Team::factory()->create([
+        $team = Team::factory()->create([
             'name' => 'Spinney Hill',
             'user_id' => $user->id,
             'personal_team' => false,
         ]);
+
+        static $listenerRegistered = false;
+        if (! $listenerRegistered) {
+            $listenerRegistered = true;
+            User::created(function (User $user): void {
+                if (! $user->is_system_admin) {
+                    $team = Team::where('name', 'Spinney Hill')->first();
+                    if (! $team) {
+                        return;
+                    }
+                    if ($user->id !== $team->user_id) {
+                        $isFilamentTest = collect(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 30))
+                            ->pluck('class')
+                            ->filter()
+                            ->contains(fn (string $class): bool => str_contains($class, 'Tests\\Feature\\Filament'));
+
+                        if ($isFilamentTest) {
+                            $user->current_team_id = $team->id;
+                            $user->saveQuietly();
+                            $user->teams()->syncWithoutDetaching([$team->id => ['role' => 'admin']]);
+                        }
+                    }
+                }
+            });
+        }
 
         // Seed Shield roles so permission-based policies can function in tests.
         $this->seed(ShieldSeeder::class);

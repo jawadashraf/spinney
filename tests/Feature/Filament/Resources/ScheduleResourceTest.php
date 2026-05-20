@@ -149,3 +149,40 @@ it('can populate form state from an after occurrences schedule record', function
         ->and($formState['end_type'])->toBe('after_occurrences')
         ->and($formState['occurrences'])->toBe(8);
 });
+
+it('can calculate and save appointment details on booking mutations', function () {
+    $inputData = [
+        'schedule_type' => 'appointment',
+        'booking_date' => '2026-05-19',
+        'selected_slot' => '09:00-10:00',
+    ];
+
+    $savedData = ScheduleForm::mutateFormDataBeforeSave($inputData);
+
+    expect($savedData['start_date'])->toBe('2026-05-19')
+        ->and($savedData['end_date'])->toBe('2026-05-19')
+        ->and($savedData['metadata']['start_time'])->toBe('09:00')
+        ->and($savedData['metadata']['end_time'])->toBe('10:00')
+        ->and($savedData['is_recurring'])->toBeFalse()
+        ->and($savedData['frequency'])->toBeNull()
+        ->and($savedData['frequency_config'])->toBeNull();
+});
+
+it('can fill appointment booking date and slot from records', function () {
+    $schedule = new Schedule([
+        'schedule_type' => 'appointment',
+        'start_date' => '2026-05-19',
+        'end_date' => '2026-05-19',
+        'is_recurring' => false,
+        'metadata' => [
+            'start_time' => '14:00',
+            'end_time' => '15:00',
+        ],
+    ]);
+
+    $formState = ScheduleForm::fillFormFromRecord($schedule);
+
+    expect($formState['booking_date'])->toBe('2026-05-19')
+        ->and($formState['selected_slot'])->toBe('14:00-15:00')
+        ->and($formState['is_recurring'])->toBeFalse();
+});

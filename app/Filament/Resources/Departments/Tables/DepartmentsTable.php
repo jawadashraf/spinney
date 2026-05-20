@@ -1,28 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Departments\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class DepartmentsTable
+final class DepartmentsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                \Filament\Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->limit(50),
-                \Filament\Tables\Columns\TextColumn::make('users_count')
+                TextColumn::make('users_count')
                     ->label('Members')
                     ->counts('users')
                     ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

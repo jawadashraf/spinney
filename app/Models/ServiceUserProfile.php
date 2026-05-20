@@ -7,18 +7,18 @@ namespace App\Models;
 use App\Enums\EngagementStatus;
 use App\Enums\ServiceTeam;
 use App\Models\Concerns\HasTeam;
+use Database\Factories\ServiceUserProfileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ServiceUserProfile extends Model
+final class ServiceUserProfile extends Model
 {
-    /** @use HasFactory<\Database\Factories\ServiceUserProfileFactory> */
+    /** @use HasFactory<ServiceUserProfileFactory> */
     use HasFactory;
 
     use HasTeam;
-
     use SoftDeletes;
 
     /**

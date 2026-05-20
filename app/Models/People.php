@@ -178,4 +178,12 @@ class People extends Model implements HasCustomFieldsContract
     {
         return $this->morphMany(Schedule::class, 'schedulable');
     }
+
+    /**
+     * @return HasMany<Schedule, $this>
+     */
+    public function serviceUserAppointments(): HasMany
+    {
+        return $this->hasMany(Schedule::class, 'metadata->service_user_id');
+    }
 }

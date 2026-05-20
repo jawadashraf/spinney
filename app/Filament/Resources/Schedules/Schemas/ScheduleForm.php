@@ -26,6 +26,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Zap\Data\DailyFrequencyConfig;
 use Zap\Data\MonthlyFrequencyConfig\AnnuallyFrequencyConfig;
 use Zap\Data\MonthlyFrequencyConfig\BiMonthlyFrequencyConfig;
@@ -50,9 +51,14 @@ final class ScheduleForm
                 Section::make('Schedule Type')
                     ->schema([
                         Select::make('schedule_type')
-                            ->options(ScheduleType::class)
+                            ->options(
+                                collect(ScheduleType::cases())
+                                    ->reject(fn (ScheduleType $type) => $type === ScheduleType::APPOINTMENT)
+                                    ->mapWithKeys(fn (ScheduleType $type) => [$type->value => $type->getLabel()])
+                                    ->toArray()
+                            )
                             ->required()
-                            ->default(ScheduleType::APPOINTMENT->value)
+                            ->default(ScheduleType::AVAILABILITY->value)
                             ->live()
                             ->native(false),
                     ]),
@@ -291,7 +297,8 @@ final class ScheduleForm
                                         'lg' => 1,
                                     ]),
                             ]),
-                    ]),
+                    ])
+                    ->visible(fn (Get $get): bool => ($get('schedule_type') ?? '') !== ScheduleType::APPOINTMENT->value),
 
                 Section::make('Availability Settings')
                     ->schema([
@@ -346,7 +353,7 @@ final class ScheduleForm
                             ->default('17:00')
                             ->after('period_start_time'),
                     ])
-                    ->visible(fn (Get $get): bool => filled($get('schedule_type')))
+                    ->visible(fn (Get $get): bool => filled($get('schedule_type')) && ($get('schedule_type') ?? '') !== ScheduleType::APPOINTMENT->value)
                     ->columns(2),
 
                 Section::make('Appointment Details')
@@ -394,6 +401,46 @@ final class ScheduleForm
                             ->numeric()
                             ->label('Care Plan ID')
                             ->placeholder('Optional linked care plan'),
+                        DatePicker::make('booking_date')
+                            ->label('Booking Date')
+                            ->required(fn (Get $get): bool => ($get('schedule_type') ?? '') === ScheduleType::APPOINTMENT->value)
+                            ->live()
+                            ->native(false)
+                            ->minDate(now()->toDateString())
+                            ->visible(fn (Get $get): bool => ($get('schedule_type') ?? '') === ScheduleType::APPOINTMENT->value),
+                        Select::make('selected_slot')
+                            ->label('Available 60-Minute Slots')
+                            ->required(fn (Get $get): bool => ($get('schedule_type') ?? '') === ScheduleType::APPOINTMENT->value)
+                            ->live()
+                            ->options(function (Get $get) {
+                                $counselorId = $get('schedulable_id');
+                                $counselorType = $get('schedulable_type');
+                                $date = $get('booking_date');
+
+                                if (! $counselorId || ! $date) {
+                                    return [];
+                                }
+
+                                $schedulableClass = Relation::getMorphedModel($counselorType) ?? $counselorType;
+                                if (! class_exists($schedulableClass)) {
+                                    return [];
+                                }
+
+                                $counselor = $schedulableClass::find($counselorId);
+                                if (! $counselor) {
+                                    return [];
+                                }
+
+                                $slots = $counselor->getBookableSlots($date, 60);
+
+                                return collect($slots)
+                                    ->filter(fn ($slot) => (bool) ($slot['is_available'] ?? false))
+                                    ->mapWithKeys(fn ($slot) => [
+                                        "{$slot['start_time']}-{$slot['end_time']}" => "{$slot['start_time']} - {$slot['end_time']}",
+                                    ])
+                                    ->toArray();
+                            })
+                            ->visible(fn (Get $get): bool => ($get('schedule_type') ?? '') === ScheduleType::APPOINTMENT->value && filled($get('booking_date'))),
                     ])
                     ->visible(fn (Get $get): bool => ($get('schedule_type') ?? '') === ScheduleType::APPOINTMENT->value)
                     ->columns(2),
@@ -599,6 +646,36 @@ final class ScheduleForm
 
     public static function mutateFormDataBeforeSave(array $data): array
     {
+        if (($data['schedule_type'] ?? '') === (ScheduleType::APPOINTMENT->value ?? ScheduleType::APPOINTMENT)) {
+            $bookingDate = $data['booking_date'] ?? null;
+            $selectedSlot = $data['selected_slot'] ?? null;
+            if ($bookingDate && $selectedSlot) {
+                [$startTime, $endTime] = explode('-', $selectedSlot);
+                $data['start_date'] = $bookingDate;
+                $data['end_date'] = $bookingDate;
+
+                $data['metadata'] = array_merge($data['metadata'] ?? [], [
+                    'start_time' => $startTime,
+                    'end_time' => $endTime,
+                ]);
+
+                request()->merge([
+                    'period_start_time' => $startTime,
+                    'period_end_time' => $endTime,
+                    'data' => array_merge(request()->input('data', []), [
+                        'period_start_time' => $startTime,
+                        'period_end_time' => $endTime,
+                    ]),
+                ]);
+            }
+
+            $data['is_recurring'] = false;
+            $data['frequency'] = null;
+            $data['frequency_config'] = null;
+
+            return $data;
+        }
+
         if (! ($data['is_recurring'] ?? false)) {
             $data['frequency'] = null;
             $data['frequency_config'] = null;
@@ -766,6 +843,17 @@ final class ScheduleForm
     public static function fillFormFromRecord(Schedule $record): array
     {
         $data = [];
+        if (($record->schedule_type->value ?? $record->schedule_type) === (ScheduleType::APPOINTMENT->value ?? ScheduleType::APPOINTMENT)) {
+            $data['booking_date'] = $record->start_date ? Carbon::parse($record->start_date)->toDateString() : null;
+            $meta = $record->metadata ?? [];
+            if (isset($meta['start_time']) && isset($meta['end_time'])) {
+                $data['selected_slot'] = "{$meta['start_time']}-{$meta['end_time']}";
+            }
+            $data['is_recurring'] = false;
+
+            return $data;
+        }
+
         if (! $record->is_recurring) {
             $data['is_recurring'] = false;
 

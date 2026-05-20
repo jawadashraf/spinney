@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Departments;
 
 use App\Filament\Resources\Departments\Pages\CreateDepartment;
@@ -14,9 +16,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Filament\Models\Contracts\HasTenancy;
 
-class DepartmentResource extends Resource
+final class DepartmentResource extends Resource
 {
     protected static ?string $model = Department::class;
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Schedules;
 
+use App\Enums\ScheduleType;
 use App\Filament\Resources\Schedules\Pages\CreateSchedule;
 use App\Filament\Resources\Schedules\Pages\EditSchedule;
 use App\Filament\Resources\Schedules\Pages\ListSchedules;
@@ -18,6 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 final class ScheduleResource extends Resource
 {
@@ -25,11 +27,11 @@ final class ScheduleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::Clock;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Appointments';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {
@@ -51,6 +53,15 @@ final class ScheduleResource extends Resource
         return [
             SchedulePeriodsRelationManager::class,
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->whereIn('schedule_type', [
+            ScheduleType::AVAILABILITY->value ?? ScheduleType::AVAILABILITY,
+            ScheduleType::BLOCKED->value ?? ScheduleType::BLOCKED,
+            ScheduleType::CUSTOM->value ?? ScheduleType::CUSTOM,
+        ]);
     }
 
     public static function getPages(): array

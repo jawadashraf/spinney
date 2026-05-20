@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Departments\RelationManagers;
 
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Actions\AttachAction;
-use Filament\Actions\DetachAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class UsersRelationManager extends RelationManager
+final class UsersRelationManager extends RelationManager
 {
     protected static string $relationship = 'users';
 

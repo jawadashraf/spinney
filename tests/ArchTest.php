@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Filament\Exports\BaseExporter;
 use App\Filament\Imports\BaseImporter;
 use App\Livewire\BaseLivewireComponent;
+use App\Models\People;
 
 arch()->preset()->php();
 
@@ -17,9 +18,12 @@ arch()->preset()
     ->ignoring([
         'App\Providers\AppServiceProvider',
         'App\Providers\Filament\AppPanelProvider',
+        'App\Providers\Filament\KnowledgeBasePanelProvider',
         'Relaticle\Admin\AdminPanelProvider',
         'App\Enums\EnumValues',
         'App\Enums\CustomFields\CustomFieldTrait',
+        'App\Console\Commands\SyncCounselorSpecialties',
+        'App\Console\Commands\SendAppointmentReminders',
     ]);
 
 arch('strict types')
@@ -34,6 +38,9 @@ arch('avoid open for extension')
         BaseLivewireComponent::class,
         BaseImporter::class,
         BaseExporter::class,
+        People::class,
+        'App\Policies',
+        'App\Http\Middleware',
     ]);
 
 arch('ensure no extends')
@@ -67,6 +74,9 @@ arch('avoid mutation')
         'App\View',
         'App\Services\Favicon\Drivers',
         'App\Providers\Filament',
+        'App\Policies',
+        'App\Support',
+        'App\Http\Middleware',
     ]);
 
 arch('avoid inheritance')
@@ -86,6 +96,9 @@ arch('avoid inheritance')
         'App\Notifications',
         'App\Providers',
         'App\View',
+        'App\Policies',
+        'App\Support',
+        'App\Http\Middleware',
     ]);
 
 // arch('annotations')

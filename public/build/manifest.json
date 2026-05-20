@@ -1,6 +1,6 @@
 {
   "app-modules/Documentation/resources/css/documentation.css": {
-    "file": "assets/documentation-CTqDsvHI.css",
+    "file": "assets/documentation-Bva7TW58.css",
     "src": "app-modules/Documentation/resources/css/documentation.css",
     "isEntry": true,
     "name": "documentation",
@@ -15,7 +15,7 @@
     "isEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-C6r8BsWv.css",
+    "file": "assets/app-sm75CGec.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -24,11 +24,11 @@
     ]
   },
   "resources/css/filament/admin/theme.css": {
-    "file": "assets/theme-BUeTqqw3.css",
+    "file": "assets/theme-DIeI_Knf.css",
     "src": "resources/css/filament/admin/theme.css"
   },
   "resources/css/filament/app/theme.css": {
-    "file": "assets/theme-CTX5ZohF.css",
+    "file": "assets/theme-B6YxwQGi.css",
     "src": "resources/css/filament/app/theme.css"
   },
   "resources/css/filament/knowledge-base/theme.css": {

@@ -4,66 +4,66 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\Activitylog\Models\Activity;
 
 final class ActivityPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(User $user): bool
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('ViewAny:Activity');
+        return $authUser->can('ViewAny:Activity');
     }
 
-    public function view(User $user, Activity $activity): bool
+    public function view(AuthUser $authUser, Activity $activity): bool
     {
-        return $user->checkPermissionTo('View:Activity');
+        return $authUser->can('View:Activity');
     }
 
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('Create:Activity');
+        return $authUser->can('Create:Activity');
     }
 
-    public function update(User $user, Activity $activity): bool
+    public function update(AuthUser $authUser, Activity $activity): bool
     {
-        return $user->checkPermissionTo('Update:Activity');
+        return $authUser->can('Update:Activity');
     }
 
-    public function delete(User $user, Activity $activity): bool
+    public function delete(AuthUser $authUser, Activity $activity): bool
     {
-        return $user->checkPermissionTo('Delete:Activity');
+        return $authUser->can('Delete:Activity');
     }
 
-    public function restore(User $user, Activity $activity): bool
+    public function restore(AuthUser $authUser, Activity $activity): bool
     {
-        return $user->checkPermissionTo('Restore:Activity');
+        return $authUser->can('Restore:Activity');
     }
 
-    public function forceDelete(User $user, Activity $activity): bool
+    public function forceDelete(AuthUser $authUser, Activity $activity): bool
     {
-        return $user->checkPermissionTo('ForceDelete:Activity');
+        return $authUser->can('ForceDelete:Activity');
     }
 
-    public function forceDeleteAny(User $user): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('ForceDeleteAny:Activity');
+        return $authUser->can('ForceDeleteAny:Activity');
     }
 
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('RestoreAny:Activity');
+        return $authUser->can('RestoreAny:Activity');
     }
 
-    public function replicate(User $user, Activity $activity): bool
+    public function replicate(AuthUser $authUser, Activity $activity): bool
     {
-        return $user->checkPermissionTo('Replicate:Activity');
+        return $authUser->can('Replicate:Activity');
     }
 
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->checkPermissionTo('Reorder:Activity');
+        return $authUser->can('Reorder:Activity');
     }
 }
