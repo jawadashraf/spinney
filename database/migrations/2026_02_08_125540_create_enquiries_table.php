@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('people_id')->nullable()->constrained('people')->nullOnDelete();
             $table->string('category');
+            $table->string('phone')->nullable();
             $table->text('reason_for_contact');
             $table->text('risk_flags')->nullable();
             $table->boolean('safeguarding_flags')->default(false);

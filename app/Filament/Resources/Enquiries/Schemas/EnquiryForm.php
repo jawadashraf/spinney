@@ -43,6 +43,9 @@ final class EnquiryForm
                                     ->required(),
                             ])
                             ->label('Caller')->columnSpanFull(),
+                        TextInput::make('phone')
+                            ->tel()
+                            ->label('Phone Number'),
                         Select::make('category')
                             ->options(EnquiryCategory::class)
                             ->native(false)

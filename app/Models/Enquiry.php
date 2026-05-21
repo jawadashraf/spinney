@@ -8,6 +8,7 @@ use App\Enums\EnquiryCategory;
 use App\Enums\EnquiryStatus;
 use App\Models\Concerns\HasCreator;
 use App\Models\Concerns\HasTeam;
+use Database\Factories\EnquiryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,13 +17,14 @@ final class Enquiry extends Model
 {
     use HasCreator;
 
-    /** @use HasFactory<\Database\Factories\EnquiryFactory> */
+    /** @use HasFactory<EnquiryFactory> */
     use HasFactory;
 
     use HasTeam;
 
     protected $fillable = [
         'people_id',
+        'phone',
         'category',
         'reason_for_contact',
         'risk_flags',
@@ -70,8 +72,4 @@ final class Enquiry extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-
-
-
 }

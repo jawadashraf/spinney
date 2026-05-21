@@ -20,6 +20,9 @@ final class EnquiryInfolist
                         TextEntry::make('people.name')
                             ->label('Caller'),
 
+                        TextEntry::make('phone')
+                            ->label('Phone'),
+
                         TextEntry::make('category')
                             ->badge(),
 
