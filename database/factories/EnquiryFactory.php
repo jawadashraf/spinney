@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\EnquiryCallType;
 use App\Enums\EnquiryCategory;
+use App\Enums\EnquiryDirection;
+use App\Enums\EnquirySourceType;
+use App\Enums\EnquiryStatus;
 use App\Models\Enquiry;
 use App\Models\Team;
 use App\Models\User;
@@ -35,6 +39,14 @@ final class EnquiryFactory extends Factory
             'occurred_at' => now(),
             'team_id' => Team::factory(),
             'creator_id' => User::factory(),
+            'status' => EnquiryStatus::OPEN,
+            'source' => EnquirySourceType::PHONE,
+            'direction' => EnquiryDirection::INBOUND,
+            'call_type' => EnquiryCallType::GENERAL,
+            'department_id' => null,
+            'due_date' => null,
+            'parent_enquiry_id' => null,
+            'outcome' => null,
         ];
     }
 }

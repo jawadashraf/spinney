@@ -1,15 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Department;
+use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<Department>
  */
-class DepartmentFactory extends Factory
+final class DepartmentFactory extends Factory
 {
+    protected $model = Department::class;
+
     /**
      * Define the model's default state.
      *
@@ -18,7 +23,9 @@ class DepartmentFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->company(),
+            'description' => $this->faker->sentence(),
+            'team_id' => Team::factory(),
         ];
     }
 }

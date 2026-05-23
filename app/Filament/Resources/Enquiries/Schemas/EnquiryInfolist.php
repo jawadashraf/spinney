@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Enquiries\Schemas;
 
+use App\Filament\Resources\Enquiries\EnquiryResource;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -19,9 +20,23 @@ final class EnquiryInfolist
                 Section::make('Enquiry Overview')
                     ->icon(Heroicon::User)
                     ->schema([
+                        TextEntry::make('direction')
+                            ->badge(),
+
+                        TextEntry::make('call_type')
+                            ->badge()
+                            ->placeholder('—'),
+
+                        TextEntry::make('source')
+                            ->badge(),
+
                         TextEntry::make('people.name')
                             ->label('Caller')
                             ->default('Anonymous'),
+
+                        TextEntry::make('caller_type')
+                            ->badge()
+                            ->label('Caller Type'),
 
                         TextEntry::make('caller_note')
                             ->label('Caller Notes')
@@ -45,6 +60,38 @@ final class EnquiryInfolist
                         TextEntry::make('converted_at')
                             ->dateTime()
                             ->visible(fn ($record): bool => $record?->converted_at !== null),
+                    ])
+                    ->columns(2),
+
+                Section::make('Assignment & Follow-up')
+                    ->icon(Heroicon::UserGroup)
+                    ->schema([
+                        TextEntry::make('department.name')
+                            ->label('Department')
+                            ->placeholder('Unassigned')
+                            ->badge(),
+
+                        TextEntry::make('due_date')
+                            ->dateTime()
+                            ->label('Due Date')
+                            ->placeholder('Not set')
+                            ->visible(fn ($record): bool => $record->due_date !== null),
+
+                        TextEntry::make('outcome')
+                            ->badge()
+                            ->placeholder('—')
+                            ->visible(fn ($record): bool => $record->outcome !== null),
+
+                        TextEntry::make('parentEnquiry.reason_for_contact')
+                            ->label('Originating Enquiry')
+                            ->limit(100)
+                            ->url(fn ($record) => $record->parentEnquiry ? EnquiryResource::getUrl('view', ['record' => $record->parentEnquiry]) : null)
+                            ->visible(fn ($record): bool => $record->parent_enquiry_id !== null),
+
+                        TextEntry::make('childEnquiriesCount')
+                            ->label('Follow-up Enquiries')
+                            ->state(fn ($record): int => $record->childEnquiries()->count())
+                            ->visible(fn ($record): bool => $record->childEnquiries()->exists()),
                     ])
                     ->columns(2),
 

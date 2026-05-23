@@ -8,6 +8,7 @@ use App\Filament\Pages\ApiTokens;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\EditProfile;
+use App\Filament\Pages\LiaisonDashboard;
 use App\Filament\Pages\Tenancy\EditOrganization;
 use App\Filament\Pages\Tenancy\RegisterOrganization;
 use App\Filament\Resources\CompanyResource;
@@ -148,6 +149,7 @@ final class AppPanelProvider extends PanelProvider
             ->pages([
                 EditProfile::class,
                 ApiTokens::class,
+                LiaisonDashboard::class,
             ])
             ->spa()
             ->breadcrumbs(true)

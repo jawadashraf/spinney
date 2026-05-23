@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Enquiries\Tables;
 
+use App\Enums\EnquiryCallType;
 use App\Enums\EnquiryCategory;
+use App\Enums\EnquiryDirection;
+use App\Enums\EnquirySourceType;
 use App\Enums\EnquiryStatus;
+use App\Filament\Resources\Enquiries\Actions\AssignToDepartmentAction;
 use App\Filament\Resources\Enquiries\Actions\CloseEnquiryAction;
 use App\Filament\Resources\Enquiries\Actions\ConvertToServiceUserAction;
 use Filament\Actions\BulkActionGroup;
@@ -28,6 +32,14 @@ final class EnquiriesTable
         return $table
             ->defaultSort('occurred_at', 'desc')
             ->columns([
+                TextColumn::make('direction')
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('call_type')
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('category')
                     ->badge()
                     ->sortable(),
@@ -51,14 +63,38 @@ final class EnquiriesTable
                     ->label('Staff')
                     ->sortable(),
 
+                TextColumn::make('department.name')
+                    ->label('Department')
+                    ->badge()
+                    ->color('gray')
+                    ->placeholder('Unassigned')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('occurred_at')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Occurred')
+                    ->toggleable(),
+
+                TextColumn::make('due_date')
+                    ->dateTime()
+                    ->label('Due')
+                    ->sortable()
+                    ->placeholder('—')
+                    ->toggleable(),
 
                 TextColumn::make('status')
                     ->badge()
                     ->sortable(),
+
+                TextColumn::make('source')
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('outcome')
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('—'),
 
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -70,12 +106,25 @@ final class EnquiriesTable
                 SelectFilter::make('category')
                     ->options(EnquiryCategory::class),
 
+                SelectFilter::make('status')
+                    ->options(EnquiryStatus::class),
+
+                SelectFilter::make('direction')
+                    ->options(EnquiryDirection::class),
+
+                SelectFilter::make('call_type')
+                    ->options(EnquiryCallType::class),
+
+                SelectFilter::make('source')
+                    ->options(EnquirySourceType::class),
+
+                SelectFilter::make('department_id')
+                    ->relationship('department', 'name')
+                    ->label('Department'),
+
                 SelectFilter::make('user_id')
                     ->relationship('user', 'name')
                     ->label('Staff Member'),
-
-                SelectFilter::make('status')
-                    ->options(EnquiryStatus::class),
 
                 TernaryFilter::make('safeguarding_flags')
                     ->label('Safeguarding')
@@ -113,7 +162,9 @@ final class EnquiriesTable
                 EditAction::make(),
                 ConvertToServiceUserAction::make(),
                 CloseEnquiryAction::make()
-                    ->visible(fn ($record): bool => $record->status === EnquiryStatus::OPEN),
+                    ->visible(fn ($record): bool => in_array($record->status, [EnquiryStatus::OPEN, EnquiryStatus::IN_PROGRESS], true)),
+                AssignToDepartmentAction::make()
+                    ->visible(fn ($record): bool => in_array($record->status, [EnquiryStatus::OPEN, EnquiryStatus::IN_PROGRESS], true)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

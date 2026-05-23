@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Enquiries\Schemas;
 
+use App\Enums\EnquiryCallType;
 use App\Enums\EnquiryCategory;
+use App\Enums\EnquiryDirection;
+use App\Enums\EnquirySourceType;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
@@ -30,9 +33,21 @@ final class EnquiryForm
                         self::getPeopleIdField(),
                         self::getCallerNoteFieldForEdit(),
                         self::getPhoneFieldForEdit(),
+                        self::getDirectionField(),
+                        self::getCallTypeFieldForEdit(),
+                        self::getSourceField(),
                         self::getCategoryField(),
                         self::getOccurredAtField(),
                         self::getReasonForContactField(),
+                    ])
+                    ->columns(2),
+
+                Section::make('Assignment & Follow-up')
+                    ->icon(Heroicon::UserGroup)
+                    ->schema([
+                        self::getDepartmentIdField(),
+                        self::getDueDateFieldForEdit(),
+                        self::getUserIdField(),
                     ])
                     ->columns(2),
 
@@ -51,7 +66,6 @@ final class EnquiryForm
                         self::getActionTakenField(),
                         self::getReferralTypeField(),
                         self::getReferralDestinationFieldForEdit(),
-                        self::getUserIdField(),
                     ])
                     ->columns(2),
             ]);
@@ -68,23 +82,28 @@ final class EnquiryForm
                     self::getPeopleIdField(),
                     self::getCallerNoteField(),
                     self::getPhoneField(),
+                    self::getDirectionField(),
+                    self::getCallTypeField(),
+                    self::getSourceField(),
                     self::getCategoryField(),
                     self::getOccurredAtField(),
                 ])
                 ->columns(2),
 
-            Step::make('Reason & Safeguarding')
-                ->icon(Heroicon::ExclamationTriangle)
-                ->description('What is the enquiry about?')
+            Step::make('Details & Assignment')
+                ->icon(Heroicon::ClipboardDocumentCheck)
+                ->description('What is this about and who handles it?')
                 ->schema([
                     self::getReasonForContactField(),
+                    self::getDepartmentIdField(),
+                    self::getDueDateField(),
                     self::getSafeguardingFlagsField(),
                     self::getRiskFlagsField(),
                 ])
                 ->columns(1),
 
             Step::make('Actions & Outcomes')
-                ->icon(Heroicon::ClipboardDocumentCheck)
+                ->icon(Heroicon::CheckCircle)
                 ->description('What was done? (optional)')
                 ->schema([
                     self::getAdviceGivenField(),
@@ -173,6 +192,46 @@ final class EnquiryForm
         return TextInput::make('phone')
             ->tel()
             ->label('Phone Number');
+    }
+
+    public static function getDirectionField(): ToggleButtons
+    {
+        return ToggleButtons::make('direction')
+            ->options(EnquiryDirection::class)
+            ->inline()
+            ->default('inbound')
+            ->live()
+            ->required();
+    }
+
+    public static function getCallTypeField(): Select
+    {
+        return Select::make('call_type')
+            ->options(EnquiryCallType::class)
+            ->native(false)
+            ->default('general')
+            ->required()
+            ->live()
+            ->visible(fn (Get $get): bool => $get('direction') === 'outbound' || filled($get('direction')));
+    }
+
+    private static function getCallTypeFieldForEdit(): Select
+    {
+        return Select::make('call_type')
+            ->options(EnquiryCallType::class)
+            ->native(false)
+            ->default('general')
+            ->required()
+            ->live();
+    }
+
+    public static function getSourceField(): Select
+    {
+        return Select::make('source')
+            ->options(EnquirySourceType::class)
+            ->native(false)
+            ->default('phone')
+            ->required();
     }
 
     public static function getCategoryField(): Select
@@ -283,5 +342,30 @@ final class EnquiryForm
             ->default(fn () => auth()->user()?->id)
             ->required()
             ->label('Staff Member');
+    }
+
+    public static function getDepartmentIdField(): Select
+    {
+        return Select::make('department_id')
+            ->relationship('department', 'name')
+            ->searchable()
+            ->preload()
+            ->label('Assign to Department')
+            ->placeholder('Unassigned');
+    }
+
+    public static function getDueDateField(): DateTimePicker
+    {
+        return DateTimePicker::make('due_date')
+            ->label('Due Date')
+            ->seconds(false)
+            ->visible(fn (Get $get): bool => $get('direction') === 'outbound');
+    }
+
+    private static function getDueDateFieldForEdit(): DateTimePicker
+    {
+        return DateTimePicker::make('due_date')
+            ->label('Due Date')
+            ->seconds(false);
     }
 }
