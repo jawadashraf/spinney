@@ -25,6 +25,7 @@ final class Enquiry extends Model
     protected $fillable = [
         'people_id',
         'phone',
+        'caller_note',
         'category',
         'reason_for_contact',
         'risk_flags',
