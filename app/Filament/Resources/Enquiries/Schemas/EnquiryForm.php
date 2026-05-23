@@ -27,18 +27,24 @@ final class EnquiryForm
     {
         return $schema
             ->components([
-                Section::make('Caller & Enquiry Details')
+                Section::make('Caller Information')
                     ->icon(Heroicon::User)
                     ->schema([
                         self::getPeopleIdField(),
                         self::getCallerNoteFieldForEdit(),
                         self::getPhoneFieldForEdit(),
+                    ])
+                    ->columns(2),
+
+                Section::make('Enquiry Details')
+                    ->icon(Heroicon::ChatBubbleLeftRight)
+                    ->schema([
+                        self::getReasonForContactField(),
+                        self::getCategoryField(),
                         self::getDirectionField(),
                         self::getCallTypeFieldForEdit(),
                         self::getSourceField(),
-                        self::getCategoryField(),
                         self::getOccurredAtField(),
-                        self::getReasonForContactField(),
                     ])
                     ->columns(2),
 
@@ -82,6 +88,14 @@ final class EnquiryForm
                     self::getPeopleIdField(),
                     self::getCallerNoteField(),
                     self::getPhoneField(),
+                ])
+                ->columns(2),
+
+            Step::make('Enquiry Details')
+                ->icon(Heroicon::ChatBubbleLeftRight)
+                ->description('What is this about?')
+                ->schema([
+                    self::getReasonForContactField(),
                     self::getDirectionField(),
                     self::getCallTypeField(),
                     self::getSourceField(),
@@ -90,17 +104,17 @@ final class EnquiryForm
                 ])
                 ->columns(2),
 
-            Step::make('Details & Assignment')
-                ->icon(Heroicon::ClipboardDocumentCheck)
-                ->description('What is this about and who handles it?')
+            Step::make('Assignment & Safeguarding')
+                ->icon(Heroicon::UserGroup)
+                ->description('Who handles it and any risks?')
                 ->schema([
-                    self::getReasonForContactField(),
                     self::getDepartmentIdField(),
+                    self::getUserIdField(),
                     self::getDueDateField(),
                     self::getSafeguardingFlagsField(),
                     self::getRiskFlagsField(),
                 ])
-                ->columns(1),
+                ->columns(2),
 
             Step::make('Actions & Outcomes')
                 ->icon(Heroicon::CheckCircle)
@@ -110,7 +124,6 @@ final class EnquiryForm
                     self::getActionTakenField(),
                     self::getReferralTypeField(),
                     self::getReferralDestinationField(),
-                    self::getUserIdField(),
                 ])
                 ->columns(2),
         ];
@@ -338,7 +351,10 @@ final class EnquiryForm
     public static function getUserIdField(): Select
     {
         return Select::make('user_id')
-            ->relationship('user', 'name')
+            ->relationship(
+                'user',
+                'name',
+                modifyQueryUsing: fn ($query) => $query->whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'manager'])))
             ->default(fn () => auth()->user()?->id)
             ->required()
             ->label('Staff Member');

@@ -30,20 +30,17 @@ return new class extends Migration
             $table->timestamp('occurred_at');
             $table->foreignId('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignId('creator_id')->nullable()->constrained('users')->cascadeOnDelete();
-
-            $table->string('source')->nullable()->after('converted_at');
-            $table->string('direction')->default('inbound')->after('source');
-            $table->string('call_type')->default('general')->after('direction');
-            $table->string('caller_type')->nullable()->after('call_type');
-            $table->foreignId('department_id')->nullable()->after('caller_type')->constrained('departments')->nullOnDelete();
-            $table->timestamp('due_date')->nullable()->after('department_id');
-            $table->foreignId('parent_enquiry_id')->nullable()->after('due_date')->constrained('enquiries')->nullOnDelete();
-            $table->string('outcome')->nullable()->after('parent_enquiry_id');
+            $table->string('source')->nullable();
+            $table->string('direction')->default('inbound');
+            $table->string('call_type')->default('general');
+            $table->string('caller_type')->nullable();
+            $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->timestamp('due_date')->nullable();
+            $table->foreignId('parent_enquiry_id')->nullable()->constrained('enquiries')->nullOnDelete();
+            $table->string('outcome')->nullable();
 
             $table->string('status')->default('open');
             $table->timestamp('converted_at')->nullable();
-
-
 
             $table->timestamps();
         });

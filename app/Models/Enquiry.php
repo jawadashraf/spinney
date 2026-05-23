@@ -13,12 +13,15 @@ use App\Enums\EnquirySourceType;
 use App\Enums\EnquiryStatus;
 use App\Models\Concerns\HasCreator;
 use App\Models\Concerns\HasTeam;
+use App\Observers\EnquiryObserver;
 use Database\Factories\EnquiryFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[ObservedBy(EnquiryObserver::class)]
 final class Enquiry extends Model
 {
     use HasCreator;
