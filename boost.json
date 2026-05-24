@@ -5,22 +5,27 @@
         "gemini",
         "opencode"
     ],
+    "cloud": false,
     "guidelines": true,
     "mcp": true,
-    "nightwatch_mcp": false,
+    "nightwatch": false,
     "packages": [
         "filament/filament",
         "spatie/laravel-medialibrary",
-        "filament/blueprint"
+        "filament/blueprint",
+        "laraveljutsu/zap",
+        "relaticle/flowforge"
     ],
     "sail": false,
     "skills": [
+        "fortify-development",
         "laravel-best-practices",
         "configuring-horizon",
         "socialite-development",
         "livewire-development",
         "pest-testing",
         "tailwindcss-development",
+        "flowforge-development",
         "medialibrary-development"
     ]
 }
