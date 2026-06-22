@@ -2,8 +2,8 @@
     "agents": [
         "claude_code",
         "codex",
-        "gemini",
-        "opencode"
+        "opencode",
+        "antigravity"
     ],
     "cloud": false,
     "guidelines": true,
@@ -14,7 +14,9 @@
         "spatie/laravel-medialibrary",
         "filament/blueprint",
         "laraveljutsu/zap",
-        "relaticle/flowforge"
+        "relaticle/flowforge",
+        "spatie/laravel-activitylog",
+        "achyutn/filament-log-viewer"
     ],
     "sail": false,
     "skills": [
@@ -25,7 +27,9 @@
         "livewire-development",
         "pest-testing",
         "tailwindcss-development",
+        "filament-log-viewer-development",
         "flowforge-development",
-        "medialibrary-development"
+        "medialibrary-development",
+        "filament-security-audit"
     ]
 }

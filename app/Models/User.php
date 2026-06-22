@@ -27,7 +27,7 @@ use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 /**
  * @property string $name
  * @property string $email
@@ -39,7 +39,7 @@ use Spatie\Activitylog\LogOptions;
  * @property string|null $two_factor_recovery_codes
  * @property string|null $two_factor_secret
  */
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 use Zap\Models\Concerns\HasSchedules;
 
@@ -51,9 +51,13 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     use HasFactory;
 
     use HasProfilePhoto;
-    use HasRoles;
+    use HasRoles {
+        HasRoles::teams as permissionTeams;
+    }
     use HasSchedules;
-    use HasTeams;
+    use HasTeams {
+        HasTeams::teams insteadof HasRoles;
+    }
     use LogsActivity;
     use Notifiable;
     use TwoFactorAuthenticatable;

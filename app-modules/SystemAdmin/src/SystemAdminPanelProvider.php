@@ -22,6 +22,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Relaticle\SystemAdmin\Filament\Pages\Dashboard;
+use AchyutN\FilamentLogViewer\FilamentLogViewer;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 
 
@@ -84,6 +85,7 @@ final class SystemAdminPanelProvider extends PanelProvider
                     ->label('Log')
                     ->pluralLabel('Logs')
                     ->navigationGroup('System'),
+                FilamentLogViewer::make(),
             ])
             ->databaseNotifications()
             ->middleware([
