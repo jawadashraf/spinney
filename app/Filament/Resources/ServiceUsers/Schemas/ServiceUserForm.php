@@ -13,6 +13,8 @@ use App\Enums\SubstanceUseFrequency;
 use App\Enums\TreatmentOutcome;
 use App\Models\Enquiry;
 use App\Models\ServiceUser;
+use App\Services\AddressLookupService;
+use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
@@ -24,7 +26,10 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -105,7 +110,36 @@ final class ServiceUserForm
                                                         ->columnSpanFull(),
                                                     PhoneInput::make('phone')
                                                         ->initialCountry('gb'),
-                                                    TextInput::make('postcode'),
+                                                    TextInput::make('postcode')
+                                                        ->live(onBlur: true)
+                                                        ->suffixAction(
+                                                            Action::make('findAddress')
+                                                                ->label('Find Address')
+                                                                ->icon('heroicon-o-magnifying-glass')
+                                                                ->color('primary')
+                                                                ->modalHeading('Select Address')
+                                                                ->modalWidth(Width::Medium)
+                                                                ->form(fn (Get $get) => [
+                                                                    Select::make('selected_address')
+                                                                        ->label('Matching Addresses')
+                                                                        ->placeholder('Select an address')
+                                                                        ->options(function () use ($get) {
+                                                                            $postcode = $get('postcode');
+                                                                            if (empty($postcode)) {
+                                                                                return [];
+                                                                            }
+
+                                                                            return resolve(AddressLookupService::class)->lookup($postcode);
+                                                                        })
+                                                                        ->required()
+                                                                        ->searchable(),
+                                                                ])
+                                                                ->action(function (array $data, Set $set) {
+                                                                    if (isset($data['selected_address'])) {
+                                                                        $set('address', $data['selected_address']);
+                                                                    }
+                                                                })
+                                                        ),
                                                     Toggle::make('no_fixed_address')
                                                         ->label('No current fixed address'),
                                                     Textarea::make('address')

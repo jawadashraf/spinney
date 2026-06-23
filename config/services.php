@@ -56,4 +56,8 @@ return [
     'discord' => [
         'invite_url' => env('DISCORD_INVITE_URL'),
     ],
+
+    'ideal_postcodes' => [
+        'api_key' => env('IDEAL_POSTCODES_API_KEY'),
+    ],
 ];

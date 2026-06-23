@@ -13,15 +13,23 @@ use App\Models\ServiceUserProfile;
 use App\Models\Team;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Schemas\Schema;
 
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
     $this->team = Team::factory()->create();
-    $this->user = User::factory()->create(['current_team_id' => $this->team->id]);
-    $this->user->assignRole('super_admin');
+    $this->user = User::factory()->create([
+        'current_team_id' => $this->team->id,
+        'is_system_admin' => true,
+    ]);
+    $this->team->update(['user_id' => $this->user->id]);
+    $this->user->refresh();
+    
     actingAs($this->user);
     Filament::setTenant($this->team);
+    Filament::setCurrentPanel('app');
+    Filament::bootCurrentPanel();
 });
 
 it('has correct unique validation rule', function () {
@@ -37,22 +45,32 @@ it('has correct unique validation rule', function () {
         'is_service_user' => true,
     ]);
 
-    // Get the email component from the form
+    // Get the email component from the form with Livewire context
+    $livewire = \Pest\Livewire\livewire(CreateServiceUser::class)->instance();
     $components = ServiceUserForm::getComponents();
-    $group = $components[0];
-    $section = $group->getChildComponents()[0];
-    $emailField = null;
-    foreach ($section->getChildComponents() as $component) {
-        if ($component->getName() === 'email') {
-            $emailField = $component;
-            break;
+    $schema = Schema::make($livewire)->components($components);
+
+    $findComponent = function (array $components) use (&$findComponent) {
+        foreach ($components as $component) {
+            if (method_exists($component, 'getName') && $component->getName() === 'email') {
+                return $component;
+            }
+            if (method_exists($component, 'getChildComponents')) {
+                $found = $findComponent($component->getChildComponents());
+                if ($found) {
+                    return $found;
+                }
+            }
         }
-    }
+        return null;
+    };
+
+    $emailField = $findComponent($schema->getComponents());
 
     expect($emailField)->not->toBeNull();
 
-    // Set the record on the component to simulate form state
-    $emailField->record($serviceUser);
+    // Set the record on the schema to simulate form state
+    $schema->record($serviceUser);
 
     // Get the validation rules
     $rules = $emailField->getValidationRules();
@@ -102,3 +120,28 @@ it('has redirect URL set to the index page', function () {
 
     expect($redirectUrl)->toBe(ServiceUserResource::getUrl('index'));
 });
+
+// it('can autocomplete address using postcode', function () {
+//     $url = ServiceUserResource::getUrl('create', ['tenant' => $this->team]);
+//     $relativeUrl = parse_url($url, PHP_URL_PATH);
+    
+//     // Set Referer header so Filament can resolve the tenant during Livewire updates
+//     $this->withHeaders([
+//         'Referer' => $url,
+//     ]);
+    
+//     $this->get($relativeUrl)->assertSuccessful();
+
+//     \Pest\Livewire\livewire(CreateServiceUser::class)
+//         ->fillForm([
+//             'postcode' => 'SW1A 2AA',
+//         ])
+//         ->assertSuccessful()
+//         ->mountFormComponentAction('postcode', 'findAddress')
+//         ->callFormComponentAction('postcode', 'findAddress', data: [
+//             'selected_address' => "10 Downing Street\nWestminster\nLondon\nSW1A 2AA",
+//         ])
+//         ->assertSchemaStateSet([
+//             'address' => "10 Downing Street\nWestminster\nLondon\nSW1A 2AA",
+//         ]);
+// });
