@@ -27,6 +27,7 @@ use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 final class ServiceUserForm
 {
@@ -88,9 +89,7 @@ final class ServiceUserForm
                                                             'other' => 'Other',
                                                         ]),
                                                     TextInput::make('ethnicity'),
-                                                    TextInput::make('phone')
-                                                        ->tel()
-                                                        ->mask('(999) 999-9999)'),
+                                                    PhoneInput::make('phone'),
                                                     TextInput::make('postcode'),
                                                     Toggle::make('no_fixed_address')
                                                         ->label('No current fixed address'),
@@ -104,8 +103,7 @@ final class ServiceUserForm
                                             Section::make('Emergency Contact')
                                                 ->schema([
                                                     TextInput::make('emergency_contact_name'),
-                                                    TextInput::make('emergency_contact_number')
-                                                        ->tel(),
+                                                    PhoneInput::make('emergency_contact_number'),
                                                 ])->columns(2),
 
                                             Section::make('Consent & GDPR')

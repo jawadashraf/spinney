@@ -52,7 +52,8 @@
         "symfony/http-client": "^7.2",
         "symfony/postmark-mailer": "^7.2",
         "symfony/yaml": "^7.2",
-        "tightenco/parental": "^1.5"
+        "tightenco/parental": "^1.5",
+        "ysfkaya/filament-phone-input": "^4.2"
     },
     "require-dev": {
         "cweagans/composer-patches": "*",
