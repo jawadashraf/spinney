@@ -11,17 +11,16 @@ use App\Enums\ReferralType;
 use App\Enums\ServiceTeam;
 use App\Enums\SubstanceUseFrequency;
 use App\Enums\TreatmentOutcome;
+use App\Filament\Resources\Enquiries\Pages\ListEnquiries;
 use App\Models\Enquiry;
 use App\Models\People;
 use App\Models\User;
 use App\Notifications\ServiceUserPromotedNotification;
 use Illuminate\Support\Facades\Notification;
-use Spatie\Permission\Models\Role;
-use Tests\TestCase;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 
 // Note: uses() is already globally configured in tests/Pest.php
 
@@ -31,7 +30,7 @@ it('can convert an enquiry to a service user with comprehensive data', function 
     $staff = User::factory()->withPersonalTeam()->create();
     $staff->assignRole('super_admin');
     $team = $staff->personalTeam();
-    
+
     $superAdmin = User::factory()->create(['email' => 'admin@example.com']);
     $superAdmin->assignRole('super_admin');
 
@@ -44,14 +43,14 @@ it('can convert an enquiry to a service user with comprehensive data', function 
 
     actingAs($staff);
 
-    \Livewire\Livewire::test(\App\Filament\Resources\Enquiries\Pages\ListEnquiries::class)
+    Livewire::test(ListEnquiries::class)
         ->assertSuccessful()
         ->callTableAction('convertToServiceUser', $enquiry, data: [
             'email' => 'new-service-user@example.com',
             'password' => 'password123',
             'date_of_birth' => '1990-01-01',
             'gender' => 'male',
-            'ethnicity' => 'White British',
+            'ethnicity' => 'white_british',
             'phone' => '0123456789',
             'postcode' => 'LE1 1AA',
             'address' => '123 Spinney Hill Road',
@@ -108,6 +107,7 @@ it('can convert an enquiry to a service user with comprehensive data', function 
     expect($person->registered_with_gp)->toBeTrue();
     expect($person->gp_name)->toBe('Dr. Smith');
     expect($person->consent_data_storage)->toBeTrue();
+    expect($person->ethnicity)->toBe('white_british');
 
     // Assert Enquiry updated
     $enquiry->refresh();

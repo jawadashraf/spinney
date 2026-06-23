@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ServiceUsers\Schemas;
 
 use App\Enums\EngagementStatus;
+use App\Enums\Ethnicity;
 use App\Enums\InjectionHistory;
 use App\Enums\ReferralType;
 use App\Enums\ServiceTeam;
@@ -88,8 +89,22 @@ final class ServiceUserForm
                                                             'female' => 'Female',
                                                             'other' => 'Other',
                                                         ]),
-                                                    TextInput::make('ethnicity'),
-                                                    PhoneInput::make('phone'),
+                                                    Radio::make('ethnicity')
+                                                        ->options(Ethnicity::class)
+                                                        ->columns(3)
+                                                        ->columnSpanFull()
+                                                        ->live(),
+                                                    TextInput::make('ethnicity_other')
+                                                        ->label('Other ethnicity (please specify)')
+                                                        ->visible(fn ($get): bool => $get('ethnicity') === 'other' ||
+                                                            $get('ethnicity') === Ethnicity::Other ||
+                                                            ($get('ethnicity') instanceof Ethnicity && $get('ethnicity')->value === 'other') ||
+                                                            (is_array($get('ethnicity')) && in_array('other', $get('ethnicity'), true)) ||
+                                                            (is_string($get('ethnicity')) && in_array('other', json_decode($get('ethnicity'), true) ?? [], true))
+                                                        )
+                                                        ->columnSpanFull(),
+                                                    PhoneInput::make('phone')
+                                                        ->initialCountry('gb'),
                                                     TextInput::make('postcode'),
                                                     Toggle::make('no_fixed_address')
                                                         ->label('No current fixed address'),
@@ -103,7 +118,8 @@ final class ServiceUserForm
                                             Section::make('Emergency Contact')
                                                 ->schema([
                                                     TextInput::make('emergency_contact_name'),
-                                                    PhoneInput::make('emergency_contact_number'),
+                                                    PhoneInput::make('emergency_contact_number')
+                                                        ->initialCountry('gb'),
                                                 ])->columns(2),
 
                                             Section::make('Consent & GDPR')

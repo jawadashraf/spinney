@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Enums\EngagementStatus;
 use App\Enums\ServiceTeam;
+use App\Filament\Resources\ServiceUsers\Pages\CreateServiceUser;
 use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
 use App\Filament\Resources\ServiceUsers\Schemas\ServiceUserForm;
+use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Models\ServiceUser;
 use App\Models\ServiceUserProfile;
 use App\Models\Team;
@@ -84,4 +86,19 @@ it('populates profile fields in edit mode', function () {
             'profile.target_service_team' => ServiceTeam::ASSESSMENT,
             'profile.engagement_status' => EngagementStatus::ACTIVE,
         ]);
+});
+
+it('can render the create page', function () {
+    \Pest\Livewire\livewire(CreateServiceUser::class)
+        ->assertSuccessful();
+});
+
+it('has redirect URL set to the index page', function () {
+    $page = new CreateServiceUser;
+
+    $reflector = new ReflectionMethod(CreateServiceUser::class, 'getRedirectUrl');
+
+    $redirectUrl = $reflector->invoke($page);
+
+    expect($redirectUrl)->toBe(ServiceUserResource::getUrl('index'));
 });
