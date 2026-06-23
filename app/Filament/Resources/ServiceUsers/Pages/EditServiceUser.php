@@ -36,6 +36,19 @@ final class EditServiceUser extends EditRecord
         ];
     }
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        /** @var ServiceUser $record */
+        $record = $this->record;
+        $profile = $record->profile;
+
+        if ($profile) {
+            $data['profile'] = $profile->toArray();
+        }
+
+        return $data;
+    }
+
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         /** @var ServiceUser $record */

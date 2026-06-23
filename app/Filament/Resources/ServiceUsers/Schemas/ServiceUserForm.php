@@ -11,6 +11,7 @@ use App\Enums\ServiceTeam;
 use App\Enums\SubstanceUseFrequency;
 use App\Enums\TreatmentOutcome;
 use App\Models\Enquiry;
+use App\Models\ServiceUser;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
@@ -24,6 +25,8 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 
 final class ServiceUserForm
 {
@@ -47,7 +50,18 @@ final class ServiceUserForm
                                 ->email()
                                 ->required()
                                 ->maxLength(255)
-                                ->unique(ignoreRecord: true)
+                                ->unique(
+                                    table: 'users',
+                                    column: 'email',
+                                    modifyRuleUsing: function (Unique $rule, ?Model $record) {
+                                        // If we are editing an existing ServiceUser, ignore its linked User's ID
+                                        if ($record && $record->user_id) {
+                                            return Rule::unique('users', 'email')->ignore($record->user_id, 'id');
+                                        }
+
+                                        return $rule;
+                                    }
+                                )
                                 ->default(fn (?Model $record) => $record instanceof Enquiry ? $record->people?->email : null),
                             TextInput::make('password')
                                 ->password()
