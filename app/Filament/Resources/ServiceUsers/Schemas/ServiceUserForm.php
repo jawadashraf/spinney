@@ -11,11 +11,14 @@ use App\Enums\ReferralType;
 use App\Enums\ServiceTeam;
 use App\Enums\SubstanceUseFrequency;
 use App\Enums\TreatmentOutcome;
+use App\Filament\Resources\ServiceUsers\Pages\CreateServiceUser;
+use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
 use App\Models\Enquiry;
 use App\Models\People;
 use App\Models\ServiceUser;
 use App\Services\AddressLookupService;
 use Filament\Actions\Action;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
@@ -38,7 +41,6 @@ use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
-use Livewire\Component as LivewireComponent;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 final class ServiceUserForm
@@ -395,8 +397,8 @@ final class ServiceUserForm
                                     ->label('Back')
                                     ->icon('heroicon-m-arrow-left')
                                     ->color('gray')
-                                    ->visible(fn (LivewireComponent $livewire): bool => $livewire->activeServiceUserTab !== self::TAB_DEMOGRAPHICS_CONSENT)
-                                    ->action(function (LivewireComponent $livewire): void {
+                                    ->visible(fn (CreateServiceUser|EditServiceUser $livewire): bool => $livewire->activeServiceUserTab !== self::TAB_DEMOGRAPHICS_CONSENT)
+                                    ->action(function (CreateServiceUser|EditServiceUser $livewire): void {
                                         $currentIndex = array_search($livewire->activeServiceUserTab, self::TABS, true);
 
                                         if ($currentIndex !== false && $currentIndex > 0) {
@@ -407,8 +409,8 @@ final class ServiceUserForm
                                     ->label('Next')
                                     ->icon('heroicon-m-arrow-right')
                                     ->iconPosition(IconPosition::After)
-                                    ->visible(fn (LivewireComponent $livewire): bool => $livewire->activeServiceUserTab !== self::TAB_SERVICE_PLAN)
-                                    ->action(function (LivewireComponent $livewire): void {
+                                    ->visible(fn (CreateServiceUser|EditServiceUser $livewire): bool => $livewire->activeServiceUserTab !== self::TAB_SERVICE_PLAN)
+                                    ->action(function (CreateServiceUser|EditServiceUser $livewire): void {
                                         $currentIndex = array_search($livewire->activeServiceUserTab, self::TABS, true);
 
                                         if ($currentIndex !== false && $currentIndex < count(self::TABS) - 1) {

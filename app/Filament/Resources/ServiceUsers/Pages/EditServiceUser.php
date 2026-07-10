@@ -51,7 +51,9 @@ final class EditServiceUser extends EditRecord
 
         $emergencyContact = $record->emergencyContacts()->first();
         $data['emergency_contact_id'] = $emergencyContact?->id;
-        $data['emergency_contact_relation_type'] = $emergencyContact?->pivot?->relation_type;
+        /** @var array<string, mixed> $pivot */
+        $pivot = $emergencyContact?->pivot?->toArray() ?? [];
+        $data['emergency_contact_relation_type'] = $pivot['relation_type'] ?? null;
 
         return $data;
     }
