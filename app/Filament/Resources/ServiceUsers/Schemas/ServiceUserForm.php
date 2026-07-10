@@ -22,6 +22,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -30,14 +31,35 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Alignment;
+use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
+use Livewire\Component as LivewireComponent;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 final class ServiceUserForm
 {
+    public const string TAB_DEMOGRAPHICS_CONSENT = 'demographics-consent';
+
+    public const string TAB_ASSESSMENT = 'assessment';
+
+    public const string TAB_REFERRAL = 'referral';
+
+    public const string TAB_SERVICE_PLAN = 'service-plan';
+
+    /**
+     * @var array<int, string>
+     */
+    public const array TABS = [
+        self::TAB_DEMOGRAPHICS_CONSENT,
+        self::TAB_ASSESSMENT,
+        self::TAB_REFERRAL,
+        self::TAB_SERVICE_PLAN,
+    ];
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -89,8 +111,9 @@ final class ServiceUserForm
                         ->schema([
                             Tabs::make('Profile Information')
                                 ->contained(false)
+                                ->livewireProperty('activeServiceUserTab')
                                 ->tabs([
-                                    Tab::make('Demographics & Consent')
+                                    self::TAB_DEMOGRAPHICS_CONSENT => Tab::make('Demographics & Consent')
                                         ->icon('heroicon-o-user')
                                         ->schema([
                                             Section::make('Demographics')
@@ -175,7 +198,7 @@ final class ServiceUserForm
                                                 ])->columns(3),
                                         ]),
 
-                                    Tab::make('Assessment')
+                                    self::TAB_ASSESSMENT => Tab::make('Assessment')
                                         ->icon('heroicon-o-clipboard-document-list')
                                         ->schema([
                                             Section::make('Substance Use')
@@ -232,7 +255,7 @@ final class ServiceUserForm
                                                 ])->columns(2),
                                         ]),
 
-                                    Tab::make('Referral')
+                                    self::TAB_REFERRAL => Tab::make('Referral')
                                         ->icon('heroicon-o-link')
                                         ->schema([
                                             Section::make('Referral Details')
@@ -264,7 +287,7 @@ final class ServiceUserForm
                                                 ]),
                                         ]),
 
-                                    Tab::make('Service Plan')
+                                    self::TAB_SERVICE_PLAN => Tab::make('Service Plan')
                                         ->icon('heroicon-o-briefcase')
                                         ->schema([
                                             Section::make('Service Assignment')
@@ -311,6 +334,36 @@ final class ServiceUserForm
                                                 ]),
                                         ]),
                                 ])->columnSpanFull(),
+
+                            Actions::make([
+                                Action::make('previousTab')
+                                    ->label('Back')
+                                    ->icon('heroicon-m-arrow-left')
+                                    ->color('gray')
+                                    ->visible(fn (LivewireComponent $livewire): bool => $livewire->activeServiceUserTab !== self::TAB_DEMOGRAPHICS_CONSENT)
+                                    ->action(function (LivewireComponent $livewire): void {
+                                        $currentIndex = array_search($livewire->activeServiceUserTab, self::TABS, true);
+
+                                        if ($currentIndex !== false && $currentIndex > 0) {
+                                            $livewire->activeServiceUserTab = self::TABS[$currentIndex - 1];
+                                        }
+                                    }),
+                                Action::make('nextTab')
+                                    ->label('Next')
+                                    ->icon('heroicon-m-arrow-right')
+                                    ->iconPosition(IconPosition::After)
+                                    ->visible(fn (LivewireComponent $livewire): bool => $livewire->activeServiceUserTab !== self::TAB_SERVICE_PLAN)
+                                    ->action(function (LivewireComponent $livewire): void {
+                                        $currentIndex = array_search($livewire->activeServiceUserTab, self::TABS, true);
+
+                                        if ($currentIndex !== false && $currentIndex < count(self::TABS) - 1) {
+                                            $livewire->activeServiceUserTab = self::TABS[$currentIndex + 1];
+                                        }
+                                    }),
+                            ])
+                                ->key('service-user-tab-navigation')
+                                ->alignment(Alignment::Between)
+                                ->columnSpanFull(),
                         ])->collapsible(),
 
                 ])

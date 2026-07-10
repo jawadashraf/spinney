@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ServiceUsers\Pages;
 
 use App\Enums\CreationSource;
+use App\Filament\Resources\ServiceUsers\Concerns\HasServiceUserTabNavigation;
 use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Models\ServiceUser;
 use App\Models\User;
@@ -16,6 +17,8 @@ use Illuminate\Support\Str;
 
 final class CreateServiceUser extends CreateRecord
 {
+    use HasServiceUserTabNavigation;
+
     protected static string $resource = ServiceUserResource::class;
 
     protected function handleRecordCreation(array $data): Model
