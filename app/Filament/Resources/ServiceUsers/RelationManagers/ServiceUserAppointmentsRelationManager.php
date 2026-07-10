@@ -10,14 +10,14 @@ use App\Enums\ScheduleType;
 use App\Models\Schedule;
 use App\Models\User;
 use Carbon\Carbon;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -69,11 +69,12 @@ final class ServiceUserAppointmentsRelationManager extends RelationManager
                             return [];
                         }
 
+                        /** @var User $counselor */
                         $slots = $counselor->getBookableSlots($date, 60);
 
                         return collect($slots)
-                            ->filter(fn ($slot) => (bool) ($slot['is_available'] ?? false))
-                            ->mapWithKeys(fn ($slot) => [
+                            ->filter(fn ($slot): bool => (bool) ($slot['is_available'] ?? false))
+                            ->mapWithKeys(fn ($slot): array => [
                                 "{$slot['start_time']}-{$slot['end_time']}" => "{$slot['start_time']} - {$slot['end_time']}",
                             ])
                             ->toArray();
@@ -103,7 +104,7 @@ final class ServiceUserAppointmentsRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('time_range')
                     ->label('Time')
-                    ->state(fn (Schedule $record) => Carbon::parse($record->start_date)->format('H:i').' - '.Carbon::parse($record->end_date)->format('H:i')),
+                    ->state(fn (Schedule $record): string => Carbon::parse($record->start_date)->format('H:i').' - '.Carbon::parse($record->end_date)->format('H:i')),
                 TextColumn::make('metadata.appointment_status')
                     ->label('Status')
                     ->badge()
@@ -137,7 +138,7 @@ final class ServiceUserAppointmentsRelationManager extends RelationManager
 
                         $data['metadata'] = [
                             'attendee_type' => AttendeeType::SERVICE_USER->value,
-                            'service_user_id' => $this->getOwnerRecord()->id,
+                            'service_user_id' => $this->getOwnerRecord()->getKey(),
                             'appointment_status' => AppointmentStatus::SCHEDULED->value,
                             'counselor_type' => 'individual',
                             'session_type' => 'individual',

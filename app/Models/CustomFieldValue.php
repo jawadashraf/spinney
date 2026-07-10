@@ -5,33 +5,30 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Concerns\HasTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+#[Fillable([
+    'team_id',
+    'entity_type',
+    'entity_id',
+    'custom_field_id',
+    'string_value',
+    'text_value',
+    'boolean_value',
+    'integer_value',
+    'float_value',
+    'date_value',
+    'datetime_value',
+    'json_value',
+])]
+#[WithoutTimestamps]
 final class CustomFieldValue extends Model
 {
     use HasTeam;
-
-    /**
-     * @var bool
-     */
-    public $timestamps = false;
-
-    protected $fillable = [
-        'team_id',
-        'entity_type',
-        'entity_id',
-        'custom_field_id',
-        'string_value',
-        'text_value',
-        'boolean_value',
-        'integer_value',
-        'float_value',
-        'date_value',
-        'datetime_value',
-        'json_value',
-    ];
 
     protected function casts(): array
     {
@@ -45,11 +42,17 @@ final class CustomFieldValue extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<CustomField, $this>
+     */
     public function customField(): BelongsTo
     {
         return $this->belongsTo(CustomField::class, 'custom_field_id');
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function entity(): MorphTo
     {
         return $this->morphTo();

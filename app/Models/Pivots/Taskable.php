@@ -6,15 +6,12 @@ namespace App\Models\Pivots;
 
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
+#[Table(name: 'taskables')]
 final class Taskable extends MorphPivot
 {
-    /**
-     * @var string
-     */
-    protected $table = 'taskables';
-
     /**
      * @var array<string, string>
      */

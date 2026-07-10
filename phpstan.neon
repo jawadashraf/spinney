@@ -7,6 +7,8 @@ parameters:
 
     stubFiles:
         - stubs/Mailcoach.stub
+        - stubs/Prism.stub
+        - stubs/KnowledgeBase.stub
 
     paths:
         - app
@@ -18,6 +20,9 @@ parameters:
 
     excludePaths:
         - app-modules/SystemAdmin
+        - app/Console/Commands/CreateSystemAdminCommand.php
+        - app/Console/Commands/InstallCommand.php
+        - app/Providers/Filament/KnowledgeBasePanelProvider.php
 
     configDirectories:
         - config

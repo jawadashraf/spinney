@@ -18,7 +18,7 @@ final class Import extends BaseImport
     {
         self::creating(function (Import $import): void {
             if (auth()->check()) {
-                /** @var \App\Models\User $user */
+                /** @var User $user */
                 $user = auth()->user();
                 $import->team_id = $user->currentTeam?->getKey();
             }

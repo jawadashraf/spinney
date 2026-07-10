@@ -21,6 +21,9 @@ final class TableBuilder
         return $this;
     }
 
+    /**
+     * @return array<int, TextColumn>
+     */
     public function columns(): array
     {
         $query = CustomField::query()
@@ -32,9 +35,12 @@ final class TableBuilder
             $query->where('entity_type', $this->model);
         }
 
-        return $query->get()->map(fn (CustomField $field): \Filament\Tables\Columns\TextColumn => $this->createColumn($field))->all();
+        return $query->get()->map(fn (CustomField $field): TextColumn => $this->createColumn($field))->all();
     }
 
+    /**
+     * @return array<int, SelectFilter>
+     */
     public function filters(): array
     {
         $query = CustomField::query()
@@ -51,10 +57,13 @@ final class TableBuilder
 
     private function createColumn(CustomField $field): TextColumn
     {
+        /** @var array<string, mixed> $fieldSettings */
+        $fieldSettings = (array) $field->settings;
+
         $column = TextColumn::make($field->code)
             ->label($field->name)
             ->getStateUsing(fn (HasCustomFieldsContract $record): mixed => app(ValueResolver::class)->resolve($record, $field))
-            ->toggleable($field->settings->list_toggleable_hidden ?? true);
+            ->toggleable($fieldSettings['list_toggleable_hidden'] ?? true);
 
         // Add specific formatting based on type if needed
         if ($field->type === 'date') {
@@ -63,11 +72,13 @@ final class TableBuilder
             $column->dateTime();
         }
 
-        if ($field->settings->enable_option_colors ?? false) {
+        if ($fieldSettings['enable_option_colors'] ?? false) {
             $column->badge()
                 ->color(function (HasCustomFieldsContract $record) use ($field): string|array|null {
                     $option = app(ValueResolver::class)->resolveOption($record, $field);
-                    $color = $option?->settings->color;
+                    /** @var array<string, mixed> $optionSettings */
+                    $optionSettings = (array) ($option->settings ?? []);
+                    $color = $optionSettings['color'] ?? null;
 
                     if ($color && str_starts_with($color, '#')) {
                         return Color::hex($color);

@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Tasks\Actions;
 use App\Enums\CreationSource;
 use App\Enums\CustomFields\TaskField;
 use App\Enums\TaskType;
+use App\Models\CustomField;
 use App\Models\CustomFieldOption;
 use App\Models\Task;
 use Filament\Actions\Action;
@@ -40,12 +41,12 @@ final class RecordOutcomeAction
                     ->native(false),
             ])
             ->action(function (array $data, Task $record): void {
-                DB::transaction(function () use ($data, $record) {
+                DB::transaction(function () use ($data, $record): void {
                     $record->loadMissing('people');
 
                     foreach ($record->people as $person) {
                         $person->notes()->create([
-                            'title' => 'Follow-up Call Outcome: ' . $record->title,
+                            'title' => 'Follow-up Call Outcome: '.$record->title,
                             'body' => $data['outcome'],
                             'team_id' => $record->team_id,
                             'creator_id' => auth()->id(),
@@ -55,13 +56,14 @@ final class RecordOutcomeAction
 
                     // Resolve "Done" status option ID
                     $doneOptionId = CustomFieldOption::query()
-                        ->whereHas('customField', fn ($q) => $q->where('code', TaskField::STATUS->value))
+                        ->whereHas('field', fn ($q) => $q->where('code', TaskField::STATUS->value))
                         ->where('name', 'Done')
                         ->value('id');
 
                     if ($doneOptionId) {
                         // Assuming the Task model has a way to get the CustomField instance by code
-                        $statusField = $record->customFields()
+                        $statusField = CustomField::query()
+                            ->where('entity_type', $record::class)
                             ->where('code', TaskField::STATUS->value)
                             ->first();
 
@@ -69,12 +71,13 @@ final class RecordOutcomeAction
                             $record->saveCustomFieldValue($statusField, (string) $doneOptionId);
                         }
                     }
-                    
+
                     // Also save the outcome to the task's own CALL_NOTES custom field if it exists
-                    $notesField = $record->customFields()
+                    $notesField = CustomField::query()
+                        ->where('entity_type', $record::class)
                         ->where('code', TaskField::CALL_NOTES->value)
                         ->first();
-                        
+
                     if ($notesField) {
                         $record->saveCustomFieldValue($notesField, $data['outcome']);
                     }

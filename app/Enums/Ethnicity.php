@@ -27,7 +27,7 @@ enum Ethnicity: string implements HasLabel
     case Other = 'other';
     case PreferNotToSay = 'prefer_not_to_say';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::WhiteBritish => 'White British',

@@ -18,6 +18,8 @@ use Filament\Actions\CreateAction;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -49,7 +51,7 @@ final class OpportunitiesBoard extends BoardPage
         return $board
             ->query(
                 fn () => Opportunity::query()
-                    ->leftJoin('custom_field_values as cfv', function (\Illuminate\Database\Query\JoinClause $join): void {
+                    ->leftJoin('custom_field_values as cfv', function (JoinClause $join): void {
                         $join->on('opportunities.id', '=', 'cfv.entity_id')
                             ->where('cfv.custom_field_id', '=', $this->stageCustomField()?->getKey());
                     })
@@ -158,7 +160,7 @@ final class OpportunitiesBoard extends BoardPage
         $board = $this->getBoard();
         $query = $board->getQuery();
 
-        if (! $query instanceof \Illuminate\Database\Eloquent\Builder) {
+        if (! $query instanceof Builder) {
             throw new InvalidArgumentException('Board query not available');
         }
 
@@ -227,14 +229,21 @@ final class OpportunitiesBoard extends BoardPage
         }
 
         // Check if color options are enabled for this field
-        $colorsEnabled = $field->settings->enable_option_colors ?? false;
+        /** @var array<string, mixed> $settings */
+        $settings = (array) $field->settings;
+        $colorsEnabled = $settings['enable_option_colors'] ?? false;
 
-        return $field->options->map(fn (CustomFieldOption $option): array => [
-            'id' => $option->getKey(),
-            'custom_field_id' => $option->getAttribute('custom_field_id'),
-            'name' => $option->getAttribute('name'),
-            'color' => $colorsEnabled ? ($option->settings->color ?? 'gray') : 'gray',
-        ]);
+        return $field->options->map(function (CustomFieldOption $option) use ($colorsEnabled): array {
+            /** @var array<string, mixed> $optionSettings */
+            $optionSettings = (array) $option->settings;
+
+            return [
+                'id' => $option->getKey(),
+                'custom_field_id' => $option->getAttribute('custom_field_id'),
+                'name' => $option->getAttribute('name'),
+                'color' => (string) ($colorsEnabled ? ($optionSettings['color'] ?? 'gray') : 'gray'),
+            ];
+        });
     }
 
     public static function canAccess(): bool

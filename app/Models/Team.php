@@ -7,20 +7,26 @@ namespace App\Models;
 use App\Services\AvatarService;
 use Database\Factories\TeamFactory;
 use Filament\Models\Contracts\HasAvatar;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use Laravel\Jetstream\Events\TeamCreated;
 use Laravel\Jetstream\Events\TeamDeleted;
 use Laravel\Jetstream\Events\TeamUpdated;
-use App\Models\Department;
-use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Laravel\Jetstream\Team as JetstreamTeam;
-use Illuminate\Support\Str;
 
 /**
  * @property string $name
  */
-#[CollectedBy(\Illuminate\Database\Eloquent\Collection::class)]
+#[CollectedBy(Collection::class)]
+#[Fillable([
+    'name',
+    'slug',
+    'personal_team',
+])]
 final class Team extends JetstreamTeam implements HasAvatar
 {
     /** @use HasFactory<TeamFactory> */
@@ -28,7 +34,7 @@ final class Team extends JetstreamTeam implements HasAvatar
 
     protected static function booted(): void
     {
-        static::creating(function (Team $team): void {
+        self::creating(function (Team $team): void {
             if (empty($team->slug)) {
                 $team->slug = Str::slug($team->name);
             }
@@ -39,17 +45,6 @@ final class Team extends JetstreamTeam implements HasAvatar
     {
         return 'slug';
     }
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'slug',
-        'personal_team',
-    ];
 
     /**
      * The event map for the model.
@@ -132,45 +127,39 @@ final class Team extends JetstreamTeam implements HasAvatar
         return $this->hasMany(Department::class);
     }
 
-    /** @return HasMany<\App\Models\Role, self> */
+    /** @return HasMany<Role, $this> */
     public function organization(): HasMany
     {
-        return $this->hasMany(\App\Models\Role::class);
+        return $this->hasMany(Role::class);
     }
 
-
-    /** @return HasMany<\App\Models\CustomFieldSection, self> */
+    /** @return HasMany<CustomFieldSection, $this> */
     public function customFieldSections(): HasMany
     {
-        return $this->hasMany(\App\Models\CustomFieldSection::class);
+        return $this->hasMany(CustomFieldSection::class);
     }
 
-
-    /** @return HasMany<\App\Models\CustomField, self> */
+    /** @return HasMany<CustomField, $this> */
     public function customFields(): HasMany
     {
-        return $this->hasMany(\App\Models\CustomField::class);
+        return $this->hasMany(CustomField::class);
     }
 
-
-    /** @return HasMany<\App\Models\Enquiry, self> */
+    /** @return HasMany<Enquiry, $this> */
     public function enquiries(): HasMany
     {
-        return $this->hasMany(\App\Models\Enquiry::class);
+        return $this->hasMany(Enquiry::class);
     }
 
-
-    /** @return HasMany<\App\Models\ThirdPartyCarePlan, self> */
+    /** @return HasMany<ThirdPartyCarePlan, $this> */
     public function thirdPartyCarePlans(): HasMany
     {
-        return $this->hasMany(\App\Models\ThirdPartyCarePlan::class);
+        return $this->hasMany(ThirdPartyCarePlan::class);
     }
 
-
-    /** @return HasMany<\App\Models\Schedule, self> */
+    /** @return HasMany<Schedule, $this> */
     public function schedules(): HasMany
     {
-        return $this->hasMany(\App\Models\Schedule::class);
+        return $this->hasMany(Schedule::class);
     }
-
 }

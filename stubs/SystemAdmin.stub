@@ -1,0 +1,48 @@
+<?php
+
+namespace Relaticle\SystemAdmin\Models;
+
+class SystemAdministrator
+{
+    public string $name = '';
+    public string $email = '';
+    public string $password = '';
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    public static function create(array $attributes = []): static
+    {
+        return new static();
+    }
+
+    public static function count(): int
+    {
+        return 0;
+    }
+
+    public static function exists(): bool
+    {
+        return false;
+    }
+
+    public static function where(string $column, mixed $value = null): SystemAdministratorQuery
+    {
+        return new SystemAdministratorQuery();
+    }
+}
+
+class SystemAdministratorQuery
+{
+    public function exists(): bool
+    {
+        return false;
+    }
+}
+
+namespace Relaticle\SystemAdmin\Enums;
+
+enum SystemAdministratorRole: string
+{
+    case SuperAdministrator = 'super_administrator';
+}

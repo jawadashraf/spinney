@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 final class ThirdPartyCarePlanResource extends Resource
 {
     protected static ?string $model = ThirdPartyCarePlan::class;
+
     protected static bool $shouldRegisterNavigation = false;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
@@ -30,8 +31,6 @@ final class ThirdPartyCarePlanResource extends Resource
     protected static string|\UnitEnum|null $navigationGroup = 'Service Users';
 
     protected static ?string $navigationLabel = 'External Care Plans';
-
-    protected static ?string $pluralNavigationLabel = 'External Care Plans';
 
     protected static ?string $recordTitleAttribute = 'provider_name';
 
@@ -75,6 +74,9 @@ final class ThirdPartyCarePlanResource extends Resource
             ]);
     }
 
+    /**
+     * @return array<int, string>
+     */
     public static function getGlobalSearchAttributes(): array
     {
         return ['provider_name', 'status', 'serviceUser.name'];

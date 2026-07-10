@@ -69,7 +69,7 @@ final class Note extends Model implements HasCustomFieldsContract
     }
 
     /**
-     * @return MorphToMany<Company, $this>
+     * @return MorphToMany<Company, $this, Noteable>
      */
     public function companies(): MorphToMany
     {
@@ -80,7 +80,7 @@ final class Note extends Model implements HasCustomFieldsContract
     }
 
     /**
-     * @return MorphToMany<People, $this>
+     * @return MorphToMany<People, $this, Noteable>
      */
     public function people(): MorphToMany
     {
@@ -91,7 +91,7 @@ final class Note extends Model implements HasCustomFieldsContract
     }
 
     /**
-     * @return MorphToMany<Opportunity, $this>
+     * @return MorphToMany<Opportunity, $this, Noteable>
      */
     public function opportunities(): MorphToMany
     {

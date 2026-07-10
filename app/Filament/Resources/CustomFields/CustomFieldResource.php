@@ -8,6 +8,7 @@ use App\Enums\CustomFields\CustomFieldWidth;
 use App\Filament\Resources\CustomFields\Pages\CreateCustomField;
 use App\Filament\Resources\CustomFields\Pages\EditCustomField;
 use App\Filament\Resources\CustomFields\Pages\ListCustomFields;
+use App\Filament\Resources\CustomFields\RelationManagers\OptionsRelationManager;
 use App\Models\Company;
 use App\Models\CustomField;
 use App\Models\CustomFieldSection;
@@ -55,7 +56,12 @@ final class CustomFieldResource extends Resource
                             ])
                             ->required()
                             ->live()
-                            ->afterStateUpdated(fn (Select $component): ?\Filament\Schemas\Components\Component => $component->getContainer()->getComponent(fn ($c): bool => $c->getName() === 'custom_field_section_id')?->state(null)),
+                            ->afterStateUpdated(function (Select $component): void {
+                                $target = $component->getContainer()->getComponent(fn ($c): bool => $c->getName() === 'custom_field_section_id');
+                                if ($target && method_exists($target, 'state')) {
+                                    $target->state(null);
+                                }
+                            }),
 
                         Select::make('custom_field_section_id')
                             ->label('Section')
@@ -156,7 +162,7 @@ final class CustomFieldResource extends Resource
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Resources\CustomFields\RelationManagers\OptionsRelationManager::class,
+            OptionsRelationManager::class,
         ];
     }
 

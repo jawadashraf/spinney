@@ -21,6 +21,9 @@ final class UpcomingCarePlanReferralsWidget extends TableWidget
         return 'Upcoming Care Plan Referrals';
     }
 
+    /**
+     * @return Builder<ThirdPartyCarePlan>
+     */
     protected function getTableQuery(): Builder
     {
         return ThirdPartyCarePlan::query()

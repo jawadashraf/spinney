@@ -22,7 +22,7 @@ final class EditServiceUser extends EditRecord
         return true;
     }
 
-    public function getContentTabLabel(): ?string
+    public function getContentTabLabel(): string
     {
         return 'Details & Profile';
     }
@@ -69,6 +69,7 @@ final class EditServiceUser extends EditRecord
 
         $record = parent::handleRecordUpdate($record, $identityData);
 
+        /** @var ServiceUser $record */
         if (! empty($profileData)) {
             $record->profile()->updateOrCreate(
                 ['team_id' => $record->team_id],

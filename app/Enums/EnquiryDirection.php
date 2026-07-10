@@ -13,7 +13,7 @@ enum EnquiryDirection: string implements HasColor, HasIcon, HasLabel
     case INBOUND = 'inbound';
     case OUTBOUND = 'outbound';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::INBOUND => 'Inbound',
@@ -21,7 +21,7 @@ enum EnquiryDirection: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getColor(): string
     {
         return match ($this) {
             self::INBOUND => 'info',
@@ -29,7 +29,7 @@ enum EnquiryDirection: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): string
     {
         return match ($this) {
             self::INBOUND => 'heroicon-o-arrow-down-tray',

@@ -39,7 +39,7 @@ final class AppointmentsTable
                 TextColumn::make('attendee')
                     ->label('Attendee')
                     ->state(fn (Schedule $record): string => $record->isServiceUserAppointment()
-                        ? ($record->serviceUser?->name ?? '—')
+                        ? ($record->serviceUser->name ?? '—')
                         : ($record->getExternalAttendeeName() ?? '—')
                     )
                     ->searchable(query: fn (Builder $query, string $search) => $query->whereHas('serviceUser', fn ($q) => $q->where('name', 'like', "%{$search}%"))->orWhere('metadata->external_attendee_name', 'like', "%{$search}%")),

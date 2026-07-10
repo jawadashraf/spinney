@@ -14,7 +14,7 @@ enum CallerType: string implements HasColor, HasIcon, HasLabel
     case KNOWN_PERSON = 'known_person';
     case SERVICE_USER = 'service_user';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::ANONYMOUS => 'Anonymous',
@@ -23,7 +23,7 @@ enum CallerType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getColor(): string
     {
         return match ($this) {
             self::ANONYMOUS => 'gray',
@@ -32,7 +32,7 @@ enum CallerType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): string
     {
         return match ($this) {
             self::ANONYMOUS => 'heroicon-o-user-minus',

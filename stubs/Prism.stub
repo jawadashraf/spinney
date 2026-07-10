@@ -1,0 +1,67 @@
+<?php
+
+namespace Prism\Prism\Facades;
+
+class Prism extends \Illuminate\Support\Facades\Facade
+{
+    protected static function getFacadeAccessor(): string
+    {
+        return 'prism';
+    }
+
+    public static function text(): \Prism\Prism\PendingGeneration
+    {
+        return new \Prism\Prism\PendingGeneration();
+    }
+}
+
+namespace Prism\Prism;
+
+class PendingGeneration
+{
+    public function using(\Prism\Prism\Enums\Provider $provider, string $model): static
+    {
+        return $this;
+    }
+
+    public function withSystemPrompt(string $prompt): static
+    {
+        return $this;
+    }
+
+    public function withPrompt(string $prompt): static
+    {
+        return $this;
+    }
+
+    public function generate(): \Prism\Prism\ValueObjects\TextResponse
+    {
+        return new \Prism\Prism\ValueObjects\TextResponse('', new \Prism\Prism\ValueObjects\Usage(0, 0, 0));
+    }
+}
+
+namespace Prism\Prism\Enums;
+
+enum Provider: string
+{
+    case Anthropic = 'anthropic';
+}
+
+namespace Prism\Prism\ValueObjects;
+
+class Usage
+{
+    public function __construct(
+        public readonly int $promptTokens,
+        public readonly int $completionTokens,
+        public readonly int $totalTokens,
+    ) {}
+}
+
+class TextResponse
+{
+    public function __construct(
+        public readonly string $text,
+        public readonly Usage $usage,
+    ) {}
+}

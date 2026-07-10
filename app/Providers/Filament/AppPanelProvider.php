@@ -70,7 +70,7 @@ final class AppPanelProvider extends PanelProvider
             // ->domain('app.'.parse_url((string) config('app.url'))['host'])
             ->homeUrl(fn (): string => Filament::getTenant() ? CompanyResource::getUrl('index') : url('/'))
             ->brandName('Spinneyhill')
-            ->tenant(Team::class, ownershipRelationship: 'team', slugAttribute: 'slug')
+            ->tenant(Team::class, slugAttribute: 'slug', ownershipRelationship: 'team')
             ->tenantMiddleware([
                 SyncSpatiePermissionsTeamId::class,
             ], isPersistent: true)

@@ -22,7 +22,7 @@ final class NotesRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return NoteForm::get($schema, ['people']);
+        return NoteForm::get($schema);
     }
 
     public function table(Table $table): Table
@@ -48,7 +48,6 @@ final class NotesRelationManager extends RelationManager
                     ->orderQueryUsing(fn ($query) => $query->orderByDesc('notes.created_at'))
                     ->collapsible()
             )
-            ->paginated([10])
-            ->asTimeline();
+            ->paginated([10]);
     }
 }

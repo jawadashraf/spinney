@@ -26,7 +26,7 @@ final class Department extends Model
     // ];
 
     /**
-     * @return BelongsToMany<User, $this>
+     * @return BelongsToMany<User, $this, DepartmentUser>
      */
     public function users(): BelongsToMany
     {

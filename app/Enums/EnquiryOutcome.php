@@ -14,7 +14,7 @@ enum EnquiryOutcome: string implements HasColor, HasLabel
     case VOICEMAIL = 'voicemail';
     case CALLBACK_REQUIRED = 'callback_required';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::ANSWERED => 'Answered',
@@ -24,7 +24,7 @@ enum EnquiryOutcome: string implements HasColor, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getColor(): string
     {
         return match ($this) {
             self::ANSWERED => 'success',

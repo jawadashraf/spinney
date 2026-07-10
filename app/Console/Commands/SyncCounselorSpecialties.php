@@ -6,15 +6,15 @@ namespace App\Console\Commands;
 
 use App\Enums\CounselorType;
 use App\Models\User;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Spatie\Permission\Models\Role;
 
+#[Description('Migrate old specialty roles to counselor role with metadata')]
+#[Signature('counselors:sync-specialties')]
 final class SyncCounselorSpecialties extends Command
 {
-    protected $signature = 'counselors:sync-specialties';
-
-    protected $description = 'Migrate old specialty roles to counselor role with metadata';
-
     public function handle(): int
     {
         $this->info('Starting counselor specialty migration...');
@@ -49,10 +49,11 @@ final class SyncCounselorSpecialties extends Command
 
             foreach ($users as $user) {
                 // Add counselor type to user's metadata
+                /** @var array<int, string> $types */
                 $types = $user->counselor_types ?? [];
                 if (! in_array($counselorType, $types)) {
                     $types[] = $counselorType;
-                    $user->counselor_types = $types;
+                    $user->forceFill(['counselor_types' => $types]);
                     $user->save();
                 }
 

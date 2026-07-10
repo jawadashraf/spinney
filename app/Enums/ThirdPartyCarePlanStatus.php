@@ -15,7 +15,7 @@ enum ThirdPartyCarePlanStatus: string implements HasColor, HasIcon, HasLabel
     case COMPLETED = 'completed';
     case CANCELLED = 'cancelled';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::PENDING => 'Pending',
@@ -25,7 +25,7 @@ enum ThirdPartyCarePlanStatus: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getColor(): string
     {
         return match ($this) {
             self::PENDING => 'warning',
@@ -35,7 +35,7 @@ enum ThirdPartyCarePlanStatus: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): string
     {
         return match ($this) {
             self::PENDING => 'heroicon-m-clock',

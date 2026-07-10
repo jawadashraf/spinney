@@ -19,6 +19,7 @@ final class InfolistBuilder
 {
     private ?Schema $schema = null;
 
+    /** @var array<int, string> */
     private array $only = [];
 
     private bool $hiddenLabels = false;
@@ -34,6 +35,9 @@ final class InfolistBuilder
         return $this;
     }
 
+    /**
+     * @param  array<int, string>  $only
+     */
     public function only(array $only): static
     {
         $this->only = $only;
@@ -104,6 +108,9 @@ final class InfolistBuilder
         return Grid::make(2)->components($this->values()->toArray());
     }
 
+    /**
+     * @return Collection<int, mixed>
+     */
     public function values(): Collection
     {
         $modelClass = $this->schema instanceof Schema ? $this->schema->getModel() : null;

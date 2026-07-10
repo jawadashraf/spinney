@@ -6,15 +6,12 @@ namespace App\Models\Pivots;
 
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
+#[Table(name: 'task_user')]
 final class TaskUser extends Pivot
 {
-    /**
-     * @var string
-     */
-    protected $table = 'task_user';
-
     /**
      * @var array<string, string>
      */

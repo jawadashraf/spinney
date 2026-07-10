@@ -16,7 +16,7 @@ enum EnquirySourceType: string implements HasColor, HasIcon, HasLabel
     case ONLINE = 'online';
     case REFERRAL = 'referral';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::PHONE => 'Phone',
@@ -27,7 +27,7 @@ enum EnquirySourceType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getColor(): string
     {
         return match ($this) {
             self::PHONE => 'primary',
@@ -38,7 +38,7 @@ enum EnquirySourceType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): string
     {
         return match ($this) {
             self::PHONE => 'heroicon-o-phone',

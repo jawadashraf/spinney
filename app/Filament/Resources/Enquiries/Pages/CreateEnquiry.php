@@ -8,6 +8,7 @@ use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\Enquiries\EnquiryResource;
 use App\Filament\Resources\Enquiries\Schemas\EnquiryForm;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\Wizard\Step;
 
 final class CreateEnquiry extends CreateRecord
 {
@@ -21,6 +22,9 @@ final class CreateEnquiry extends CreateRecord
         return true;
     }
 
+    /**
+     * @return array<int, Step>
+     */
     protected function getSteps(): array
     {
         return EnquiryForm::getWizardSteps();

@@ -11,7 +11,6 @@ use App\Enums\ScheduleType;
 use App\Enums\SessionType;
 use App\Models\People;
 use App\Models\User;
-use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\Select;
@@ -86,11 +85,12 @@ final class AppointmentForm
                                                     return [];
                                                 }
 
+                                                /** @var array<int, array<string, mixed>> $slots */
                                                 $slots = $counselor->getBookableSlots($date, 60);
 
                                                 return collect($slots)
-                                                    ->filter(fn ($slot) => (bool) ($slot['is_available'] ?? false))
-                                                    ->mapWithKeys(fn ($slot) => [
+                                                    ->filter(fn ($slot): bool => (bool) ($slot['is_available'] ?? false))
+                                                    ->mapWithKeys(fn ($slot): array => [
                                                         "{$slot['start_time']}-{$slot['end_time']}" => "{$slot['start_time']} - {$slot['end_time']}",
                                                     ])
                                                     ->toArray();
@@ -181,6 +181,10 @@ final class AppointmentForm
             ]);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     public static function mutateFormDataBeforeSave(array $data): array
     {
         $data['schedule_type'] = ScheduleType::APPOINTMENT->value;
@@ -188,7 +192,7 @@ final class AppointmentForm
         $bookingDate = $data['booking_date'] ?? null;
         $selectedSlot = $data['selected_slot'] ?? null;
         if ($bookingDate && $selectedSlot) {
-            [$startTime, $endTime] = explode('-', $selectedSlot);
+            [$startTime, $endTime] = explode('-', (string) $selectedSlot);
             $data['start_date'] = $bookingDate;
             $data['end_date'] = $bookingDate;
 
@@ -214,10 +218,13 @@ final class AppointmentForm
         return $data;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function fillFormFromRecord(Schedule $record): array
     {
         $data = [];
-        $data['booking_date'] = $record->start_date ? Carbon::parse($record->start_date)->toDateString() : null;
+        $data['booking_date'] = optional($record->start_date)->toDateString();
         $meta = $record->metadata ?? [];
         if (isset($meta['start_time']) && isset($meta['end_time'])) {
             $data['selected_slot'] = "{$meta['start_time']}-{$meta['end_time']}";

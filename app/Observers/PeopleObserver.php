@@ -23,7 +23,7 @@ final readonly class PeopleObserver
     {
         $people->invalidateAiSummary();
 
-        if (isset($people->custom_fields) && is_array($people->custom_fields)) {
+        if ($people->custom_fields !== null) {
             $people->saveCustomFields($people->custom_fields);
         }
     }

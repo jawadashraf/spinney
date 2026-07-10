@@ -12,7 +12,7 @@ enum InjectionHistory: string implements HasLabel
     case PREVIOUSLY = 'previously';
     case CURRENTLY = 'currently';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::NEVER => 'Never injected',

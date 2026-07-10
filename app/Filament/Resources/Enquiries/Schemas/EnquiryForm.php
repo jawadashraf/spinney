@@ -77,6 +77,9 @@ final class EnquiryForm
             ]);
     }
 
+    /**
+     * @return array<int, Step>
+     */
     public static function getWizardSteps(): array
     {
         return [

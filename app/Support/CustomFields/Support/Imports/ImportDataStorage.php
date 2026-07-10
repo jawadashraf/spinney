@@ -9,11 +9,14 @@ use WeakMap;
 
 final class ImportDataStorage
 {
+    /** @var WeakMap<object, array<string, mixed>>|null */
     private static ?WeakMap $storage = null;
 
     private static function init(): void
     {
-        self::$storage ??= new WeakMap;
+        /** @var WeakMap<object, array<string, mixed>> $storage */
+        $storage = new WeakMap;
+        self::$storage ??= $storage;
     }
 
     public static function set(Model $record, string $fieldCode, mixed $value): void
@@ -22,9 +25,14 @@ final class ImportDataStorage
 
         $data = self::$storage[$record] ?? [];
         $data[$fieldCode] = $value;
-        self::$storage[$record] = $data;
+        /** @var array<string, mixed> $cleanData */
+        $cleanData = $data;
+        self::$storage[$record] = $cleanData;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function pull(Model $record): array
     {
         self::init();

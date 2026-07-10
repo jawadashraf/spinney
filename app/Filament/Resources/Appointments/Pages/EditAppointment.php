@@ -13,6 +13,7 @@ use App\Filament\Resources\Schedules\Actions\ConfirmAppointmentAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Zap\Models\Schedule;
 
 final class EditAppointment extends EditRecord
 {
@@ -22,7 +23,10 @@ final class EditAppointment extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        return array_merge($data, AppointmentForm::fillFormFromRecord($this->record));
+        /** @var Schedule $record */
+        $record = $this->record;
+
+        return array_merge($data, AppointmentForm::fillFormFromRecord($record));
     }
 
     protected function mutateFormDataBeforeSave(array $data): array

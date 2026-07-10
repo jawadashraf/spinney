@@ -13,7 +13,7 @@ enum PaymentType: string implements HasColor, HasIcon, HasLabel
     case FREE = 'free';
     case PAID = 'paid';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::FREE => 'Free',
@@ -21,7 +21,7 @@ enum PaymentType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getColor(): string
     {
         return match ($this) {
             self::FREE => 'success',
@@ -29,7 +29,7 @@ enum PaymentType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): string
     {
         return match ($this) {
             self::FREE => 'heroicon-m-gift',

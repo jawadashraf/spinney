@@ -14,7 +14,7 @@ enum SubstanceUseFrequency: string implements HasLabel
     case MONTHLY = 'monthly';
     case NOT_USING = 'not_currently_using';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::DAILY => 'Daily',

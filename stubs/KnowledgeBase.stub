@@ -1,0 +1,18 @@
+<?php
+
+namespace Guava\FilamentKnowledgeBase\Plugins;
+
+use Filament\Panel;
+
+class KnowledgeBasePlugin
+{
+    public static function make(): static
+    {
+        return new static();
+    }
+
+    public function getId(): string
+    {
+        return 'knowledge-base';
+    }
+}

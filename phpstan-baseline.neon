@@ -7,16 +7,70 @@ parameters:
 			path: app-modules/OnboardSeed/src/Support/BaseModelSeeder.php
 
 		-
-			message: '#^Access to an undefined property Relaticle\\CustomFields\\Models\\CustomField\:\:\$tenant_id\.$#'
-			identifier: property.notFound
+			message: '#^Method App\\Http\\Responses\\LoginResponse\:\:toResponse\(\) should return Illuminate\\Http\\RedirectResponse\|Livewire\\Features\\SupportRedirects\\Redirector but returns Illuminate\\Http\\RedirectResponse\|Illuminate\\Routing\\Redirector\.$#'
+			identifier: return.type
 			count: 1
-			path: app/Console/Commands/BackfillCustomFieldColorsCommand.php
+			path: app/Http/Responses/LoginResponse.php
 
 		-
 			message: '#^Call to an undefined method Filament\\Models\\Contracts\\HasTenants\|Illuminate\\Contracts\\Auth\\Authenticatable\|Illuminate\\Database\\Eloquent\\Model\:\:switchTeam\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/Listeners/SwitchTeam.php
+
+		-
+			message: '#^Method App\\Models\\Company\:\:customFieldValues\(\) should return Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, Illuminate\\Database\\Eloquent\\Model\> but returns Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, \$this\(App\\Models\\Company\)\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Company.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Enquiry\:\:\$creation_source\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Enquiry.php
+
+		-
+			message: '#^Method App\\Models\\Note\:\:customFieldValues\(\) should return Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, Illuminate\\Database\\Eloquent\\Model\> but returns Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, \$this\(App\\Models\\Note\)\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Note.php
+
+		-
+			message: '#^Method App\\Models\\Opportunity\:\:customFieldValues\(\) should return Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, Illuminate\\Database\\Eloquent\\Model\> but returns Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, \$this\(App\\Models\\Opportunity\)\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Opportunity.php
+
+		-
+			message: '#^Method App\\Models\\People\:\:customFieldValues\(\) should return Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, Illuminate\\Database\\Eloquent\\Model\> but returns Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, \$this\(App\\Models\\People\)\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/People.php
+
+		-
+			message: '#^Parameter \#1 \$builder \(Illuminate\\Database\\Eloquent\\Builder\<TModel of Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Models\\Scopes\\TeamScope\:\:apply\(\) should be compatible with parameter \$builder \(Illuminate\\Database\\Eloquent\\Builder\<covariant Illuminate\\Database\\Eloquent\\Model\>\) of method Illuminate\\Database\\Eloquent\\Scope\<TModel of Illuminate\\Database\\Eloquent\\Model\>\:\:apply\(\)$#'
+			identifier: method.childParameterType
+			count: 1
+			path: app/Models/Scopes/TeamScope.php
+
+		-
+			message: '#^Method App\\Models\\Task\:\:customFieldValues\(\) should return Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, Illuminate\\Database\\Eloquent\\Model\> but returns Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, \$this\(App\\Models\\Task\)\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Task.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ThirdPartyCarePlan\:\:\$creation_source\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/ThirdPartyCarePlan.php
+
+		-
+			message: '#^Method App\\Models\\ThirdPartyCarePlan\:\:customFieldValues\(\) should return Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, Illuminate\\Database\\Eloquent\\Model\> but returns Illuminate\\Database\\Eloquent\\Relations\\MorphMany\<App\\Models\\CustomFieldValue, \$this\(App\\Models\\ThirdPartyCarePlan\)\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/ThirdPartyCarePlan.php
 
 		-
 			message: '#^Property App\\Models\\Opportunity\:\:\$creator_id \(int\<0, max\>\|null\) does not accept int\|string\|null\.$#'
@@ -37,16 +91,52 @@ parameters:
 			path: app/Observers/TaskObserver.php
 
 		-
-			message: '#^Cannot access offset ''host'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
+			message: '#^Property App\\Models\\ThirdPartyCarePlan\:\:\$creator_id \(int\<0, max\>\) does not accept int\.$#'
+			identifier: assign.propertyType
 			count: 1
-			path: app/Providers/Filament/AppPanelProvider.php
+			path: app/Observers/ThirdPartyCarePlanObserver.php
+
+		-
+			message: '#^Access to constant Anthropic on an unknown class Prism\\Prism\\Enums\\Provider\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Services/AI/RecordSummaryService.php
+
+		-
+			message: '#^Access to property \$completionTokens on an unknown class Prism\\Prism\\ValueObjects\\Usage\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Services/AI/RecordSummaryService.php
+
+		-
+			message: '#^Access to property \$promptTokens on an unknown class Prism\\Prism\\ValueObjects\\Usage\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Services/AI/RecordSummaryService.php
+
+		-
+			message: '#^Call to static method text\(\) on an unknown class Prism\\Prism\\Facades\\Prism\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Services/AI/RecordSummaryService.php
+
+		-
+			message: '#^Parameter \$usage of method App\\Services\\AI\\RecordSummaryService\:\:cacheSummary\(\) has invalid type Prism\\Prism\\ValueObjects\\Usage\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Services/AI/RecordSummaryService.php
 
 		-
 			message: '#^Parameter \#1 \$array of function array_filter expects array, list\<string\>\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Services/AvatarService.php
+
+		-
+			message: '#^Static property App\\Support\\CustomFields\\Support\\Imports\\ImportDataStorage\:\:\$storage \(WeakMap\<object, array\<string, mixed\>\>\|null\) does not accept non\-empty\-array\<mixed, array\<string, mixed\>\>\|WeakMap\<object, array\<string, mixed\>\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Support/CustomFields/Support/Imports/ImportDataStorage.php
 
 		-
 			message: '#^Parameter \#1 \$title of static method Illuminate\\Support\\Str\:\:slug\(\) expects string, bool\|string given\.$#'

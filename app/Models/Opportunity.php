@@ -13,6 +13,7 @@ use App\Models\Concerns\HasTeam;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Observers\OpportunityObserver;
 use Database\Factories\OpportunityFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,9 @@ use Spatie\EloquentSortable\SortableTrait;
  * @property CreationSource $creation_source
  */
 #[ObservedBy(OpportunityObserver::class)]
+#[Fillable([
+    'creation_source',
+])]
 final class Opportunity extends Model implements HasCustomFieldsContract
 {
     use HasAiSummary;
@@ -40,15 +44,6 @@ final class Opportunity extends Model implements HasCustomFieldsContract
     use HasTeam;
     use SoftDeletes;
     use SortableTrait;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'creation_source',
-    ];
 
     /**
      * @var array<string, mixed>
@@ -93,7 +88,7 @@ final class Opportunity extends Model implements HasCustomFieldsContract
         return $this->morphToMany(Task::class, 'taskable');
     }
 
-    /** @return BelongsTo<Team, self> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);

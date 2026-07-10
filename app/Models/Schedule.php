@@ -10,29 +10,30 @@ use App\Enums\CounselorType;
 use App\Enums\PaymentType;
 use App\Enums\SessionType;
 use App\Models\Concerns\HasTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Zap\Models\Schedule as ZapSchedule;
 
+#[Fillable([
+    'team_id',
+    'schedulable_type',
+    'schedulable_id',
+    'name',
+    'description',
+    'schedule_type',
+    'start_date',
+    'end_date',
+    'is_recurring',
+    'frequency',
+    'frequency_config',
+    'metadata',
+    'is_active',
+])]
 final class Schedule extends ZapSchedule
 {
     use HasTeam;
-
-    protected $fillable = [
-        'team_id',
-        'schedulable_type',
-        'schedulable_id',
-        'name',
-        'description',
-        'schedule_type',
-        'start_date',
-        'end_date',
-        'is_recurring',
-        'frequency',
-        'frequency_config',
-        'metadata',
-        'is_active',
-    ];
 
     //    protected static function booted(): void
     //    {
@@ -53,11 +54,17 @@ final class Schedule extends ZapSchedule
     //        });
     //    }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function schedulable(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * @return BelongsTo<People, $this>
+     */
     public function serviceUser(): BelongsTo
     {
         return $this->belongsTo(People::class, 'metadata->service_user_id');

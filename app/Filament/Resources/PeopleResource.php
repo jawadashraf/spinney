@@ -69,10 +69,15 @@ final class PeopleResource extends Resource
                 Grid::make()
                     ->columnSpanFull()
                     ->schema([
-                        TextInput::make('name')
+                        TextInput::make('first_name')
                             ->required()
                             ->maxLength(255)
-                            ->columnSpan(7)
+                            ->columnSpan(4)
+                            ->disabled(fn (?People $record) => $record?->is_locked),
+                        TextInput::make('last_name')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpan(3)
                             ->disabled(fn (?People $record) => $record?->is_locked),
                         Select::make('company_id')
                             ->relationship('company', 'name')
@@ -127,7 +132,9 @@ final class PeopleResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('avatar')->label('')->imageSize(24)->circular(),
-                TextColumn::make('name')
+                TextColumn::make('first_name')
+                    ->searchable(),
+                TextColumn::make('last_name')
                     ->searchable(),
                 TextColumn::make('company.name')
                     ->label('Company')
@@ -243,11 +250,14 @@ final class PeopleResource extends Resource
         /** @var User|null $user */
         $user = Auth::user();
 
-        return parent::getEloquentQuery()
+        /** @var Builder<People> $query */
+        $query = parent::getEloquentQuery()
             ->where('is_service_user', false)
             ->when($user?->hasRole('service_user'), fn (Builder $query) => $query->where('user_id', Auth::id()))
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+
+        return $query;
     }
 }

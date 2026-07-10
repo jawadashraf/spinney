@@ -14,7 +14,7 @@ enum TreatmentOutcome: string implements HasLabel
     case DROP_OUT = 'drop_out';
     case PEER_SUPPORT = 'peer_support';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::DRUG_FREE => 'TREATMENT COMPLETED (Drug Free)',

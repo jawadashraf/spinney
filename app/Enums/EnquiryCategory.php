@@ -19,7 +19,7 @@ enum EnquiryCategory: string implements HasColor, HasIcon, HasLabel
     case MENTAL_HEALTH = 'mental_health';
     case COMMUNITY_SUPPORT = 'community_support';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::FAMILY_ADVICE => 'Family Advice',
@@ -33,7 +33,7 @@ enum EnquiryCategory: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getColor(): string
     {
         return match ($this) {
             self::FAMILY_ADVICE => 'info',
@@ -47,7 +47,7 @@ enum EnquiryCategory: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): string
     {
         return match ($this) {
             self::FAMILY_ADVICE => 'heroicon-m-users',

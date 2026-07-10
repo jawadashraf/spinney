@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ServiceUsers\RelationManagers;
 
 use App\Enums\ThirdPartyCarePlanStatus;
+use App\Models\ServiceUser;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -42,6 +43,7 @@ final class ThirdPartyCarePlansRelationManager extends RelationManager
 
     public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
     {
+        /** @var ServiceUser $ownerRecord */
         return Tab::make('External Care')
             ->badge($ownerRecord->thirdPartyCarePlans()->count())
             ->badgeColor('info')
@@ -101,11 +103,11 @@ final class ThirdPartyCarePlansRelationManager extends RelationManager
                             ->maxDate(now()),
                         DatePicker::make('start_date')
                             ->visible(fn (Get $get): bool => in_array($get('status'), ['in_progress', 'completed']))
-                            ->minDate(fn (Get $get) => $get('referral_date'))
+                            ->minDate(fn (Get $get): mixed => $get('referral_date'))
                             ->nullable(),
                         DatePicker::make('end_date')
                             ->visible(fn (Get $get): bool => $get('status') === 'completed')
-                            ->minDate(fn (Get $get) => $get('start_date'))
+                            ->minDate(fn (Get $get): mixed => $get('start_date'))
                             ->nullable(),
                         Select::make('managers')
                             ->relationship('managers', 'name')
@@ -197,7 +199,7 @@ final class ThirdPartyCarePlansRelationManager extends RelationManager
                 CreateAction::make()
                     ->icon('heroicon-o-plus')
                     ->mutateFormDataUsing(function (array $data): array {
-                        $data['people_id'] = $this->getOwnerRecord()->id;
+                        $data['people_id'] = $this->getOwnerRecord()->getKey();
 
                         return $data;
                     }),

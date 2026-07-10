@@ -34,7 +34,7 @@ final class AssignToDepartmentAction
                 $department = $record->department;
 
                 Notification::make()
-                    ->title('Enquiry assigned to '.($department?->name ?? 'department'))
+                    ->title('Enquiry assigned to '.($department->name ?? 'department'))
                     ->success()
                     ->send();
             });

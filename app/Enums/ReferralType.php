@@ -14,7 +14,7 @@ enum ReferralType: string implements HasLabel
     case POLICE = 'police';
     case OTHER = 'other';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::SELF => 'Self-Referral',

@@ -72,66 +72,66 @@ final class ScheduleInfolist
                                 }
 
                                 $freqStr = $frequency instanceof \BackedEnum ? (string) $frequency->value : (string) $frequency;
-                                $configArr = is_object($config) ? json_decode(json_encode($config), true) : (is_array($config) ? $config : []);
+                                $configArr = is_object($config) ? json_decode(json_encode($config) ?: '{}', true) : (is_array($config) ? $config : []);
 
                                 if ($freqStr === 'daily') {
                                     return 'Repeats daily';
                                 }
 
                                 if ($freqStr === 'weekly') {
-                                    $days = array_map('ucfirst', $configArr['days'] ?? []);
+                                    $days = array_map(ucfirst(...), $configArr['days'] ?? []);
 
-                                    return 'Repeats weekly'.(! empty($days) ? ' on '.implode(', ', $days) : '');
+                                    return 'Repeats weekly'.($days === [] ? '' : ' on '.implode(', ', $days));
                                 }
 
                                 if ($freqStr === 'biweekly') {
-                                    $days = array_map('ucfirst', $configArr['days'] ?? []);
+                                    $days = array_map(ucfirst(...), $configArr['days'] ?? []);
 
-                                    return 'Repeats bi-weekly'.(! empty($days) ? ' on '.implode(', ', $days) : '');
+                                    return 'Repeats bi-weekly'.($days === [] ? '' : ' on '.implode(', ', $days));
                                 }
 
                                 if (preg_match('/^every_(\d+)_weeks$/', $freqStr, $matches)) {
                                     $weeks = $matches[1];
-                                    $days = array_map('ucfirst', $configArr['days'] ?? []);
+                                    $days = array_map(ucfirst(...), $configArr['days'] ?? []);
 
-                                    return "Repeats every {$weeks} weeks".(! empty($days) ? ' on '.implode(', ', $days) : '');
+                                    return "Repeats every {$weeks} weeks".($days === [] ? '' : ' on '.implode(', ', $days));
                                 }
 
                                 if ($freqStr === 'monthly') {
                                     $days = $configArr['days_of_month'] ?? [];
 
-                                    return 'Repeats monthly'.(! empty($days) ? ' on day(s) '.implode(', ', $days) : '');
+                                    return 'Repeats monthly'.(empty($days) ? '' : ' on day(s) '.implode(', ', $days));
                                 }
 
                                 if ($freqStr === 'bimonthly') {
                                     $days = $configArr['days_of_month'] ?? [];
 
-                                    return 'Repeats every 2 months'.(! empty($days) ? ' on day(s) '.implode(', ', $days) : '');
+                                    return 'Repeats every 2 months'.(empty($days) ? '' : ' on day(s) '.implode(', ', $days));
                                 }
 
                                 if ($freqStr === 'quarterly') {
                                     $days = $configArr['days_of_month'] ?? [];
 
-                                    return 'Repeats quarterly'.(! empty($days) ? ' on day(s) '.implode(', ', $days) : '');
+                                    return 'Repeats quarterly'.(empty($days) ? '' : ' on day(s) '.implode(', ', $days));
                                 }
 
                                 if ($freqStr === 'semiannually') {
                                     $days = $configArr['days_of_month'] ?? [];
 
-                                    return 'Repeats every 6 months'.(! empty($days) ? ' on day(s) '.implode(', ', $days) : '');
+                                    return 'Repeats every 6 months'.(empty($days) ? '' : ' on day(s) '.implode(', ', $days));
                                 }
 
                                 if (preg_match('/^every_(\d+)_months$/', $freqStr, $matches)) {
                                     $months = $matches[1];
                                     $days = $configArr['days_of_month'] ?? [];
 
-                                    return "Repeats every {$months} months".(! empty($days) ? ' on day(s) '.implode(', ', $days) : '');
+                                    return "Repeats every {$months} months".(empty($days) ? '' : ' on day(s) '.implode(', ', $days));
                                 }
 
                                 if ($freqStr === 'annually') {
-                                    $months = array_map('ucfirst', $record->metadata['recurring_months'] ?? []);
+                                    $months = array_map(ucfirst(...), $record->metadata['recurring_months'] ?? []);
 
-                                    return 'Repeats annually'.(! empty($months) ? ' in '.implode(', ', $months) : '');
+                                    return 'Repeats annually'.($months === [] ? '' : ' in '.implode(', ', $months));
                                 }
 
                                 if ($freqStr === 'monthly_ordinal_weekday') {

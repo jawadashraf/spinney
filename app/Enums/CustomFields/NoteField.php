@@ -11,6 +11,8 @@ enum NoteField: string
 {
     use CustomFieldTrait;
 
+    case BODY = 'body';
+
     public function getFieldType(): string
     {
         return 'note';

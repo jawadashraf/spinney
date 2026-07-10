@@ -26,11 +26,14 @@ final class AppointmentCancelledNotification extends Notification implements Sho
         return ['mail', 'database'];
     }
 
+    /**
+     * @param  object{name: string}  $notifiable
+     */
     public function toMail(object $notifiable): MailMessage
     {
         $periods = $this->schedule->periods;
-        $startTime = $periods->first()?->start_time ?? 'N/A';
-        $endTime = $periods->first()?->end_time ?? 'N/A';
+        $startTime = $periods->first()->start_time ?? 'N/A';
+        $endTime = $periods->first()->end_time ?? 'N/A';
 
         $mail = (new MailMessage)
             ->subject('Appointment Cancelled')
@@ -38,7 +41,7 @@ final class AppointmentCancelledNotification extends Notification implements Sho
             ->line('An appointment has been cancelled:')
             ->line('**Date:** '.$this->schedule->start_date->format('F j, Y'))
             ->line('**Time:** '.$startTime.' - '.$endTime)
-            ->line('**Counselor:** '.$this->schedule->schedulable->name)
+            ->line('**Counselor:** '.($this->schedule->schedulable->name ?? 'N/A'))
             ->line('**Service User:** '.($this->schedule->metadata['service_user_name'] ?? 'N/A'));
 
         if (isset($this->schedule->metadata['cancellation_reason'])) {
@@ -62,7 +65,7 @@ final class AppointmentCancelledNotification extends Notification implements Sho
             'schedule_id' => $this->schedule->id,
             'message' => 'Appointment cancelled for '.$this->schedule->start_date->format('F j, Y'),
             'date' => $this->schedule->start_date->format('Y-m-d'),
-            'time' => $periods->first()?->start_time ?? 'N/A',
+            'time' => $periods->first()->start_time ?? 'N/A',
             'reason' => $this->schedule->metadata['cancellation_reason'] ?? null,
         ];
     }

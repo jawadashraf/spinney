@@ -14,6 +14,7 @@ use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Observers\CompanyObserver;
 use App\Services\AvatarService;
 use Database\Factories\CompanyFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +36,13 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property-read string $created_by
  */
 #[ObservedBy(CompanyObserver::class)]
+#[Fillable([
+    'name',
+    'address',
+    'country',
+    'phone',
+    'creation_source',
+])]
 final class Company extends Model implements HasCustomFieldsContract, HasMedia
 {
     use HasAiSummary;
@@ -48,17 +56,6 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
     use HasTeam;
     use InteractsWithMedia;
     use SoftDeletes;
-
-    /**
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'address',
-        'country',
-        'phone',
-        'creation_source',
-    ];
 
     /**
      * @var array<string, mixed>
@@ -120,7 +117,7 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
         return $this->morphToMany(Task::class, 'taskable');
     }
 
-    /** @return BelongsTo<Team, self> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);

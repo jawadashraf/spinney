@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace App\Models\Pivots;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
+#[Table(name: 'noteables')]
 final class Noteable extends MorphPivot
 {
-    /**
-     * @var string
-     */
-    protected $table = 'noteables';
-
     /**
      * @var array<string, string>
      */

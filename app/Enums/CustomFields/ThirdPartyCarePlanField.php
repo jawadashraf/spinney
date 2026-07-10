@@ -56,7 +56,7 @@ enum ThirdPartyCarePlanField: string
         };
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return match ($this) {
             self::TREATMENT_GOALS => 'Primary goals and objectives of the treatment plan',

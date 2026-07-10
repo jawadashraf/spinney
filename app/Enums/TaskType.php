@@ -13,7 +13,7 @@ enum TaskType: string implements HasColor, HasIcon, HasLabel
     case GeneralTask = 'general_task';
     case FollowUpCall = 'follow_up_call';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::GeneralTask => 'General Task',
@@ -21,7 +21,7 @@ enum TaskType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getColor(): string
     {
         return match ($this) {
             self::GeneralTask => 'primary',
@@ -29,7 +29,7 @@ enum TaskType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): string
     {
         return match ($this) {
             self::GeneralTask => 'heroicon-o-check-circle',

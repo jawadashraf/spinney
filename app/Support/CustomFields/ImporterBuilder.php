@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\CustomFields;
 
+use App\Models\Contracts\HasCustomFields;
 use App\Models\CustomField;
 use App\Support\CustomFields\Support\Imports\ImportDataStorage;
 use Filament\Actions\Imports\ImportColumn;
@@ -27,6 +28,9 @@ final class ImporterBuilder
         return $this;
     }
 
+    /**
+     * @return array<int, ImportColumn>
+     */
     public function columns(): array
     {
         $query = CustomField::query()
@@ -51,7 +55,7 @@ final class ImporterBuilder
 
     public function saveValues(): void
     {
-        if (! $this->record instanceof \Illuminate\Database\Eloquent\Model) {
+        if (! $this->record instanceof Model) {
             return;
         }
 
@@ -61,7 +65,7 @@ final class ImporterBuilder
             return;
         }
 
-        /** @var \App\Models\Contracts\HasCustomFields $record */
+        /** @var HasCustomFields&Model $record */
         $record = $this->record;
         $record->saveCustomFields($values);
     }

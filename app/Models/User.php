@@ -15,6 +15,9 @@ use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -24,9 +27,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasTeams;
-use Laravel\Sanctum\HasApiTokens;
 /**
  * @property string $name
  * @property string $email
@@ -35,14 +35,38 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read string $profile_photo_url
  * @property Carbon|null $email_verified_at
  * @property string|null $remember_token
- * @property string|null $two_factor_recovery_codes
  * @property string|null $two_factor_secret
+ * @property array<int, string> $counselor_types
+ *
+ * @method array getBookableSlots(string $date, int $duration)
  */
+use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Jetstream\HasTeams;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Models\Concerns\HasActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 use Zap\Models\Concerns\HasSchedules;
 
+#[Appends([
+    'name',
+    'profile_photo_url',
+])]
+#[Fillable([
+    'name',
+    'first_name',
+    'last_name',
+    'email',
+    'password',
+    'is_system_admin',
+    'counselor_types',
+])]
+#[Hidden([
+    'password',
+    'remember_token',
+    'two_factor_recovery_codes',
+    'two_factor_secret',
+])]
 final class User extends Authenticatable implements FilamentUser, HasAvatar, HasTenants, MustVerifyEmail
 {
     use HasActivity;
@@ -69,40 +93,6 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     }
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'is_system_admin',
-        'counselor_types',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-        'two_factor_recovery_codes',
-        'two_factor_secret',
-    ];
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var list<string>
-     */
-    protected $appends = [
-        'profile_photo_url', // @phpstan-ignore rules.modelAppends
-    ];
-
-    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -117,26 +107,59 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
         ];
     }
 
+    public function getNameAttribute(): string
+    {
+        if ($this->first_name && $this->last_name) {
+            return "{$this->first_name} {$this->last_name}";
+        }
+
+        return $this->attributes['name'] ?? '';
+    }
+
+    protected static function booted(): void
+    {
+        self::saving(function (User $user): void {
+            if (isset($user->attributes['name']) && ! isset($user->attributes['first_name'])) {
+                $nameParts = explode(' ', trim((string) $user->attributes['name']), 2);
+                $user->first_name = $nameParts[0];
+                $user->last_name = $nameParts[1] ?? $nameParts[0];
+            }
+
+            if ($user->first_name && $user->last_name) {
+                $user->attributes['name'] = "{$user->first_name} {$user->last_name}";
+            }
+
+            if ($user->first_name && $user->last_name) {
+                $user->attributes['name'] = "{$user->first_name} {$user->last_name}";
+            }
+        });
+    }
+
     public function hasSpecialty(CounselorType $type): bool
     {
-        return in_array($type->value, $this->counselor_types ?? []);
+        /** @var array<int, string> $types */
+        $types = $this->counselor_types ?? [];
+
+        return in_array($type->value, $types);
     }
 
     public function addSpecialty(CounselorType $type): void
     {
+        /** @var array<int, string> $types */
         $types = $this->counselor_types ?? [];
         if (! in_array($type->value, $types)) {
             $types[] = $type->value;
-            $this->counselor_types = $types;
+            $this->forceFill(['counselor_types' => $types]);
             $this->save();
         }
     }
 
     public function removeSpecialty(CounselorType $type): void
     {
+        /** @var array<int, string> $types */
         $types = $this->counselor_types ?? [];
-        $types = array_filter($types, fn ($t) => $t !== $type->value);
-        $this->counselor_types = array_values($types);
+        $types = array_filter($types, fn ($t): bool => $t !== $type->value);
+        $this->forceFill(['counselor_types' => array_values($types)]);
         $this->save();
     }
 
@@ -149,7 +172,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     }
 
     /**
-     * @return BelongsToMany<Task, $this>
+     * @return BelongsToMany<Task, $this, TaskUser>
      */
     public function tasks(): BelongsToMany
     {
@@ -176,7 +199,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     }
 
     /**
-     * @return BelongsToMany<Department, $this>
+     * @return BelongsToMany<Department, $this, DepartmentUser>
      */
     public function departments(): BelongsToMany
     {
@@ -225,7 +248,10 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     /**
      * @return array<Model>|Collection<Model>
      */
-    public function getTenants(Panel $panel): array|Collection
+    /**
+     * @return Collection<int, Team>
+     */
+    public function getTenants(Panel $panel): Collection
     {
         if ($this->is_system_admin) {
             return Team::all();
@@ -240,7 +266,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
             return true;
         }
 
-        return $this->allTeams()->pluck('id')->contains($tenant->id);
+        return $this->allTeams()->pluck('id')->contains($tenant->getKey());
     }
 
     /**

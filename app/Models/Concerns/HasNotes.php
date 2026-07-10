@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 trait HasNotes
 {
     /**
-     * @return MorphToMany<Note, $this>
+     * @return MorphToMany<Note, $this, Noteable>
      */
     public function notes(): MorphToMany
     {

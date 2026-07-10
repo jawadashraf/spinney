@@ -15,6 +15,7 @@ use App\Models\Pivots\Taskable;
 use App\Models\Pivots\TaskUser;
 use App\Observers\TaskObserver;
 use Database\Factories\TaskFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,10 +33,22 @@ use Spatie\EloquentSortable\SortableTrait;
  * @property Carbon|null $deleted_at
  * @property CreationSource $creation_source
  * @property string $createdBy
+ * @property TaskType $type
  *
  * @method void saveCustomFieldValue(CustomField $field, mixed $value)
  */
 #[ObservedBy(TaskObserver::class)]
+#[Fillable([
+    'user_id',
+    'title',
+    'description',
+    'status',
+    'priority',
+    'creation_source',
+    'type',
+    'department_id',
+    'due_date',
+])]
 final class Task extends Model implements HasCustomFieldsContract
 {
     use HasCreator;
@@ -48,18 +61,6 @@ final class Task extends Model implements HasCustomFieldsContract
     use InvalidatesRelatedAiSummaries;
     use SoftDeletes;
     use SortableTrait;
-
-    protected $fillable = [
-        'user_id',
-        'title',
-        'description',
-        'status',
-        'priority',
-        'creation_source',
-        'type',
-        'department_id',
-        'due_date',
-    ];
 
     /**
      * @var array<string, mixed>
@@ -92,7 +93,7 @@ final class Task extends Model implements HasCustomFieldsContract
     ];
 
     /**
-     * @return BelongsToMany<User, $this>
+     * @return BelongsToMany<User, $this, TaskUser>
      */
     public function assignees(): BelongsToMany
     {
@@ -100,7 +101,7 @@ final class Task extends Model implements HasCustomFieldsContract
     }
 
     /**
-     * @return MorphToMany<Company, $this>
+     * @return MorphToMany<Company, $this, Taskable>
      */
     public function companies(): MorphToMany
     {
@@ -108,7 +109,7 @@ final class Task extends Model implements HasCustomFieldsContract
     }
 
     /**
-     * @return MorphToMany<Opportunity, $this>
+     * @return MorphToMany<Opportunity, $this, Taskable>
      */
     public function opportunities(): MorphToMany
     {
@@ -116,39 +117,49 @@ final class Task extends Model implements HasCustomFieldsContract
     }
 
     /**
-     * @return MorphToMany<People, $this>
+     * @return MorphToMany<People, $this, Taskable>
      */
     public function people(): MorphToMany
     {
         return $this->morphedByMany(People::class, 'taskable')->using(Taskable::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function assignee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assignee_id');
     }
 
-    /** @return BelongsTo<Team, self> */
+    /** @return BelongsTo<Team, $this> */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    /** @return BelongsTo<Department, self> */
+    /** @return BelongsTo<Department, $this> */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
     }
 
-    /** @param Builder<Task> $query */
+    /**
+     * @param  Builder<Task>  $query
+     * @param  Collection<int, int>  $departmentIds
+     * @return Builder<Task>
+     */
     public function scopeForDepartments(Builder $query, Collection $departmentIds): Builder
     {
-        return $query->where(function (Builder $q) use ($departmentIds) {
+        return $query->where(function (Builder $q) use ($departmentIds): void {
             $q->whereIn('department_id', $departmentIds)
                 ->orWhereDoesntHave('assignees')
                 ->orWhereHas('assignees', fn (Builder $sub) => $sub->where('users.id', auth()->id()));

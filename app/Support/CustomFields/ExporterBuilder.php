@@ -18,6 +18,9 @@ final class ExporterBuilder
         return $this;
     }
 
+    /**
+     * @return array<int, ExportColumn>
+     */
     public function columns(): array
     {
         $query = CustomField::query()
@@ -28,7 +31,7 @@ final class ExporterBuilder
             $query->where('entity_type', $this->model);
         }
 
-        return $query->get()->map(fn (CustomField $field): \Filament\Actions\Exports\ExportColumn => $this->createColumn($field))->all();
+        return $query->get()->map(fn (CustomField $field): ExportColumn => $this->createColumn($field))->all();
     }
 
     private function createColumn(CustomField $field): ExportColumn

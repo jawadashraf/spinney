@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support\CustomFields;
 
 use App\Enums\CustomFields\CustomFieldWidth;
-use App\Models\Contracts\HasCustomFields;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Models\CustomField;
 use App\Models\CustomFieldSection;
@@ -28,8 +27,10 @@ final class FormBuilder
 {
     private ?Schema $schema = null;
 
+    /** @var array<int, string> */
     private array $except = [];
 
+    /** @var array<int, string> */
     private array $only = [];
 
     private bool $columnSpanFull = false;
@@ -41,6 +42,9 @@ final class FormBuilder
         return $this;
     }
 
+    /**
+     * @param  array<int, string>  $except
+     */
     public function except(array $except): static
     {
         $this->except = $except;
@@ -48,6 +52,9 @@ final class FormBuilder
         return $this;
     }
 
+    /**
+     * @param  array<int, string>  $only
+     */
     public function only(array $only): static
     {
         $this->only = $only;
@@ -169,15 +176,15 @@ final class FormBuilder
             if (! SchemaFacade::hasColumn($tableName, $field->code)) {
                 $component
                     ->dehydrated(false)
-                    ->afterStateHydrated(function (Component $component, ?Model $record) use ($field) {
+                    ->afterStateHydrated(function (Component $component, ?Model $record) use ($field): void {
                         if ($record instanceof HasCustomFieldsContract) {
-                            /** @var HasCustomFields $record */
+                            /** @var HasCustomFieldsContract&Model $record */
                             $component->state($record->getCustomFieldValue($field));
                         }
                     })
-                    ->saveRelationshipsUsing(function (Model $record, $state) use ($field) {
+                    ->saveRelationshipsUsing(function (Model $record, $state) use ($field): void {
                         if ($record instanceof HasCustomFieldsContract) {
-                            /** @var HasCustomFields $record */
+                            /** @var HasCustomFieldsContract&Model $record */
                             $record->saveCustomFieldValue($field, $state);
                         }
                     });

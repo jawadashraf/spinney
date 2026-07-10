@@ -69,14 +69,14 @@ final class ThirdPartyCarePlansRelationManager extends RelationManager
             ])
             ->recordActions([
                 ViewAction::make()
-                    ->url(fn ($record) => ThirdPartyCarePlanResource::getUrl('view', ['record' => $record])),
+                    ->url(fn ($record): string => ThirdPartyCarePlanResource::getUrl('view', ['record' => $record])),
                 EditAction::make()
-                    ->url(fn ($record) => ThirdPartyCarePlanResource::getUrl('edit', ['record' => $record]))
+                    ->url(fn ($record): string => ThirdPartyCarePlanResource::getUrl('edit', ['record' => $record]))
                     ->visible(fn () => auth()->user()->can('update', $this->ownerRecord)),
             ])
             ->toolbarActions([
                 CreateAction::make()
-                    ->url(fn () => ThirdPartyCarePlanResource::getUrl('create', ['people_id' => $this->ownerRecord->id]))
+                    ->url(fn (): string => ThirdPartyCarePlanResource::getUrl('create', ['people_id' => $this->ownerRecord->getKey()]))
                     ->visible(fn () => auth()->user()->can('create', ThirdPartyCarePlan::class)),
             ]);
     }

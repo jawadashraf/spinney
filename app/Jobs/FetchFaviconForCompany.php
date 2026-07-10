@@ -5,21 +5,19 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\Company;
+use App\Models\CustomField;
 use AshAllenDesign\FaviconFetcher\Facades\Favicon;
 use Exception;
 use Illuminate\Contracts\Broadcasting\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 
+#[DeleteWhenMissingModels]
 final class FetchFaviconForCompany implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, Queueable;
-
-    /**
-     * Delete the job if its models no longer exist.
-     */
-    public bool $deleteWhenMissingModels = true;
 
     /**
      * Create a new job instance.
@@ -35,8 +33,9 @@ final class FetchFaviconForCompany implements ShouldBeUnique, ShouldQueue
     public function handle(): void
     {
         try {
-            $customFieldDomain = $this->company->customFields()
+            $customFieldDomain = CustomField::query()
                 ->whereBelongsTo($this->company->team)
+                ->where('entity_type', $this->company::class)
                 ->where('code', 'domain_name')
                 ->first();
             $domainName = $this->company->getCustomFieldValue($customFieldDomain);

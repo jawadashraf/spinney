@@ -61,7 +61,7 @@ final class TaskResource extends Resource
 
     public static function table(Table $table): Table
     {
-        /** @var Collection<int, CustomField> $customFields */
+        /** @var SupportCollection<string, CustomField> $customFields */
         $customFields = CustomField::query()->whereIn('code', ['status', 'priority'])->get()->keyBy('code');
         /** @var ValueResolver $valueResolver */
         $valueResolver = app(ValueResolver::class);
@@ -243,6 +243,7 @@ final class TaskResource extends Resource
                     ->whereColumn('custom_field_values.entity_id', 'tasks.id')
                     ->limit(1)
                     ->getQuery(),
+                /** @phpstan-ignore argument.type */
                 $direction
             ))
             ->getTitleFromRecordUsing(function (Task $record) use ($valueResolver, $field, $label): string {
@@ -275,6 +276,7 @@ final class TaskResource extends Resource
      */
     public static function getEloquentQuery(): Builder
     {
+        /** @var Builder<Task> $query */
         $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,

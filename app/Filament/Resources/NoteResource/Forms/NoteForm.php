@@ -12,9 +12,12 @@ use Filament\Schemas\Schema;
 
 final class NoteForm
 {
-    public static function getFormComponents(array $excludeFields = []): array
+    /**
+     * @return array<int, TextInput|RichEditor>
+     */
+    public static function getFormComponents(): array
     {
-        $components = [
+        return [
             TextInput::make('title')
                 ->label('Title')
                 ->rules(['max:255'])
@@ -62,8 +65,6 @@ final class NoteForm
                 ])
                 ->required(),
         ];
-
-        return $components;
     }
 
     /**
@@ -75,7 +76,7 @@ final class NoteForm
     public static function get(Schema $schema, array $excludeFields = []): Schema
     {
         return $schema
-            ->components(self::getFormComponents($excludeFields))
+            ->components(self::getFormComponents())
             ->columns(2);
     }
 }

@@ -50,7 +50,9 @@ final class OptionsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->mutateDataUsing(function (array $data): array {
-                        $data['team_id'] = $this->getOwnerRecord()->team_id;
+                        /** @var CustomField $owner */
+                        $owner = $this->getOwnerRecord();
+                        $data['team_id'] = $owner->team_id;
 
                         return $data;
                     }),

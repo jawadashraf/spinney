@@ -14,7 +14,7 @@ enum ServiceTeam: string implements HasLabel
     case EDUCATION_OUTREACH = 'education_outreach';
     case AFTERCARE = 'aftercare';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::ASSESSMENT => 'Assessment',

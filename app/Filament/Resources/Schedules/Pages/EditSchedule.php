@@ -14,6 +14,7 @@ use App\Filament\Resources\Schedules\ScheduleResource;
 use App\Filament\Resources\Schedules\Schemas\ScheduleForm;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Zap\Models\Schedule;
 
 final class EditSchedule extends EditRecord
 {
@@ -23,7 +24,10 @@ final class EditSchedule extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        return array_merge($data, ScheduleForm::fillFormFromRecord($this->record));
+        /** @var Schedule $record */
+        $record = $this->record;
+
+        return array_merge($data, ScheduleForm::fillFormFromRecord($record));
     }
 
     protected function mutateFormDataBeforeSave(array $data): array

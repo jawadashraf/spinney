@@ -22,6 +22,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -43,6 +44,9 @@ final class ServiceUserForm
             ->components(self::getComponents());
     }
 
+    /**
+     * @return array<int, Component>
+     */
     public static function getComponents(string $profilePrefix = 'profile.'): array
     {
         return [
@@ -50,7 +54,10 @@ final class ServiceUserForm
                 ->schema([
                     Section::make('Identity')
                         ->schema([
-                            TextInput::make('name')
+                            TextInput::make('first_name')
+                                ->required()
+                                ->maxLength(255),
+                            TextInput::make('last_name')
                                 ->required()
                                 ->maxLength(255),
                             TextInput::make('email')
@@ -62,6 +69,7 @@ final class ServiceUserForm
                                     column: 'email',
                                     modifyRuleUsing: function (Unique $rule, ?Model $record) {
                                         // If we are editing an existing ServiceUser, ignore its linked User's ID
+                                        /** @var ServiceUser|null $record */
                                         if ($record && $record->user_id) {
                                             return Rule::unique('users', 'email')->ignore($record->user_id, 'id');
                                         }
@@ -102,7 +110,6 @@ final class ServiceUserForm
                                                     TextInput::make('ethnicity_other')
                                                         ->label('Other ethnicity (please specify)')
                                                         ->visible(fn ($get): bool => $get('ethnicity') === 'other' ||
-                                                            $get('ethnicity') === Ethnicity::Other ||
                                                             ($get('ethnicity') instanceof Ethnicity && $get('ethnicity')->value === 'other') ||
                                                             (is_array($get('ethnicity')) && in_array('other', $get('ethnicity'), true)) ||
                                                             (is_string($get('ethnicity')) && in_array('other', json_decode($get('ethnicity'), true) ?? [], true))
@@ -119,7 +126,7 @@ final class ServiceUserForm
                                                                 ->color('primary')
                                                                 ->modalHeading('Select Address')
                                                                 ->modalWidth(Width::Medium)
-                                                                ->form(fn (Get $get) => [
+                                                                ->form(fn (Get $get): array => [
                                                                     Select::make('selected_address')
                                                                         ->label('Matching Addresses')
                                                                         ->placeholder('Select an address')
@@ -134,7 +141,7 @@ final class ServiceUserForm
                                                                         ->required()
                                                                         ->searchable(),
                                                                 ])
-                                                                ->action(function (array $data, Set $set) {
+                                                                ->action(function (array $data, Set $set): void {
                                                                     if (isset($data['selected_address'])) {
                                                                         $set('address', $data['selected_address']);
                                                                     }

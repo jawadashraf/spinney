@@ -55,6 +55,7 @@ class People extends Model implements HasCustomFieldsContract
      */
     protected $guarded = [];
 
+    /** @var array<string, class-string> */
     protected $childTypes = [
         'service_user' => ServiceUser::class,
         'relative' => Relative::class,
@@ -111,6 +112,30 @@ class People extends Model implements HasCustomFieldsContract
         return $query->where('is_service_user', true);
     }
 
+    public function getNameAttribute(): string
+    {
+        if ($this->first_name && $this->last_name) {
+            return "{$this->first_name} {$this->last_name}";
+        }
+
+        return $this->attributes['name'] ?? '';
+    }
+
+    protected static function booted(): void
+    {
+        self::saving(function (People $people): void {
+            if (isset($people->attributes['name']) && ! isset($people->attributes['first_name'])) {
+                $nameParts = explode(' ', trim((string) $people->attributes['name']), 2);
+                $people->first_name = $nameParts[0];
+                $people->last_name = $nameParts[1] ?? $nameParts[0];
+            }
+
+            if ($people->first_name && $people->last_name) {
+                $people->attributes['name'] = "{$people->first_name} {$people->last_name}";
+            }
+        });
+    }
+
     public function getAvatarAttribute(): string
     {
         return app(AvatarService::class)->generateAuto(name: $this->name, initialCount: 1);
@@ -132,6 +157,9 @@ class People extends Model implements HasCustomFieldsContract
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsToMany<People, $this>
+     */
     public function relatedPeople(): BelongsToMany
     {
         return $this->belongsToMany(People::class, 'person_relationships', 'person_id', 'related_person_id')
@@ -139,6 +167,9 @@ class People extends Model implements HasCustomFieldsContract
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<People, $this>
+     */
     public function relatedBy(): BelongsToMany
     {
         return $this->belongsToMany(People::class, 'person_relationships', 'related_person_id', 'person_id')

@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Responses;
 
-use App\Filament\Resources\CompanyResource;
 use Filament\Facades\Filament;
 use Illuminate\Http\RedirectResponse;
 use Livewire\Features\SupportRedirects\Redirector;
 
 final readonly class LoginResponse implements \Filament\Auth\Http\Responses\Contracts\LoginResponse
 {
-    /** @phpstan-ignore-next-line return.unusedType */
     public function toResponse($request): RedirectResponse|Redirector // @pest-ignore-type
     {
         $panel = Filament::getCurrentPanel();

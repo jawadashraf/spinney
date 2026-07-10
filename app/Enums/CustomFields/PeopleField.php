@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Enums\CustomFields;
 
 use App\Enums\CustomFieldType;
+use App\Enums\EngagementStatus;
+use App\Enums\ServiceTeam;
 
 /**
  * People custom field codes
@@ -64,19 +66,25 @@ enum PeopleField: string
         };
     }
 
+    /**
+     * @return array<string, string>|null
+     */
     public function getOptions(): ?array
     {
         return match ($this) {
-            self::SERVICE_TEAM => array_reduce(\App\Enums\ServiceTeam::cases(), fn ($acc, $case): array => $acc + [$case->value => $case->getLabel()], []),
-            self::ENGAGEMENT_STATUS => array_reduce(\App\Enums\EngagementStatus::cases(), fn ($acc, $case): array => $acc + [$case->value => $case->getLabel()], []),
+            self::SERVICE_TEAM => array_reduce(ServiceTeam::cases(), fn ($acc, $case): array => $acc + [$case->value => $case->getLabel()], []),
+            self::ENGAGEMENT_STATUS => array_reduce(EngagementStatus::cases(), fn ($acc, $case): array => $acc + [$case->value => $case->getLabel()], []),
             default => null,
         };
     }
 
+    /**
+     * @return array<string, string>|null
+     */
     public function getOptionColors(): ?array
     {
         return match ($this) {
-            self::ENGAGEMENT_STATUS => array_reduce(\App\Enums\EngagementStatus::cases(), fn ($acc, $case): array => $acc + [$case->value => $case->getColor()], []),
+            self::ENGAGEMENT_STATUS => array_reduce(EngagementStatus::cases(), fn ($acc, $case): array => $acc + [$case->value => $case->getColor()], []),
             default => null,
         };
     }

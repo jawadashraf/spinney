@@ -26,6 +26,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Zap\Data\DailyFrequencyConfig;
 use Zap\Data\MonthlyFrequencyConfig\AnnuallyFrequencyConfig;
@@ -53,8 +54,8 @@ final class ScheduleForm
                         Select::make('schedule_type')
                             ->options(
                                 collect(ScheduleType::cases())
-                                    ->reject(fn (ScheduleType $type) => $type === ScheduleType::APPOINTMENT)
-                                    ->mapWithKeys(fn (ScheduleType $type) => [$type->value => $type->getLabel()])
+                                    ->reject(fn (ScheduleType $type): bool => $type === ScheduleType::APPOINTMENT)
+                                    ->mapWithKeys(fn (ScheduleType $type): array => [$type->value => $type->getLabel()])
                                     ->toArray()
                             )
                             ->required()
@@ -181,7 +182,7 @@ final class ScheduleForm
                                                         // Day of month buttons (Circular style grid)
                                                         ToggleButtons::make('days_of_month')
                                                             ->multiple()
-                                                            ->options(array_combine(range(1, 31), range(1, 31)))
+                                                            ->options(collect(range(1, 31))->mapWithKeys(fn (int $day): array => [(string) $day => (string) $day])->toArray())
                                                             ->columns(7)
                                                             ->required()
                                                             ->live()
@@ -291,7 +292,7 @@ final class ScheduleForm
                                 // Right Column: Live occurrence calculation and preview
                                 Placeholder::make('recurrence_preview')
                                     ->label('')
-                                    ->content(fn (Get $get) => view('filament.schedules.recurrence-preview', self::getRecurrencePreviewData($get)))
+                                    ->content(fn (Get $get): Factory|\Illuminate\Contracts\View\View => view('filament.schedules.recurrence-preview', self::getRecurrencePreviewData($get)))
                                     ->columnSpan([
                                         'default' => 1,
                                         'lg' => 1,
@@ -334,7 +335,7 @@ final class ScheduleForm
                     ->columns(2),
 
                 Section::make('Time Slots')
-                    ->description(fn (Get $get): ?string => ($get('schedule_type') ?? '') === ScheduleType::AVAILABILITY->value
+                    ->description(fn (Get $get): string => ($get('schedule_type') ?? '') === ScheduleType::AVAILABILITY->value
                         ? 'Define working hours. Bookable slots are generated automatically based on slot duration.'
                         : 'Define the start and end time for this schedule.')
                     ->schema([
@@ -353,7 +354,7 @@ final class ScheduleForm
                             ->default('17:00')
                             ->after('period_start_time'),
                     ])
-                    ->visible(fn (Get $get): bool => filled($get('schedule_type')) && ($get('schedule_type') ?? '') !== ScheduleType::APPOINTMENT->value)
+                    ->visible(fn (Get $get): bool => filled($get('schedule_type')) && $get('schedule_type') !== ScheduleType::APPOINTMENT->value)
                     ->columns(2),
 
                 Section::make('Appointment Details')
@@ -431,11 +432,12 @@ final class ScheduleForm
                                     return [];
                                 }
 
+                                /** @var array<int, array<string, mixed>> $slots */
                                 $slots = $counselor->getBookableSlots($date, 60);
 
                                 return collect($slots)
-                                    ->filter(fn ($slot) => (bool) ($slot['is_available'] ?? false))
-                                    ->mapWithKeys(fn ($slot) => [
+                                    ->filter(fn ($slot): bool => (bool) ($slot['is_available'] ?? false))
+                                    ->mapWithKeys(fn ($slot): array => [
                                         "{$slot['start_time']}-{$slot['end_time']}" => "{$slot['start_time']} - {$slot['end_time']}",
                                     ])
                                     ->toArray();
@@ -457,6 +459,9 @@ final class ScheduleForm
             ]);
     }
 
+    /**
+     * @return array<string, string>
+     */
     public static function getTimezoneOptions(): array
     {
         $timezones = \DateTimeZone::listIdentifiers();
@@ -464,6 +469,9 @@ final class ScheduleForm
         return array_combine($timezones, $timezones);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getRecurrencePreviewData(Get $get): array
     {
         $startDateStr = $get('start_date');
@@ -515,12 +523,12 @@ final class ScheduleForm
                 'days' => $days,
                 'startsOn' => $startDate->toDateString(),
             ];
-            $summary = ($repeatInterval === 1 ? 'Repeats weekly' : "Repeats every {$repeatInterval} weeks").' on '.implode(', ', array_map('ucfirst', $days));
+            $summary = ($repeatInterval === 1 ? 'Repeats weekly' : "Repeats every {$repeatInterval} weeks").' on '.implode(', ', array_map(ucfirst(...), $days));
         } elseif ($repeatUnit === 'month') {
             $monthRepeatBy = $get('month_repeat_by') ?? 'day_of_month';
             if ($monthRepeatBy === 'day_of_month') {
-                $daysOfMonth = array_map('intval', $get('days_of_month') ?? []);
-                if (empty($daysOfMonth)) {
+                $daysOfMonth = array_map(intval(...), $get('days_of_month') ?? []);
+                if ($daysOfMonth === []) {
                     $daysOfMonth = [$startDate->day];
                 }
                 if ($repeatInterval === 1) {
@@ -557,7 +565,7 @@ final class ScheduleForm
                 ];
                 $ordinalWords = [1 => 'first', 2 => 'second', 3 => 'third', 4 => 'fourth', 5 => 'last'];
                 $ordinalWord = $ordinalWords[$ordinal] ?? 'first';
-                $summary = "Repeats monthly on the {$ordinalWord} ".ucfirst($dayName);
+                $summary = "Repeats monthly on the {$ordinalWord} ".ucfirst((string) $dayName);
             }
         } elseif ($repeatUnit === 'year') {
             $months = $get('months') ?? [];
@@ -569,7 +577,7 @@ final class ScheduleForm
                 'days_of_month' => [$startDate->day],
                 'start_month' => $startDate->month,
             ];
-            $summary = ($repeatInterval === 1 ? 'Repeats annually' : "Repeats every {$repeatInterval} years").' in '.implode(', ', array_map('ucfirst', $months));
+            $summary = ($repeatInterval === 1 ? 'Repeats annually' : "Repeats every {$repeatInterval} years").' in '.implode(', ', array_map(ucfirst(...), $months));
         }
 
         $summary .= ', starting '.$startDate->format('M j, Y').' at '.$startDate->format('g:i A');
@@ -590,7 +598,7 @@ final class ScheduleForm
         $configInstance = null;
         if ($frequency === 'daily') {
             $configInstance = new DailyFrequencyConfig;
-        } elseif (preg_match('/^every_(\d+)_weeks$/', $frequency, $matches)) {
+        } elseif (preg_match('/^every_(\d+)_weeks$/', (string) $frequency, $matches)) {
             $configInstance = EveryXWeeksFrequencyConfig::fromArray(
                 array_merge($config, ['frequencyWeeks' => (int) $matches[1]])
             );
@@ -598,7 +606,7 @@ final class ScheduleForm
             $configInstance = WeeklyFrequencyConfig::fromArray($config);
         } elseif ($frequency === 'biweekly') {
             $configInstance = BiWeeklyFrequencyConfig::fromArray($config);
-        } elseif (preg_match('/^every_(\d+)_months$/', $frequency, $matches)) {
+        } elseif (preg_match('/^every_(\d+)_months$/', (string) $frequency, $matches)) {
             $configInstance = EveryXMonthsFrequencyConfig::fromArray(
                 array_merge($config, ['frequencyMonths' => (int) $matches[1]])
             );
@@ -631,7 +639,7 @@ final class ScheduleForm
                     $occurrences[] = $loopDate->copy();
                     $safetyLimit++;
                 }
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
             }
         }
 
@@ -644,13 +652,17 @@ final class ScheduleForm
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     public static function mutateFormDataBeforeSave(array $data): array
     {
         if (($data['schedule_type'] ?? '') === (ScheduleType::APPOINTMENT->value ?? ScheduleType::APPOINTMENT)) {
             $bookingDate = $data['booking_date'] ?? null;
             $selectedSlot = $data['selected_slot'] ?? null;
             if ($bookingDate && $selectedSlot) {
-                [$startTime, $endTime] = explode('-', $selectedSlot);
+                [$startTime, $endTime] = explode('-', (string) $selectedSlot);
                 $data['start_date'] = $bookingDate;
                 $data['end_date'] = $bookingDate;
 
@@ -712,8 +724,8 @@ final class ScheduleForm
         } elseif ($repeatUnit === 'month') {
             $monthRepeatBy = $data['month_repeat_by'] ?? 'day_of_month';
             if ($monthRepeatBy === 'day_of_month') {
-                $daysOfMonth = array_map('intval', $data['days_of_month'] ?? []);
-                if (empty($daysOfMonth)) {
+                $daysOfMonth = array_map(intval(...), $data['days_of_month'] ?? []);
+                if ($daysOfMonth === []) {
                     $daysOfMonth = [$startDate->day];
                 }
                 if ($repeatInterval === 1) {
@@ -769,7 +781,6 @@ final class ScheduleForm
         $endType = $data['end_type'] ?? 'never';
         if ($endType === 'never') {
             $data['end_date'] = null;
-        } elseif ($endType === 'on_date') {
         } elseif ($endType === 'after_occurrences') {
             $occurrencesCount = (int) ($data['occurrences'] ?? 10);
             $computedEndDate = self::computeEndDateFromOccurrences($startDate, $frequency, $config, $occurrencesCount);
@@ -782,6 +793,9 @@ final class ScheduleForm
         return $data;
     }
 
+    /**
+     * @param  array<string, mixed>|null  $config
+     */
     public static function computeEndDateFromOccurrences(Carbon $startDate, ?string $frequency, ?array $config, int $count): ?Carbon
     {
         if (! $frequency || ! $config) {
@@ -837,14 +851,19 @@ final class ScheduleForm
             $safetyLimit++;
         }
 
-        return ! empty($occurrences) ? end($occurrences) : null;
+        $last = $occurrences === [] ? null : end($occurrences);
+
+        return $last instanceof Carbon ? $last : null;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function fillFormFromRecord(Schedule $record): array
     {
         $data = [];
         if (($record->schedule_type->value ?? $record->schedule_type) === (ScheduleType::APPOINTMENT->value ?? ScheduleType::APPOINTMENT)) {
-            $data['booking_date'] = $record->start_date ? Carbon::parse($record->start_date)->toDateString() : null;
+            $data['booking_date'] = optional($record->start_date)->toDateString();
             $meta = $record->metadata ?? [];
             if (isset($meta['start_time']) && isset($meta['end_time'])) {
                 $data['selected_slot'] = "{$meta['start_time']}-{$meta['end_time']}";

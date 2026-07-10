@@ -29,7 +29,7 @@ final class CloseEnquiryAction
                     ->options(EnquiryOutcome::class)
                     ->native(false)
                     ->label('Call Outcome')
-                    ->visible(fn (Enquiry $record): bool => $record->direction === EnquiryDirection::OUTBOUND),
+                    ->visible(fn (Enquiry $record): bool => $record->direction === EnquiryDirection::OUTBOUND->value),
 
                 Textarea::make('closure_notes')
                     ->label('Closure Notes')
@@ -42,7 +42,7 @@ final class CloseEnquiryAction
                     'status' => EnquiryStatus::CLOSED,
                 ];
 
-                if ($record->direction === EnquiryDirection::OUTBOUND && isset($data['outcome']) && $data['outcome']) {
+                if ($record->direction === EnquiryDirection::OUTBOUND->value && isset($data['outcome']) && $data['outcome']) {
                     $updateData['outcome'] = $data['outcome'];
                 }
 

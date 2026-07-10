@@ -16,7 +16,7 @@ enum EnquiryCallType: string implements HasColor, HasIcon, HasLabel
     case SCHEDULED = 'scheduled';
     case EMERGENCY = 'emergency';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::GENERAL => 'General Enquiry',
@@ -27,7 +27,7 @@ enum EnquiryCallType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getColor(): string
     {
         return match ($this) {
             self::GENERAL => 'primary',
@@ -38,7 +38,7 @@ enum EnquiryCallType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): string
     {
         return match ($this) {
             self::GENERAL => 'heroicon-o-question-mark-circle',

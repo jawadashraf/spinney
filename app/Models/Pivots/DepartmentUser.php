@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace App\Models\Pivots;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
+#[Table(name: 'department_user')]
 final class DepartmentUser extends Pivot
 {
-    /**
-     * @var string
-     */
-    protected $table = 'department_user';
-
     /**
      * @var array<string, string>
      */

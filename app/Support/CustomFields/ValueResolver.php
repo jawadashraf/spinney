@@ -7,16 +7,19 @@ namespace App\Support\CustomFields;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Models\CustomField;
 use App\Models\CustomFieldOption;
+use Illuminate\Database\Eloquent\Model;
 
 final class ValueResolver
 {
     public function resolve(HasCustomFieldsContract $record, CustomField $customField): mixed
     {
-        $valueModel = $record->relationLoaded('customFieldValues')
-            ? $record->customFieldValues->where('custom_field_id', $customField->id)->first()
-            : $record->customFieldValues()
-                ->where('custom_field_id', $customField->id)
-                ->first();
+        if (! $record instanceof Model) {
+            return null;
+        }
+
+        $valueModel = $record->customFieldValues()
+            ->where('custom_field_id', $customField->id)
+            ->first();
 
         if (! $valueModel) {
             return null;
@@ -27,7 +30,7 @@ final class ValueResolver
         if ($customField->type === 'select' && ! is_null($value)) {
             $option = $this->resolveOption($record, $customField);
 
-            return $option ? $option->name : $value;
+            return $option instanceof CustomFieldOption ? $option->name : $value;
         }
 
         return $value;
@@ -35,11 +38,13 @@ final class ValueResolver
 
     public function resolveOption(HasCustomFieldsContract $record, CustomField $customField): ?CustomFieldOption
     {
-        $valueModel = $record->relationLoaded('customFieldValues')
-            ? $record->customFieldValues->where('custom_field_id', $customField->id)->first()
-            : $record->customFieldValues()
-                ->where('custom_field_id', $customField->id)
-                ->first();
+        if (! $record instanceof Model) {
+            return null;
+        }
+
+        $valueModel = $record->customFieldValues()
+            ->where('custom_field_id', $customField->id)
+            ->first();
 
         if (! $valueModel) {
             return null;

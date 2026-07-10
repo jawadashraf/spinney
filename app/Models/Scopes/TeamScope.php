@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Scope;
 
 /**
  * @template TModel of Model
+ *
+ * @implements Scope<TModel>
  */
 final class TeamScope implements Scope
 {
@@ -20,6 +22,6 @@ final class TeamScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        $builder->whereBelongsTo(auth('web')->user()->currentTeam);
+        $builder->whereBelongsTo(auth('web')->user()?->currentTeam);
     }
 }

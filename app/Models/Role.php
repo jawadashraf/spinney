@@ -11,6 +11,7 @@ use Spatie\Permission\Models\Role as SpatieRole;
 final class Role extends SpatieRole
 {
     use HasTeam;
+
     /**
      * @return BelongsTo<Team, $this>
      */

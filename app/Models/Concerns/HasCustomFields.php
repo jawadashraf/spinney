@@ -6,12 +6,13 @@ namespace App\Models\Concerns;
 
 use App\Models\CustomField;
 use App\Models\CustomFieldValue;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait HasCustomFields
 {
     /**
-     * @return MorphMany<CustomFieldValue, $this>
+     * @return MorphMany<CustomFieldValue, Model>
      */
     public function customFieldValues(): MorphMany
     {
@@ -32,6 +33,9 @@ trait HasCustomFields
         return $valueRecord?->{$valueColumn};
     }
 
+    /**
+     * @param  array<string, mixed>  $values
+     */
     public function saveCustomFields(array $values): void
     {
         foreach ($values as $code => $value) {
