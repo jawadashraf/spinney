@@ -35,9 +35,10 @@ final class RelatedPeopleRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
+            ->recordTitleAttribute('first_name')
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('first_name'),
+                TextColumn::make('last_name'),
                 TextColumn::make('relation_type'),
                 IconColumn::make('is_emergency_contact')
                     ->boolean(),

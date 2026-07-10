@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Team;
 use App\Models\User;
+use Database\Seeders\LocalSeeder;
 use Database\Seeders\TeamSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -37,7 +38,7 @@ it('seeds the functional teams via local seeder', function () {
     app()->detectEnvironment(fn () => 'local');
 
     User::factory()->create(['email' => 'manuk.minasyan1@gmail.com']);
-    $this->seed(\Database\Seeders\LocalSeeder::class);
+    $this->seed(LocalSeeder::class);
 
     $teams = [
         'Frontline',

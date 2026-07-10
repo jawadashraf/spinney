@@ -44,7 +44,7 @@ final class ThirdPartyCarePlanFactory extends Factory
 
     public function inProgress(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => ThirdPartyCarePlanStatus::IN_PROGRESS,
             'start_date' => now()->subDays(30),
         ]);
@@ -52,7 +52,7 @@ final class ThirdPartyCarePlanFactory extends Factory
 
     public function completed(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => ThirdPartyCarePlanStatus::COMPLETED,
             'start_date' => now()->subDays(60),
             'end_date' => now(),
@@ -61,7 +61,7 @@ final class ThirdPartyCarePlanFactory extends Factory
 
     public function cancelled(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => ThirdPartyCarePlanStatus::CANCELLED,
         ]);
     }

@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\View\View;
 
 final class UpdateTeamName extends BaseLivewireComponent
 {
@@ -68,7 +69,7 @@ final class UpdateTeamName extends BaseLivewireComponent
         $this->sendNotification();
     }
 
-    public function render(): \Illuminate\Contracts\View\View
+    public function render(): View
     {
         return view('livewire.app.teams.update-team-name');
     }

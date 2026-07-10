@@ -12,7 +12,6 @@ use App\Models\User;
 use Exception;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Relaticle\OnboardSeed\Support\BaseModelSeeder;
 use Relaticle\OnboardSeed\Support\FixtureRegistry;
@@ -115,20 +114,5 @@ final class TaskSeeder extends BaseModelSeeder
 
         /** @var Task */
         return $this->registerEntityFromFixture($key, $attributes, $processedFields, $team, $user);
-    }
-
-    /**
-     * Format a date value for the task due date
-     *
-     * @param  mixed  $dateValue  The date value returned from template expression
-     * @return string The formatted date string
-     */
-    private function formatDate(mixed $dateValue): string
-    {
-        if ($dateValue instanceof Carbon) {
-            return $dateValue->format('Y-m-d H:i:s');
-        }
-
-        return (string) $dateValue;
     }
 }

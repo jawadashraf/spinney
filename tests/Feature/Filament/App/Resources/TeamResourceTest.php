@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament\App\Resources;
 
+use App\Filament\Resources\TeamResource\Pages\EditTeam;
 use App\Filament\Resources\TeamResource\Pages\ListTeams;
+use App\Filament\Resources\TeamResource\RelationManagers\UsersRelationManager;
 use App\Models\Team;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
@@ -57,9 +59,9 @@ it('excludes service_user from being attached to a team', function (): void {
 
     $regularUser = User::factory()->create(['name' => 'Regular User']);
 
-    livewire(\App\Filament\Resources\TeamResource\RelationManagers\UsersRelationManager::class, [
+    livewire(UsersRelationManager::class, [
         'ownerRecord' => $team,
-        'pageClass' => \App\Filament\Resources\TeamResource\Pages\EditTeam::class,
+        'pageClass' => EditTeam::class,
     ])
         ->mountTableAction('attach')
         ->setTableActionData([

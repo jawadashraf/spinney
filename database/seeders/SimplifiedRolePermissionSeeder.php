@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Models\Team;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use App\Models\Team;
 
 final class SimplifiedRolePermissionSeeder extends Seeder
 {
@@ -29,18 +29,18 @@ final class SimplifiedRolePermissionSeeder extends Seeder
                 'permissions' => ['ViewAny:Company', 'ViewAny:Schedule', 'View:Schedule', 'Create:Schedule',
                     'Update:Schedule', 'Delete:Schedule'],
             ],
-//            'aftercare' => [
-//                'display_name' => 'Aftercare',
-//                'permissions' => ['view_any_schedule', 'view_schedule'],
-//            ],
-//            'safeguarding' => [
-//                'display_name' => 'Safeguarding',
-//                'permissions' => ['view_any_schedule', 'view_schedule'],
-//            ],
-//            'fundraising' => [
-//                'display_name' => 'Fundraising',
-//                'permissions' => ['view_any_schedule', 'view_schedule'],
-//            ],
+            //            'aftercare' => [
+            //                'display_name' => 'Aftercare',
+            //                'permissions' => ['view_any_schedule', 'view_schedule'],
+            //            ],
+            //            'safeguarding' => [
+            //                'display_name' => 'Safeguarding',
+            //                'permissions' => ['view_any_schedule', 'view_schedule'],
+            //            ],
+            //            'fundraising' => [
+            //                'display_name' => 'Fundraising',
+            //                'permissions' => ['view_any_schedule', 'view_schedule'],
+            //            ],
             'manager' => [
                 'display_name' => 'Manager',
                 'permissions' => [

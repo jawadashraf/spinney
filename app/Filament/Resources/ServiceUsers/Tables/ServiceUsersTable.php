@@ -31,7 +31,10 @@ final class ServiceUsersTable
                 ImageColumn::make('avatar')
                     ->label('')
                     ->circular(),
-                TextColumn::make('name')
+                TextColumn::make('first_name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('last_name')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email')
@@ -58,14 +61,14 @@ final class ServiceUsersTable
             ->filters([
                 SelectFilter::make('target_service_team')
                     ->options(ServiceTeam::class)
-                    ->query(function (Builder $query, array $data) {
+                    ->query(function (Builder $query, array $data): void {
                         if ($data['value']) {
                             $query->whereHas('profile', fn ($q) => $q->where('target_service_team', $data['value']));
                         }
                     }),
                 SelectFilter::make('engagement_status')
                     ->options(EngagementStatus::class)
-                    ->query(function (Builder $query, array $data) {
+                    ->query(function (Builder $query, array $data): void {
                         if ($data['value']) {
                             $query->whereHas('profile', fn ($q) => $q->where('engagement_status', $data['value']));
                         }

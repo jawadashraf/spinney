@@ -21,13 +21,13 @@ final class PeopleImporter extends BaseImporter
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('name')
+            ImportColumn::make('first_name')
                 ->requiredMapping()
-                ->guess(['name', 'full_name', 'person_name'])
+                ->guess(['first_name', 'firstname', 'first', 'given_name'])
                 ->rules(['required', 'string', 'max:255'])
-                ->example('John Doe')
+                ->example('John')
                 ->fillRecordUsing(function (People $record, string $state, Importer $importer): void {
-                    $record->name = $state;
+                    $record->first_name = $state;
 
                     // Set team and creator for new records
                     if (! $record->exists) {
@@ -35,6 +35,15 @@ final class PeopleImporter extends BaseImporter
                         $record->creator_id = $importer->import->user_id;
                         $record->creation_source = CreationSource::IMPORT;
                     }
+                }),
+
+            ImportColumn::make('last_name')
+                ->requiredMapping()
+                ->guess(['last_name', 'lastname', 'last', 'surname', 'family_name'])
+                ->rules(['required', 'string', 'max:255'])
+                ->example('Doe')
+                ->fillRecordUsing(function (People $record, string $state, Importer $importer): void {
+                    $record->last_name = $state;
                 }),
 
             ImportColumn::make('company_name')

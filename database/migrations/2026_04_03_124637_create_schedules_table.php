@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('schedules', function (Blueprint $table) {
+        Schema::create('schedules', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('team_id')->nullable()->constrained('teams')->cascadeOnDelete();
             $table->morphs('schedulable'); // User, Resource, etc.

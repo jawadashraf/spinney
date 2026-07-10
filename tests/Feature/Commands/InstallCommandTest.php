@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\File;
+use Relaticle\SystemAdmin\Enums\SystemAdministratorRole;
+use Relaticle\SystemAdmin\Models\SystemAdministrator;
 
 beforeEach(function (): void {
     // Back up existing .env file if it exists
@@ -54,7 +56,7 @@ it('completes installation with demo data but no system admin', function (): voi
 
 it('creates system administrator when requested', function (): void {
     // Clear any existing system administrators
-    \Relaticle\SystemAdmin\Models\SystemAdministrator::query()->delete();
+    SystemAdministrator::query()->delete();
 
     $this->artisan('relaticle:install', ['--force' => true])
         ->expectsChoice('Which database would you like to use?', 'sqlite', [
@@ -73,17 +75,17 @@ it('creates system administrator when requested', function (): void {
         ->assertSuccessful();
 
     // Verify the system administrator was created
-    expect(\Relaticle\SystemAdmin\Models\SystemAdministrator::where('email', 'test@example.com')->exists())->toBeTrue();
+    expect(SystemAdministrator::where('email', 'test@example.com')->exists())->toBeTrue();
 });
 
 it('skips system admin creation if one already exists', function (): void {
     // Ensure a system administrator exists
-    \Relaticle\SystemAdmin\Models\SystemAdministrator::firstOrCreate(
+    SystemAdministrator::firstOrCreate(
         ['email' => 'existing@example.com'],
         [
             'name' => 'Existing Admin',
             'password' => bcrypt('password'),
-            'role' => \Relaticle\SystemAdmin\Enums\SystemAdministratorRole::SuperAdministrator,
+            'role' => SystemAdministratorRole::SuperAdministrator,
             'email_verified_at' => now(),
         ]
     );

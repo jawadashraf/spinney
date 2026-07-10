@@ -6,36 +6,35 @@ namespace Tests\Feature;
 
 use App\Enums\CustomFields\TaskField;
 use App\Enums\TaskType;
-use App\Filament\Resources\TaskResource;
 use App\Filament\Resources\TaskResource\Pages\ManageTasks;
 use App\Models\CustomField;
 use App\Models\CustomFieldOption;
 use App\Models\Department;
 use App\Models\People;
 use App\Models\Task;
-use App\Models\User;
 use App\Models\Team;
+use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Facades\Filament;
-use Illuminate\Support\Str;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->team = Team::where('name', 'Spinney Hill')->first();
     setPermissionsTeamId($this->team->id);
-    
+
     $this->admin = User::where('email', 'admin@test.com')->first();
     $this->admin->current_team_id = $this->team->id;
     $this->admin->save();
-    
+
     $this->liaisonUser = User::where('email', 'liaison@test.com')->first();
     $this->liaisonUser->current_team_id = $this->team->id;
     $this->liaisonUser->save();
 
     $this->liaisonDept = Department::where('name', 'Liaison')->where('team_id', $this->team->id)->first();
     $this->mgmtDept = Department::where('name', 'Management')->where('team_id', $this->team->id)->first();
-    
+
     actingAs($this->admin);
     Filament::setTenant($this->team);
 
@@ -46,7 +45,7 @@ beforeEach(function () {
         'entity_type' => Task::class,
         'type' => 'select',
     ]);
-    
+
     $this->doneOption = CustomFieldOption::factory()->create([
         'team_id' => $this->team->id,
         'custom_field_id' => $this->statusField->id,
@@ -68,13 +67,13 @@ describe('Authorization & Scoping', function () {
             'department_id' => $this->liaisonDept->id,
             'title' => 'Liaison Task',
         ]);
-        
+
         $mgmtTask = Task::factory()->create([
             'team_id' => $this->team->id,
             'department_id' => $this->mgmtDept->id,
             'title' => 'Mgmt Task',
         ]);
-        
+
         $unassignedTask = Task::factory()->create([
             'team_id' => $this->team->id,
             'department_id' => $this->liaisonDept->id, // Open in their dept
@@ -95,7 +94,7 @@ describe('Authorization & Scoping', function () {
             'department_id' => $this->liaisonDept->id,
             'title' => 'Liaison Task',
         ]);
-        
+
         $mgmtTask = Task::factory()->create([
             'team_id' => $this->team->id,
             'department_id' => $this->mgmtDept->id,
@@ -142,7 +141,7 @@ describe('Record Outcome Action', function () {
             'team_id' => $this->team->id,
             'type' => TaskType::GeneralTask,
         ]);
-        
+
         $followUpTask = Task::factory()->create([
             'team_id' => $this->team->id,
             'type' => TaskType::FollowUpCall,
@@ -158,7 +157,7 @@ describe('Record Outcome Action', function () {
     it('creates notes on linked people and marks task as done', function () {
         $person1 = People::factory()->create(['team_id' => $this->team->id]);
         $person2 = People::factory()->create(['team_id' => $this->team->id]);
-        
+
         $followUpTask = Task::factory()->create([
             'team_id' => $this->team->id,
             'type' => TaskType::FollowUpCall,
@@ -180,21 +179,21 @@ describe('Record Outcome Action', function () {
         expect($person1->notes()->count())->toBe(1);
         expect($person1->notes()->first()->body)->toBe('Spoke to them, all good.');
         expect($person2->notes()->count())->toBe(1);
-        
+
         // Verify task status updated to Done
         $statusValue = $followUpTask->customFieldValues()
             ->where('custom_field_id', $this->statusField->id)
             ->first()
             ?->getValue();
-            
+
         expect((string) $statusValue)->toBe((string) $this->doneOption->id);
-        
+
         // Verify CALL_NOTES custom field updated
         $notesValue = $followUpTask->customFieldValues()
             ->where('custom_field_id', $this->callNotesField->id)
             ->first()
             ?->getValue();
-            
+
         expect($notesValue)->toBe('Spoke to them, all good.');
     });
 });
@@ -221,7 +220,7 @@ describe('Filters', function () {
         livewire(ManageTasks::class)
             ->assertCanSeeTableRecords([$thisWeekTask])
             ->assertCanNotSeeTableRecords([$nextWeekTask]);
-            
+
         // Toggle filter off
         livewire(ManageTasks::class)
             ->filterTable('due_this_week', false)

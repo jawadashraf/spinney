@@ -22,7 +22,7 @@ return new class extends Migration
         });
 
         DB::table($tableName)->whereNotNull('properties')->eachById(function ($row): void {
-            $properties = json_decode($row->properties, true);
+            $properties = json_decode((string) $row->properties, true);
             if (! is_array($properties)) {
                 return;
             }
@@ -30,8 +30,8 @@ return new class extends Migration
             $remaining = array_diff_key($properties, array_flip(['attributes', 'old']));
 
             DB::table(config('activitylog.table_name', 'activity_log'))->where('id', $row->id)->update([
-                'attribute_changes' => empty($changes) ? null : json_encode($changes),
-                'properties' => empty($remaining) ? null : json_encode($remaining),
+                'attribute_changes' => $changes === [] ? null : json_encode($changes),
+                'properties' => $remaining === [] ? null : json_encode($remaining),
             ]);
         });
     }
@@ -48,8 +48,8 @@ return new class extends Migration
         });
 
         DB::table($tableName)->whereNotNull('attribute_changes')->eachById(function ($row): void {
-            $attributeChanges = json_decode($row->attribute_changes, true);
-            $properties = $row->properties ? json_decode($row->properties, true) : [];
+            $attributeChanges = json_decode((string) $row->attribute_changes, true);
+            $properties = $row->properties ? json_decode((string) $row->properties, true) : [];
             if (is_array($attributeChanges) && is_array($properties)) {
                 $properties = array_merge($properties, $attributeChanges);
             }

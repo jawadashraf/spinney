@@ -76,7 +76,7 @@ final class AppServiceProvider extends ServiceProvider
     private function configureShield(): void
     {
         if (class_exists(FilamentShield::class)) {
-            FilamentShield::buildPermissionKeyUsing(function ($entity, $affix, $subject, $case, $separator) {
+            FilamentShield::buildPermissionKeyUsing(function ($entity, $affix, $subject, $case, string $separator): string {
                 if ($entity === AppointmentResource::class) {
                     $subject = 'Appointment';
                 }

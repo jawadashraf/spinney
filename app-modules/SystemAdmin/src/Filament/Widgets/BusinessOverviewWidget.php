@@ -150,7 +150,7 @@ final class BusinessOverviewWidget extends BaseWidget
      * @param  Collection<int, \stdClass>  $opportunities
      * @return array<int, float>
      */
-    private function generatePipelineTrend(\Illuminate\Support\Collection $opportunities): array
+    private function generatePipelineTrend(Collection $opportunities): array
     {
         return collect(range(6, 0))
             ->map(fn (int $daysAgo): array => [

@@ -10,6 +10,7 @@ use App\Models\CustomField;
 use App\Models\Enquiry;
 use App\Models\People;
 use App\Models\User;
+use Database\Seeders\ServiceUserCustomFieldSeeder;
 
 use function Pest\Livewire\livewire;
 
@@ -19,7 +20,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 
     // Ensure custom fields are seeded for the test team
-    $this->seed(\Database\Seeders\ServiceUserCustomFieldSeeder::class);
+    $this->seed(ServiceUserCustomFieldSeeder::class);
 });
 
 it('hides conversion action for already converted enquiries', function (): void {

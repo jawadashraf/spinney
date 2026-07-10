@@ -14,7 +14,7 @@ use Relaticle\SystemAdmin\SystemAdminPanelProvider;
 return [
     AppServiceProvider::class,
     FaviconServiceProvider::class,
-    Relaticle\SystemAdmin\SystemAdminPanelProvider::class,
+    SystemAdminPanelProvider::class,
     AppPanelProvider::class,
     // App\Providers\Filament\KnowledgeBasePanelProvider::class, // TODO: Re-enable when guava/filament-knowledge-base supports Laravel 13
     FortifyServiceProvider::class,

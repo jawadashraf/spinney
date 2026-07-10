@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Tenancy;
 
+use App\Actions\Jetstream\CreateTeam;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Tenancy\RegisterTenant;
 use Filament\Schemas\Schema;
@@ -30,6 +31,6 @@ final class RegisterOrganization extends RegisterTenant
     #[Override]
     protected function handleRegistration(array $data): Model
     {
-        return app(\App\Actions\Jetstream\CreateTeam::class)->create(auth('web')->user(), $data);
+        return app(CreateTeam::class)->create(auth('web')->user(), $data);
     }
 }

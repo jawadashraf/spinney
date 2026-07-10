@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use App\Models\CustomField;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-class CustomFieldPolicy
+final class CustomFieldPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:CustomField');
     }
 
-    public function view(AuthUser $authUser, CustomField $customField): bool
+    public function view(AuthUser $authUser): bool
     {
         return $authUser->can('View:CustomField');
     }
@@ -27,22 +26,22 @@ class CustomFieldPolicy
         return $authUser->can('Create:CustomField');
     }
 
-    public function update(AuthUser $authUser, CustomField $customField): bool
+    public function update(AuthUser $authUser): bool
     {
         return $authUser->can('Update:CustomField');
     }
 
-    public function delete(AuthUser $authUser, CustomField $customField): bool
+    public function delete(AuthUser $authUser): bool
     {
         return $authUser->can('Delete:CustomField');
     }
 
-    public function restore(AuthUser $authUser, CustomField $customField): bool
+    public function restore(AuthUser $authUser): bool
     {
         return $authUser->can('Restore:CustomField');
     }
 
-    public function forceDelete(AuthUser $authUser, CustomField $customField): bool
+    public function forceDelete(AuthUser $authUser): bool
     {
         return $authUser->can('ForceDelete:CustomField');
     }
@@ -57,7 +56,7 @@ class CustomFieldPolicy
         return $authUser->can('RestoreAny:CustomField');
     }
 
-    public function replicate(AuthUser $authUser, CustomField $customField): bool
+    public function replicate(AuthUser $authUser): bool
     {
         return $authUser->can('Replicate:CustomField');
     }
@@ -66,5 +65,4 @@ class CustomFieldPolicy
     {
         return $authUser->can('Reorder:CustomField');
     }
-
 }

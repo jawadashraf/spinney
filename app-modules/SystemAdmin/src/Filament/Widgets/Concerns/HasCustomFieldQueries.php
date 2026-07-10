@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Relaticle\SystemAdmin\Filament\Widgets\Concerns;
 
 use App\Enums\CreationSource;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
 trait HasCustomFieldQueries
@@ -78,7 +79,7 @@ trait HasCustomFieldQueries
      * Build a query to join entity with custom field values by option name
      */
     /**
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
     protected function queryEntitiesByCustomFieldOption(
         string $tableName,

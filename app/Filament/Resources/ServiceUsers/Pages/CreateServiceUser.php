@@ -54,7 +54,8 @@ final class CreateServiceUser extends CreateRecord
 
         // 5. Create the linked User account
         $user = User::create([
-            'name' => $record->name,
+            'first_name' => $record->first_name,
+            'last_name' => $record->last_name,
             'email' => $record->email,
             'password' => Hash::make($password),
         ]);

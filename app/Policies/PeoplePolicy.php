@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use App\Models\People;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-class PeoplePolicy
+final class PeoplePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:People');
     }
 
-    public function view(AuthUser $authUser, People $people): bool
+    public function view(AuthUser $authUser): bool
     {
         return $authUser->can('View:People');
     }
@@ -27,22 +26,22 @@ class PeoplePolicy
         return $authUser->can('Create:People');
     }
 
-    public function update(AuthUser $authUser, People $people): bool
+    public function update(AuthUser $authUser): bool
     {
         return $authUser->can('Update:People');
     }
 
-    public function delete(AuthUser $authUser, People $people): bool
+    public function delete(AuthUser $authUser): bool
     {
         return $authUser->can('Delete:People');
     }
 
-    public function restore(AuthUser $authUser, People $people): bool
+    public function restore(AuthUser $authUser): bool
     {
         return $authUser->can('Restore:People');
     }
 
-    public function forceDelete(AuthUser $authUser, People $people): bool
+    public function forceDelete(AuthUser $authUser): bool
     {
         return $authUser->can('ForceDelete:People');
     }
@@ -57,7 +56,7 @@ class PeoplePolicy
         return $authUser->can('RestoreAny:People');
     }
 
-    public function replicate(AuthUser $authUser, People $people): bool
+    public function replicate(AuthUser $authUser): bool
     {
         return $authUser->can('Replicate:People');
     }
@@ -66,5 +65,4 @@ class PeoplePolicy
     {
         return $authUser->can('Reorder:People');
     }
-
 }

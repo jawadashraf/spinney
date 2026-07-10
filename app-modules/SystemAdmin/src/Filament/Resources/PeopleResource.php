@@ -52,7 +52,10 @@ final class PeopleResource extends Resource
                 Select::make('team_id')
                     ->relationship('team', 'name')
                     ->required(),
-                TextInput::make('name')
+                TextInput::make('first_name')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('last_name')
                     ->required()
                     ->maxLength(255),
                 Select::make('creation_source')
@@ -69,7 +72,9 @@ final class PeopleResource extends Resource
                 TextColumn::make('team.name')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('name')
+                TextColumn::make('first_name')
+                    ->searchable(),
+                TextColumn::make('last_name')
                     ->searchable(),
                 TextColumn::make('creation_source')
                     ->badge()

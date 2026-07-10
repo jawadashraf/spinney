@@ -41,7 +41,8 @@ final class ConvertToServiceUserAction
                     // 1. Create User
                     $password = $data['password'] ?? Str::random(12);
                     $user = User::create([
-                        'name' => $person->name,
+                        'first_name' => $person->first_name,
+                        'last_name' => $person->last_name,
                         'email' => $data['email'],
                         'password' => Hash::make($password),
                     ]);

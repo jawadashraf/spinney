@@ -30,10 +30,12 @@ final class PeopleRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                TextInput::make('name')
+                TextInput::make('first_name')
                     ->required()
-                    ->maxLength(255)
-                    ->columnSpanFull(),
+                    ->maxLength(255),
+                TextInput::make('last_name')
+                    ->required()
+                    ->maxLength(255),
                 CustomFields::form()->forSchema($schema)->build()
                     ->columnSpanFull()
                     ->columns(),
@@ -43,9 +45,10 @@ final class PeopleRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
+            ->recordTitleAttribute('first_name')
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('first_name'),
+                TextColumn::make('last_name'),
 
                 ...CustomFields::table()->forModel($table->getModel())->columns(),
             ])

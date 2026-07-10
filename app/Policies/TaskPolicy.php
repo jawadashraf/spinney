@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use App\Models\Task;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-class TaskPolicy
+final class TaskPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Task');
     }
 
-    public function view(AuthUser $authUser, Task $task): bool
+    public function view(AuthUser $authUser): bool
     {
         return $authUser->can('View:Task');
     }
@@ -27,22 +26,22 @@ class TaskPolicy
         return $authUser->can('Create:Task');
     }
 
-    public function update(AuthUser $authUser, Task $task): bool
+    public function update(AuthUser $authUser): bool
     {
         return $authUser->can('Update:Task');
     }
 
-    public function delete(AuthUser $authUser, Task $task): bool
+    public function delete(AuthUser $authUser): bool
     {
         return $authUser->can('Delete:Task');
     }
 
-    public function restore(AuthUser $authUser, Task $task): bool
+    public function restore(AuthUser $authUser): bool
     {
         return $authUser->can('Restore:Task');
     }
 
-    public function forceDelete(AuthUser $authUser, Task $task): bool
+    public function forceDelete(AuthUser $authUser): bool
     {
         return $authUser->can('ForceDelete:Task');
     }
@@ -57,7 +56,7 @@ class TaskPolicy
         return $authUser->can('RestoreAny:Task');
     }
 
-    public function replicate(AuthUser $authUser, Task $task): bool
+    public function replicate(AuthUser $authUser): bool
     {
         return $authUser->can('Replicate:Task');
     }
@@ -66,5 +65,4 @@ class TaskPolicy
     {
         return $authUser->can('Reorder:Task');
     }
-
 }

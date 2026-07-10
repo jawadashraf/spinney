@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use App\Models\Schedule;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-class SchedulePolicy
+final class SchedulePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Schedule');
     }
 
-    public function view(AuthUser $authUser, Schedule $schedule): bool
+    public function view(AuthUser $authUser): bool
     {
         return $authUser->can('View:Schedule');
     }
@@ -27,22 +26,22 @@ class SchedulePolicy
         return $authUser->can('Create:Schedule');
     }
 
-    public function update(AuthUser $authUser, Schedule $schedule): bool
+    public function update(AuthUser $authUser): bool
     {
         return $authUser->can('Update:Schedule');
     }
 
-    public function delete(AuthUser $authUser, Schedule $schedule): bool
+    public function delete(AuthUser $authUser): bool
     {
         return $authUser->can('Delete:Schedule');
     }
 
-    public function restore(AuthUser $authUser, Schedule $schedule): bool
+    public function restore(AuthUser $authUser): bool
     {
         return $authUser->can('Restore:Schedule');
     }
 
-    public function forceDelete(AuthUser $authUser, Schedule $schedule): bool
+    public function forceDelete(AuthUser $authUser): bool
     {
         return $authUser->can('ForceDelete:Schedule');
     }
@@ -57,7 +56,7 @@ class SchedulePolicy
         return $authUser->can('RestoreAny:Schedule');
     }
 
-    public function replicate(AuthUser $authUser, Schedule $schedule): bool
+    public function replicate(AuthUser $authUser): bool
     {
         return $authUser->can('Replicate:Schedule');
     }
@@ -66,5 +65,4 @@ class SchedulePolicy
     {
         return $authUser->can('Reorder:Schedule');
     }
-
 }

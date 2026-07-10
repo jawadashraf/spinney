@@ -20,7 +20,7 @@ final readonly class AddressLookupService
     {
         $postcode = trim(strtoupper($postcode));
 
-        if (empty($postcode)) {
+        if ($postcode === '' || $postcode === '0') {
             return [];
         }
 
@@ -87,7 +87,7 @@ final readonly class AddressLookupService
             $address['post_town'] ?? '',
             $address['postcode'] ?? '',
         ])
-            ->map(fn ($line) => trim((string) $line))
+            ->map(fn ($line): string => trim((string) $line))
             ->filter()
             ->implode("\n");
     }
@@ -115,7 +115,7 @@ final readonly class AddressLookupService
                         $region,
                         $postcode,
                     ])
-                        ->map(fn ($line) => trim((string) $line))
+                        ->map(fn ($line): string => trim((string) $line))
                         ->filter()
                         ->implode("\n");
 

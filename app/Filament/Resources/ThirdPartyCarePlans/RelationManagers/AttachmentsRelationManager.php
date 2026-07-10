@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ThirdPartyCarePlans\RelationManagers;
 
+use App\Models\ThirdPartyCarePlan;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -82,7 +83,7 @@ final class AttachmentsRelationManager extends RelationManager
                     ->placeholder('No tags'),
                 TextColumn::make('size')
                     ->label('File Info')
-                    ->state(fn (Media $record): string => Number::fileSize($record->size) . ' (' . str($record->mime_type)->afterLast('/') . ')')
+                    ->state(fn (Media $record): string => Number::fileSize($record->size).' ('.str($record->mime_type)->afterLast('/').')')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Uploaded')
@@ -123,9 +124,10 @@ final class AttachmentsRelationManager extends RelationManager
                     ->after(function (array $data, RelationManager $livewire): void {
                         // All files uploaded via SpatieMediaLibraryFileUpload are attached to $livewire->ownerRecord
                         // We find the latest uploads and apply categories/tags.
+                        /** @var ThirdPartyCarePlan $owner */
                         $owner = $livewire->getOwnerRecord();
                         $recentMedia = $owner->media()->where('collection_name', 'attachments')->where('created_at', '>=', now()->subMinutes(1))->get();
-                        
+
                         foreach ($recentMedia as $media) {
                             $media->setCustomProperty('category', $data['category']);
                             $media->setCustomProperty('tags', $data['tags']);
@@ -146,5 +148,16 @@ final class AttachmentsRelationManager extends RelationManager
                 EditAction::make(),
                 DeleteAction::make(),
             ]);
+    }
+
+    public function toggleTableReordering(): void
+    {
+        // TODO: Implement toggleTableReordering() method.
+    }
+
+    public function isTableReordering(): bool
+    {
+        // TODO: Implement isTableReordering() method.
+        return false;
     }
 }

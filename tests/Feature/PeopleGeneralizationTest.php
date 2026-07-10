@@ -14,13 +14,15 @@ it('uses STI to create specialized people types', function () {
     $team = $user->personalTeam();
 
     $serviceUser = ServiceUser::create([
-        'name' => 'John Service',
+        'first_name' => 'John',
+        'last_name' => 'Service',
         'email' => 'john@example.com',
         'team_id' => $team->id,
     ]);
 
     $donor = Donor::create([
-        'name' => 'Jane Donor',
+        'first_name' => 'Jane',
+        'last_name' => 'Donor',
         'email' => 'jane@example.com',
         'team_id' => $team->id,
     ]);
@@ -41,8 +43,8 @@ it('can link people through relationships', function () {
     $user = User::factory()->withPersonalTeam()->create();
     $team = $user->personalTeam();
 
-    $person = People::create(['name' => 'Parent Person', 'team_id' => $team->id]);
-    $relative = People::create(['name' => 'Relative Person', 'team_id' => $team->id]);
+    $person = People::create(['first_name' => 'Parent', 'last_name' => 'Person', 'team_id' => $team->id]);
+    $relative = People::create(['first_name' => 'Relative', 'last_name' => 'Person', 'team_id' => $team->id]);
 
     $person->relatedPeople()->attach($relative->id, [
         'relation_type' => 'Brother',
@@ -63,10 +65,10 @@ it('filters people by type in tabs', function () {
     $user = User::factory()->withPersonalTeam()->create();
     $team = $user->personalTeam();
 
-    ServiceUser::create(['name' => 'S1', 'team_id' => $team->id]);
-    Donor::create(['name' => 'D1', 'team_id' => $team->id]);
-    Relative::create(['name' => 'R1', 'team_id' => $team->id]);
-    Professional::create(['name' => 'P1', 'team_id' => $team->id]);
+    ServiceUser::create(['first_name' => 'S1', 'last_name' => 'Service', 'team_id' => $team->id]);
+    Donor::create(['first_name' => 'D1', 'last_name' => 'Donor', 'team_id' => $team->id]);
+    Relative::create(['first_name' => 'R1', 'last_name' => 'Relative', 'team_id' => $team->id]);
+    Professional::create(['first_name' => 'P1', 'last_name' => 'Professional', 'team_id' => $team->id]);
 
     expect(People::where('type', 'service_user')->count())->toBe(1);
     expect(People::where('type', 'donor')->count())->toBe(1);

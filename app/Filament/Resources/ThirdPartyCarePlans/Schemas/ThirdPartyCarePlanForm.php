@@ -13,13 +13,11 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-
 use Filament\Support\Icons\Heroicon;
 
 final class ThirdPartyCarePlanForm
@@ -110,11 +108,11 @@ final class ThirdPartyCarePlanForm
                             ->maxDate(now()),
                         DatePicker::make('start_date')
                             ->visible(fn (Get $get): bool => in_array($get('status'), ['in_progress', 'completed']))
-                            ->minDate(fn (Get $get) => $get('referral_date'))
+                            ->minDate(fn (Get $get): mixed => $get('referral_date'))
                             ->nullable(),
                         DatePicker::make('end_date')
                             ->visible(fn (Get $get): bool => $get('status') === 'completed')
-                            ->minDate(fn (Get $get) => $get('start_date'))
+                            ->minDate(fn (Get $get): mixed => $get('start_date'))
                             ->nullable(),
                         Select::make('managers')
                             ->relationship('managers', 'name')
@@ -186,4 +184,3 @@ final class ThirdPartyCarePlanForm
         }
     }
 }
-

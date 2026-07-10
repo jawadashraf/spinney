@@ -14,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\View\View;
 
 final class UpdateProfileInformation extends BaseLivewireComponent
 {
@@ -22,7 +23,7 @@ final class UpdateProfileInformation extends BaseLivewireComponent
 
     public function mount(): void
     {
-        $data = $this->authUser()->only(['name', 'email']);
+        $data = $this->authUser()->only(['first_name', 'last_name', 'email']);
 
         $this->form->fill($data);
     }
@@ -44,8 +45,13 @@ final class UpdateProfileInformation extends BaseLivewireComponent
                             ->directory('profile-photos')
                             ->visibility('public')
                             ->formatStateUsing(fn () => auth('web')->user()?->profile_photo_path),
-                        TextInput::make('name')
-                            ->label(__('profile.form.name.label'))
+                        TextInput::make('first_name')
+                            ->label(__('profile.form.first_name.label'))
+                            ->string()
+                            ->maxLength(255)
+                            ->required(),
+                        TextInput::make('last_name')
+                            ->label(__('profile.form.last_name.label'))
                             ->string()
                             ->maxLength(255)
                             ->required(),
@@ -81,7 +87,7 @@ final class UpdateProfileInformation extends BaseLivewireComponent
         $this->sendNotification();
     }
 
-    public function render(): \Illuminate\Contracts\View\View
+    public function render(): View
     {
         return view('livewire.app.profile.update-profile-information');
     }

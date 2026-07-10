@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use Laravel\Jetstream\Features;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 final class UserFactory extends Factory
 {
@@ -31,7 +31,8 @@ final class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => self::$password ??= Hash::make('password'),
@@ -65,7 +66,7 @@ final class UserFactory extends Factory
 
         return $this->afterCreating(function (User $user) use ($callback): void {
             $team = Team::factory()->create([
-                'name' => $user->name.'\'s Team',
+                'name' => $user->first_name.'\'s Team',
                 'user_id' => $user->id,
                 'personal_team' => true,
             ]);

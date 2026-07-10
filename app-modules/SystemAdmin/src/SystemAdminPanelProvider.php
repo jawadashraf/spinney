@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Relaticle\SystemAdmin;
 
+use AchyutN\FilamentLogViewer\FilamentLogViewer;
+use AlizHarb\ActivityLog\ActivityLogPlugin;
 use Awcodes\Overlook\OverlookPlugin;
 use Awcodes\Overlook\Widgets\OverlookWidget;
-use AlizHarb\ActivityLog\ActivityLogPlugin;
 use Exception;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -17,14 +18,12 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Relaticle\SystemAdmin\Filament\Pages\Dashboard;
-use AchyutN\FilamentLogViewer\FilamentLogViewer;
-use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
-
 
 final class SystemAdminPanelProvider extends PanelProvider
 {
@@ -94,7 +93,7 @@ final class SystemAdminPanelProvider extends PanelProvider
                 StartSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
-                \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+                PreventRequestForgery::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,

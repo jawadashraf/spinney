@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 final class SystemAdministratorSeeder extends Seeder
@@ -13,7 +14,7 @@ final class SystemAdministratorSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::firstOrCreate(
+        User::firstOrCreate(
             ['email' => 'superadmin@spinneyhill.com'],
             [
                 'name' => 'System Administrator',

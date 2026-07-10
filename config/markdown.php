@@ -1,6 +1,8 @@
 <?php
 
 declare(strict_types=1);
+use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
+use Spatie\LaravelMarkdown\MarkdownRenderer;
 
 return [
     'code_highlighting' => [
@@ -75,7 +77,7 @@ return [
      *
      * More info: https://spatie.be/docs/laravel-markdown/v1/advanced-usage/customizing-the-rendering-process
      */
-    'renderer_class' => Spatie\LaravelMarkdown\MarkdownRenderer::class,
+    'renderer_class' => MarkdownRenderer::class,
 
     /*
      * These extensions should be added to the markdown environment. A valid
@@ -84,7 +86,7 @@ return [
      * More info: https://commonmark.thephpleague.com/2.4/extensions/overview/
      */
     'extensions' => [
-        League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension::class,
+        HeadingPermalinkExtension::class,
     ],
 
     /*

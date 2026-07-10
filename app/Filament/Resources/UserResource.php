@@ -43,7 +43,10 @@ final class UserResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            TextInput::make('name')
+            TextInput::make('first_name')
+                ->required()
+                ->maxLength(255),
+            TextInput::make('last_name')
                 ->required()
                 ->maxLength(255),
             TextInput::make('email')
@@ -68,7 +71,10 @@ final class UserResource extends Resource
                     ->label('')
                     ->imageSize(24)
                     ->circular(),
-                TextColumn::make('name')
+                TextColumn::make('first_name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('last_name')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email')

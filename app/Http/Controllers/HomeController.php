@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Filament\Resources\CompanyResource;
 use Illuminate\Support\Facades\Auth;
 
 final readonly class HomeController

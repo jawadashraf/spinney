@@ -81,7 +81,7 @@ final class LogoutOtherBrowserSessions extends BaseLivewireComponent
     /**
      * Get the current sessions.
      *
-     * @return Collection<int, object{agent: \Laravel\Jetstream\Agent, ip_address: mixed, is_current_device: bool, last_active: string}>
+     * @return Collection<int, object{agent: Agent, ip_address: mixed, is_current_device: bool, last_active: string}>
      */
     public function browserSessions(): Collection
     {

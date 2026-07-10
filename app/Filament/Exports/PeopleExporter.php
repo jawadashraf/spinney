@@ -25,7 +25,8 @@ final class PeopleExporter extends BaseExporter
                 ->label('Creation Source')
                 ->formatStateUsing(fn (mixed $state): string => $state->value ?? (string) $state),
             ExportColumn::make('company.name'),
-            ExportColumn::make('name'),
+            ExportColumn::make('first_name'),
+            ExportColumn::make('last_name'),
             ExportColumn::make('created_at'),
             ExportColumn::make('updated_at'),
             ExportColumn::make('deleted_at'),

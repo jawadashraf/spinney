@@ -137,17 +137,15 @@ final class EnquiriesTable
                         DatePicker::make('occurred_from'),
                         DatePicker::make('occurred_until'),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['occurred_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('occurred_at', '>=', $date),
-                            )
-                            ->when(
-                                $data['occurred_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('occurred_at', '<=', $date),
-                            );
-                    })
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['occurred_from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('occurred_at', '>=', $date),
+                        )
+                        ->when(
+                            $data['occurred_until'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('occurred_at', '<=', $date),
+                        ))
                     ->indicateUsing(function (array $data): ?string {
                         if ($data['occurred_from'] ?? null) {
                             return "From {$data['occurred_from']}";

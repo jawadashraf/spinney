@@ -1,6 +1,13 @@
 <?php
 
 declare(strict_types=1);
+use App\Filament\Resources\Enquiries\EnquiryResource;
+use App\Models\Team;
+use App\Models\User;
+use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
+use Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
+use Filament\Widgets\FilamentInfoWidget;
 
 return [
 
@@ -38,7 +45,7 @@ return [
     |
     */
 
-    'tenant_model' => \App\Models\Team::class,
+    'tenant_model' => Team::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -51,7 +58,7 @@ return [
     |
     */
 
-    'auth_provider_model' => \App\Models\User::class,
+    'auth_provider_model' => User::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -165,14 +172,14 @@ return [
     'resources' => [
         'subject' => 'model',
         'manage' => [
-            \BezhanSalleh\FilamentShield\Resources\Roles\RoleResource::class => [
+            RoleResource::class => [
                 'viewAny',
                 'view',
                 'create',
                 'update',
                 'delete',
             ],
-            \App\Filament\Resources\Enquiries\EnquiryResource::class => [
+            EnquiryResource::class => [
                 'convertToServiceUser',
             ],
         ],
@@ -196,7 +203,7 @@ return [
         'subject' => 'class',
         'prefix' => 'view',
         'exclude' => [
-            \Filament\Pages\Dashboard::class,
+            Dashboard::class,
         ],
     ],
 
@@ -215,8 +222,8 @@ return [
         'subject' => 'class',
         'prefix' => 'view',
         'exclude' => [
-            \Filament\Widgets\AccountWidget::class,
-            \Filament\Widgets\FilamentInfoWidget::class,
+            AccountWidget::class,
+            FilamentInfoWidget::class,
         ],
     ],
 

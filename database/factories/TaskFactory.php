@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\TaskType;
 use App\Models\Task;
 use App\Models\Team;
 use App\Models\User;
@@ -22,7 +23,7 @@ final class TaskFactory extends Factory
     {
         return [
             'title' => $this->faker->sentence(3),
-            'type' => \App\Enums\TaskType::GeneralTask,
+            'type' => TaskType::GeneralTask,
             'department_id' => null,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),

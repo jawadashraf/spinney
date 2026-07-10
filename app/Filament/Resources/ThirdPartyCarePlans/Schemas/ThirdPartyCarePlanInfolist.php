@@ -8,11 +8,9 @@ use App\Enums\ThirdPartyCarePlanStatus;
 use App\Models\ThirdPartyCarePlan;
 use App\Support\CustomFields;
 use Filament\Infolists\Components\TextEntry;
-
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
-use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 
 final class ThirdPartyCarePlanInfolist
 {
@@ -102,7 +100,7 @@ final class ThirdPartyCarePlanInfolist
                     ->columns(1)
                     ->collapsible(),
 
-                 Section::make('Attachments Summary')
+                Section::make('Attachments Summary')
                     ->description('Detailed file management is available in the Attachments tab.')
                     ->schema([
                         TextEntry::make('attachments_count')
@@ -111,7 +109,6 @@ final class ThirdPartyCarePlanInfolist
                             ->badge(),
                     ])
                     ->collapsible(),
-
 
                 Section::make('Metadata')
 

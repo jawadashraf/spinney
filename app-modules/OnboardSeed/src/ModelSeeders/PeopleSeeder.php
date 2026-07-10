@@ -74,7 +74,8 @@ final class PeopleSeeder extends BaseModelSeeder
     private function createPersonFromFixture(Company $company, Authenticatable $user, string $key, array $data): People
     {
         $attributes = [
-            'name' => $data['name'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
             'company_id' => $company->id,
             'team_id' => $company->team_id,
         ];

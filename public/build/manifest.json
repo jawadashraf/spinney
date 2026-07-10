@@ -1,6 +1,6 @@
 {
   "app-modules/Documentation/resources/css/documentation.css": {
-    "file": "assets/documentation-Bva7TW58.css",
+    "file": "assets/documentation-DYf4LnoW.css",
     "src": "app-modules/Documentation/resources/css/documentation.css",
     "isEntry": true,
     "name": "documentation",
@@ -15,7 +15,7 @@
     "isEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-sm75CGec.css",
+    "file": "assets/app-CViIOGR_.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",

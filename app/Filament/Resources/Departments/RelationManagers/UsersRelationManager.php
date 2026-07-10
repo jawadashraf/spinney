@@ -16,13 +16,16 @@ final class UsersRelationManager extends RelationManager
 {
     protected static string $relationship = 'users';
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $recordTitleAttribute = 'first_name';
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextInput::make('name')
+                TextInput::make('first_name')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('last_name')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -32,7 +35,8 @@ final class UsersRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('first_name'),
+                TextColumn::make('last_name'),
                 TextColumn::make('email'),
             ])
             ->headerActions([

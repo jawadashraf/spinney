@@ -94,7 +94,7 @@ final class CreateSchedule extends CreateRecord
             }
 
             return $schedule;
-        } catch (ScheduleConflictException $e) {
+        } catch (ScheduleConflictException) {
             Notification::make()
                 ->title('Schedule Conflict')
                 ->body('This schedule conflicts with an existing schedule.')

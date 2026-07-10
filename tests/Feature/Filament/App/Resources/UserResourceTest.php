@@ -29,12 +29,12 @@ it('can render the view page', function (): void {
 it('has `:dataset` column', function (string $column): void {
     livewire(ListUsers::class)
         ->assertTableColumnExists($column);
-})->with(['profile_photo_url', 'name', 'email', 'currentTeam.name', 'roles.name', 'email_verified_at', 'created_at']);
+})->with(['profile_photo_url', 'first_name', 'last_name', 'email', 'currentTeam.name', 'roles.name', 'email_verified_at', 'created_at']);
 
 it('can render `:dataset` column', function (string $column): void {
     livewire(ListUsers::class)
         ->assertCanRenderTableColumn($column);
-})->with(['profile_photo_url', 'name', 'email', 'currentTeam.name', 'roles.name']);
+})->with(['profile_photo_url', 'first_name', 'last_name', 'email', 'currentTeam.name', 'roles.name']);
 
 it('can search `:dataset` column', function (string $column): void {
     $records = User::factory(3)->create();
@@ -43,7 +43,7 @@ it('can search `:dataset` column', function (string $column): void {
     livewire(ListUsers::class)
         ->searchTable($search)
         ->assertCanSeeTableRecords($records->filter(fn (User $record) => data_get($record, $column) === $search));
-})->with(['name', 'email']);
+})->with(['first_name', 'last_name', 'email']);
 
 it('can sort `:dataset` column', function (string $column): void {
     User::factory(3)->create();
@@ -53,7 +53,7 @@ it('can sort `:dataset` column', function (string $column): void {
         ->assertOk()
         ->sortTable($column, 'desc')
         ->assertOk();
-})->with(['name', 'email', 'created_at']);
+})->with(['first_name', 'last_name', 'email', 'created_at']);
 
 it('has `:dataset` filter', function (string $filter): void {
     livewire(ListUsers::class)

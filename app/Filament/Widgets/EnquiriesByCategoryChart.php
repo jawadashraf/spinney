@@ -39,7 +39,7 @@ final class EnquiriesByCategoryChart extends ChartWidget
                 [
                     'data' => $values,
                     'backgroundColor' => array_map(
-                        fn (EnquiryCategory $case) => match ($case->getColor()) {
+                        fn (EnquiryCategory $case): string => match ($case->getColor()) {
                             'info' => '#3b82f6',
                             'primary' => '#6366f1',
                             'warning' => '#f59e0b',

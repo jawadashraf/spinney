@@ -47,9 +47,7 @@ final class ViewBookableSlotsAction extends Action
 
                 $slots = $counselor->getBookableSlots($data['date'], (int) $data['slot_duration']);
 
-                $this->sendSuccessNotification(
-                    'Found '.count(array_filter($slots, fn ($s) => $s['is_available'])).' available slots out of '.count($slots).' total.'
-                );
+                $this->sendSuccessNotification();
             });
     }
 }

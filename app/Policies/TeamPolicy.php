@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use App\Models\Team;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-class TeamPolicy
+final class TeamPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Team');
     }
 
-    public function view(AuthUser $authUser, Team $team): bool
+    public function view(AuthUser $authUser): bool
     {
         return $authUser->can('View:Team');
     }
@@ -27,22 +26,22 @@ class TeamPolicy
         return $authUser->can('Create:Team');
     }
 
-    public function update(AuthUser $authUser, Team $team): bool
+    public function update(AuthUser $authUser): bool
     {
         return $authUser->can('Update:Team');
     }
 
-    public function delete(AuthUser $authUser, Team $team): bool
+    public function delete(AuthUser $authUser): bool
     {
         return $authUser->can('Delete:Team');
     }
 
-    public function restore(AuthUser $authUser, Team $team): bool
+    public function restore(AuthUser $authUser): bool
     {
         return $authUser->can('Restore:Team');
     }
 
-    public function forceDelete(AuthUser $authUser, Team $team): bool
+    public function forceDelete(AuthUser $authUser): bool
     {
         return $authUser->can('ForceDelete:Team');
     }
@@ -57,7 +56,7 @@ class TeamPolicy
         return $authUser->can('RestoreAny:Team');
     }
 
-    public function replicate(AuthUser $authUser, Team $team): bool
+    public function replicate(AuthUser $authUser): bool
     {
         return $authUser->can('Replicate:Team');
     }
@@ -66,5 +65,4 @@ class TeamPolicy
     {
         return $authUser->can('Reorder:Team');
     }
-
 }

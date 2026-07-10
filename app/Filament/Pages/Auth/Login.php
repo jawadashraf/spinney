@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Auth;
 
-use App\Filament\Resources\CompanyResource;
 use DiogoGPinto\AuthUIEnhancer\Pages\Auth\Concerns\HasCustomLayout;
 use Filament\Actions\Action;
 use Filament\Support\Enums\Size;
@@ -28,11 +27,11 @@ final class Login extends \Filament\Auth\Pages\Login
             $tenant = $user->currentTeam ?? $user->allTeams()->first();
 
             if ($tenant) {
-                 redirect(
+                redirect(
                     route('filament.app.home', ['tenant' => $tenant])
-                 );
+                );
 
-                 return;
+                return;
             }
 
             redirect('/');

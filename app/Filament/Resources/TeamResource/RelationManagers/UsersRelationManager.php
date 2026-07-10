@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\TeamResource\RelationManagers;
 
+use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -27,7 +28,10 @@ final class UsersRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                TextInput::make('name')
+                TextInput::make('first_name')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('last_name')
                     ->required()
                     ->maxLength(255),
                 TextInput::make('email')
@@ -40,9 +44,12 @@ final class UsersRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
+            ->recordTitleAttribute('first_name')
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('first_name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('last_name')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email')
@@ -56,10 +63,10 @@ final class UsersRelationManager extends RelationManager
                 CreateAction::make(),
                 AttachAction::make()
                     ->recordSelectOptionsQuery(fn ($query) => $query->whereDoesntHave('roles', fn ($query) => $query->where('name', 'service_user')))
-                    ->recordSelect(fn (Select $select): \Filament\Forms\Components\Select => $select->rules([
+                    ->recordSelect(fn (Select $select): Select => $select->rules([
                         'required',
                         fn (): \Closure => function (string $attribute, $value, \Closure $fail): void {
-                            if (! \App\Models\User::query()
+                            if (! User::query()
                                 ->where('id', $value)
                                 ->whereDoesntHave('roles', fn ($q) => $q->where('name', 'service_user'))
                                 ->exists()) {

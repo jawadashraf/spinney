@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use App\Models\Note;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-class NotePolicy
+final class NotePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Note');
     }
 
-    public function view(AuthUser $authUser, Note $note): bool
+    public function view(AuthUser $authUser): bool
     {
         return $authUser->can('View:Note');
     }
@@ -27,22 +26,22 @@ class NotePolicy
         return $authUser->can('Create:Note');
     }
 
-    public function update(AuthUser $authUser, Note $note): bool
+    public function update(AuthUser $authUser): bool
     {
         return $authUser->can('Update:Note');
     }
 
-    public function delete(AuthUser $authUser, Note $note): bool
+    public function delete(AuthUser $authUser): bool
     {
         return $authUser->can('Delete:Note');
     }
 
-    public function restore(AuthUser $authUser, Note $note): bool
+    public function restore(AuthUser $authUser): bool
     {
         return $authUser->can('Restore:Note');
     }
 
-    public function forceDelete(AuthUser $authUser, Note $note): bool
+    public function forceDelete(AuthUser $authUser): bool
     {
         return $authUser->can('ForceDelete:Note');
     }
@@ -57,7 +56,7 @@ class NotePolicy
         return $authUser->can('RestoreAny:Note');
     }
 
-    public function replicate(AuthUser $authUser, Note $note): bool
+    public function replicate(AuthUser $authUser): bool
     {
         return $authUser->can('Replicate:Note');
     }
@@ -66,5 +65,4 @@ class NotePolicy
     {
         return $authUser->can('Reorder:Note');
     }
-
 }

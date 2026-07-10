@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Appointments\Pages;
 
-use App\Enums\ScheduleType;
 use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\Appointments\AppointmentResource;
 use App\Filament\Resources\Appointments\Schemas\AppointmentForm;
@@ -29,8 +28,6 @@ final class CreateAppointment extends CreateRecord
 
         $schedulableClass = Relation::getMorphedModel($data['schedulable_type']) ?? $data['schedulable_type'];
         $schedulable = $schedulableClass::findOrFail($data['schedulable_id']);
-
-        $scheduleType = ScheduleType::APPOINTMENT;
         $metadata = $data['metadata'] ?? [];
 
         unset($data['schedulable_type'], $data['schedulable_id'], $data['metadata'], $data['period_start_time'], $data['period_end_time']);
@@ -82,7 +79,7 @@ final class CreateAppointment extends CreateRecord
             }
 
             return $schedule;
-        } catch (ScheduleConflictException $e) {
+        } catch (ScheduleConflictException) {
             Notification::make()
                 ->title('Schedule Conflict')
                 ->body('This schedule conflicts with an existing schedule.')

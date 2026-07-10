@@ -29,7 +29,7 @@ final class TeamSeeder extends Seeder
             // 'Liaison',
             // 'Counselor',
             // 'Management',
-            'Spinney Hill'
+            'Spinney Hill',
         ];
 
         foreach ($teams as $name) {

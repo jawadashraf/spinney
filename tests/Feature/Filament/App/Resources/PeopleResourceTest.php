@@ -2,7 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Filament\Resources\PeopleResource\Pages\ListPeople;
+use App\Filament\Resources\PeopleResource\Pages\ViewPeople;
+use App\Models\People;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 use function Pest\Livewire\livewire;
 
@@ -13,45 +17,45 @@ beforeEach(function () {
 });
 
 it('can render the index page', function (): void {
-    livewire(App\Filament\Resources\PeopleResource\Pages\ListPeople::class)
+    livewire(ListPeople::class)
         ->assertOk();
 });
 
 it('can render the view page', function (): void {
-    $record = App\Models\People::factory()->create();
+    $record = People::factory()->create();
 
-    livewire(App\Filament\Resources\PeopleResource\Pages\ViewPeople::class, ['record' => $record->getKey()])
+    livewire(ViewPeople::class, ['record' => $record->getKey()])
         ->assertOk();
 });
 
 it('can render `:dataset` column', function (string $column): void {
-    livewire(App\Filament\Resources\PeopleResource\Pages\ListPeople::class)
+    livewire(ListPeople::class)
         ->assertCanRenderTableColumn($column);
-})->with(['avatar', 'name', 'company.name', 'creator.name']);
+})->with(['avatar', 'first_name', 'last_name', 'company.name', 'creator.name']);
 
 it('cannot render `:dataset` column', function (string $column): void {
-    livewire(App\Filament\Resources\PeopleResource\Pages\ListPeople::class)
+    livewire(ListPeople::class)
         ->assertCanNotRenderTableColumn($column);
 })->with(['created_at', 'updated_at', 'deleted_at']);
 
 it('has `:dataset` column', function (string $column): void {
-    livewire(App\Filament\Resources\PeopleResource\Pages\ListPeople::class)
+    livewire(ListPeople::class)
         ->assertTableColumnExists($column);
-})->with(['avatar', 'name', 'company.name', 'creator.name', 'created_at', 'updated_at', 'deleted_at']);
+})->with(['avatar', 'first_name', 'last_name', 'company.name', 'creator.name', 'created_at', 'updated_at', 'deleted_at']);
 
 it('shows `:dataset` column', function (string $column): void {
-    livewire(App\Filament\Resources\PeopleResource\Pages\ListPeople::class)
+    livewire(ListPeople::class)
         ->assertTableColumnVisible($column);
-})->with(['avatar', 'name', 'company.name', 'creator.name', 'created_at', 'updated_at', 'deleted_at']);
+})->with(['avatar', 'first_name', 'last_name', 'company.name', 'creator.name', 'created_at', 'updated_at', 'deleted_at']);
 
 it('can sort `:dataset` column', function (string $column): void {
-    $records = App\Models\People::factory(3)->create();
+    $records = People::factory(3)->create();
 
     $sortingKey = data_get($records->first(), $column) instanceof BackedEnum
-        ? fn (Illuminate\Database\Eloquent\Model $record) => data_get($record, $column)->value
+        ? fn (Model $record) => data_get($record, $column)->value
         : $column;
 
-    livewire(App\Filament\Resources\PeopleResource\Pages\ListPeople::class)
+    livewire(ListPeople::class)
         ->sortTable($column)
         ->assertCanSeeTableRecords($records->sortBy($sortingKey), inOrder: true)
         ->sortTable($column, 'desc')
@@ -59,38 +63,38 @@ it('can sort `:dataset` column', function (string $column): void {
 })->with(['company.name', 'creator.name', 'created_at', 'updated_at', 'deleted_at']);
 
 it('can search `:dataset` column', function (string $column): void {
-    $records = App\Models\People::factory(3)->create();
+    $records = People::factory(3)->create();
     $search = data_get($records->first(), $column);
 
-    livewire(App\Filament\Resources\PeopleResource\Pages\ListPeople::class)
+    livewire(ListPeople::class)
         ->searchTable($search instanceof BackedEnum ? $search->value : $search)
-        ->assertCanSeeTableRecords($records->filter(fn (Illuminate\Database\Eloquent\Model $record) => data_get($record, $column) === $search))
-        ->assertCanNotSeeTableRecords($records->filter(fn (Illuminate\Database\Eloquent\Model $record) => data_get($record, $column) !== $search));
-})->with(['name', 'company.name', 'creator.name']);
+        ->assertCanSeeTableRecords($records->filter(fn (Model $record) => data_get($record, $column) === $search))
+        ->assertCanNotSeeTableRecords($records->filter(fn (Model $record) => data_get($record, $column) !== $search));
+})->with(['first_name', 'last_name', 'company.name', 'creator.name']);
 
 it('cannot display trashed records by default', function (): void {
-    $records = App\Models\People::factory()->count(4)->create();
-    $trashedRecords = App\Models\People::factory()->trashed()->count(6)->create();
+    $records = People::factory()->count(4)->create();
+    $trashedRecords = People::factory()->trashed()->count(6)->create();
 
-    livewire(App\Filament\Resources\PeopleResource\Pages\ListPeople::class)
+    livewire(ListPeople::class)
         ->assertCanSeeTableRecords($records)
         ->assertCanNotSeeTableRecords($trashedRecords)
         ->assertCountTableRecords(4);
 });
 
 it('can paginate records', function (): void {
-    $records = App\Models\People::factory(20)->create();
+    $records = People::factory(20)->create();
 
-    livewire(App\Filament\Resources\PeopleResource\Pages\ListPeople::class)
+    livewire(ListPeople::class)
         ->assertCanSeeTableRecords($records->take(10), inOrder: true)
         ->call('gotoPage', 2)
         ->assertCanSeeTableRecords($records->skip(10)->take(10), inOrder: true);
 });
 
 it('can bulk delete records', function (): void {
-    $records = App\Models\People::factory(5)->create();
+    $records = People::factory(5)->create();
 
-    livewire(App\Filament\Resources\PeopleResource\Pages\ListPeople::class)
+    livewire(ListPeople::class)
         ->assertCanSeeTableRecords($records)
         ->selectTableRecords($records)
         // NOTE: Using direct action array instead of TestAction::make()->bulk()
@@ -103,6 +107,6 @@ it('can bulk delete records', function (): void {
 });
 
 it('has `:dataset` filter', function (string $filter): void {
-    livewire(App\Filament\Resources\PeopleResource\Pages\ListPeople::class)
+    livewire(ListPeople::class)
         ->assertTableFilterExists($filter);
 })->with(['creation_source', 'trashed']);

@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use App\Models\CustomFieldSection;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-class CustomFieldSectionPolicy
+final class CustomFieldSectionPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:CustomFieldSection');
     }
 
-    public function view(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function view(AuthUser $authUser): bool
     {
         return $authUser->can('View:CustomFieldSection');
     }
@@ -27,22 +26,22 @@ class CustomFieldSectionPolicy
         return $authUser->can('Create:CustomFieldSection');
     }
 
-    public function update(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function update(AuthUser $authUser): bool
     {
         return $authUser->can('Update:CustomFieldSection');
     }
 
-    public function delete(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function delete(AuthUser $authUser): bool
     {
         return $authUser->can('Delete:CustomFieldSection');
     }
 
-    public function restore(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function restore(AuthUser $authUser): bool
     {
         return $authUser->can('Restore:CustomFieldSection');
     }
 
-    public function forceDelete(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function forceDelete(AuthUser $authUser): bool
     {
         return $authUser->can('ForceDelete:CustomFieldSection');
     }
@@ -57,7 +56,7 @@ class CustomFieldSectionPolicy
         return $authUser->can('RestoreAny:CustomFieldSection');
     }
 
-    public function replicate(AuthUser $authUser, CustomFieldSection $customFieldSection): bool
+    public function replicate(AuthUser $authUser): bool
     {
         return $authUser->can('Replicate:CustomFieldSection');
     }
@@ -66,5 +65,4 @@ class CustomFieldSectionPolicy
     {
         return $authUser->can('Reorder:CustomFieldSection');
     }
-
 }

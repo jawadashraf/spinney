@@ -25,7 +25,7 @@ beforeEach(function () {
     ]);
     $this->team->update(['user_id' => $this->user->id]);
     $this->user->refresh();
-    
+
     actingAs($this->user);
     Filament::setTenant($this->team);
     Filament::setCurrentPanel('app');
@@ -62,6 +62,7 @@ it('has correct unique validation rule', function () {
                 }
             }
         }
+
         return null;
     };
 
@@ -124,12 +125,12 @@ it('has redirect URL set to the index page', function () {
 // it('can autocomplete address using postcode', function () {
 //     $url = ServiceUserResource::getUrl('create', ['tenant' => $this->team]);
 //     $relativeUrl = parse_url($url, PHP_URL_PATH);
-    
+
 //     // Set Referer header so Filament can resolve the tenant during Livewire updates
 //     $this->withHeaders([
 //         'Referer' => $url,
 //     ]);
-    
+
 //     $this->get($relativeUrl)->assertSuccessful();
 
 //     \Pest\Livewire\livewire(CreateServiceUser::class)

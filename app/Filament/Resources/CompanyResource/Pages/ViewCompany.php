@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\CompanyResource\Pages;
 
-use App\Enums\CustomFields\CompanyField;
 use App\Filament\Actions\GenerateRecordSummaryAction;
 use App\Filament\Components\Infolists\AvatarName;
 use App\Filament\Concerns\SyncsPermissionTeamId;
@@ -12,7 +11,6 @@ use App\Filament\Resources\CompanyResource;
 use App\Filament\Resources\CompanyResource\RelationManagers\NotesRelationManager;
 use App\Filament\Resources\CompanyResource\RelationManagers\PeopleRelationManager;
 use App\Filament\Resources\CompanyResource\RelationManagers\TasksRelationManager;
-use App\Jobs\FetchFaviconForCompany;
 use App\Models\Company;
 use App\Support\CustomFields;
 use Filament\Actions\ActionGroup;
@@ -43,31 +41,6 @@ final class ViewCompany extends ViewRecord
                 DeleteAction::make(),
             ]),
         ];
-    }
-
-    /**
-     * Dispatch favicon fetch job if domain_name custom field has changed.
-     *
-     * @param  array<string, mixed>  $data
-     */
-    private function dispatchFaviconFetchIfNeeded(Company $company, array $data): void
-    {
-        $customFieldsData = $data['custom_fields'] ?? [];
-        $newDomain = $customFieldsData['domain_name'] ?? null;
-
-        // Get the old domain value from the database
-        $domainField = $company->customFields()
-            ->whereBelongsTo($company->team)
-            ->where('code', CompanyField::DOMAIN_NAME->value)
-            ->first();
-
-        $oldDomain = $domainField !== null ? $company->getCustomFieldValue($domainField) : null;
-
-        // Only dispatch if domain changed and new value is not empty
-
-        // if (! in_array($newDomain, [$oldDomain, null, '', '0'], true)) {
-        //     FetchFaviconForCompany::dispatch($company)->afterCommit();
-        // }
     }
 
     public function infolist(Schema $schema): Schema

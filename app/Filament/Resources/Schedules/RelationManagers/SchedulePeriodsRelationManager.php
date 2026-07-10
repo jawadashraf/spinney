@@ -35,7 +35,7 @@ final class SchedulePeriodsRelationManager extends RelationManager
                 DatePicker::make('date')
                     ->required()
                     ->native(false)
-                    ->minDate(fn () => now()->toDateString()),
+                    ->minDate(fn (): string => now()->toDateString()),
                 TimePicker::make('start_time')
                     ->required()
                     ->native(false)

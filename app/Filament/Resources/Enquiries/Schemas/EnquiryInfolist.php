@@ -85,7 +85,7 @@ final class EnquiryInfolist
                         TextEntry::make('parentEnquiry.reason_for_contact')
                             ->label('Originating Enquiry')
                             ->limit(100)
-                            ->url(fn ($record) => $record->parentEnquiry ? EnquiryResource::getUrl('view', ['record' => $record->parentEnquiry]) : null)
+                            ->url(fn ($record): ?string => $record->parentEnquiry ? EnquiryResource::getUrl('view', ['record' => $record->parentEnquiry]) : null)
                             ->visible(fn ($record): bool => $record->parent_enquiry_id !== null),
 
                         TextEntry::make('childEnquiriesCount')
@@ -135,7 +135,7 @@ final class EnquiryInfolist
                         TextEntry::make('referral_type')
                             ->badge()
                             ->label('Referral Type')
-                            ->formatStateUsing(fn ($state): string => $state ? ucfirst($state) : '—')
+                            ->formatStateUsing(fn ($state): string => $state ? ucfirst((string) $state) : '—')
                             ->visible(fn ($record): bool => $record->referral_type !== null),
 
                         TextEntry::make('referral_destination')
