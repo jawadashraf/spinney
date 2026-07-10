@@ -49,6 +49,10 @@ final class EditServiceUser extends EditRecord
             $data['profile'] = $profile->toArray();
         }
 
+        $emergencyContact = $record->emergencyContacts()->first();
+        $data['emergency_contact_id'] = $emergencyContact?->id;
+        $data['emergency_contact_relation_type'] = $emergencyContact?->pivot?->relation_type;
+
         return $data;
     }
 
@@ -67,8 +71,10 @@ final class EditServiceUser extends EditRecord
             'treatment_outcome', 'internal_notes',
         ];
 
+        $emergencyContactId = $data['emergency_contact_id'] ?? null;
+        $emergencyContactRelationType = $data['emergency_contact_relation_type'] ?? null;
         $profileData = Arr::only($data['profile'] ?? [], $profileFields);
-        $identityData = Arr::except($data, ['password', 'profile']);
+        $identityData = Arr::except($data, ['password', 'profile', 'emergency_contact_id', 'emergency_contact_relation_type']);
 
         $record = parent::handleRecordUpdate($record, $identityData);
 
@@ -79,6 +85,11 @@ final class EditServiceUser extends EditRecord
                 $profileData
             );
         }
+
+        $record->syncEmergencyContact(
+            $emergencyContactId ? (int) $emergencyContactId : null,
+            $emergencyContactRelationType ? (string) $emergencyContactRelationType : null,
+        );
 
         if ($record->user && $record->email !== $oldEmail) {
             $record->user->update([

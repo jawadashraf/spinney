@@ -178,6 +178,28 @@ class People extends Model implements HasCustomFieldsContract
     }
 
     /**
+     * @return BelongsToMany<People, $this>
+     */
+    public function emergencyContacts(): BelongsToMany
+    {
+        return $this->relatedPeople()
+            ->wherePivot('is_emergency_contact', true);
+    }
+
+    public function syncEmergencyContact(?int $contactId, ?string $relationType = null): void
+    {
+        $this->emergencyContacts()->detach();
+
+        if ($contactId && $relationType) {
+            $this->relatedPeople()->attach($contactId, [
+                'is_emergency_contact' => true,
+                'relation_type' => $relationType,
+                'team_id' => $this->team_id,
+            ]);
+        }
+    }
+
+    /**
      * @return MorphToMany<Task, $this>
      */
     public function tasks(): MorphToMany

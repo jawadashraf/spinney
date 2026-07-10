@@ -12,6 +12,7 @@ use App\Enums\ServiceTeam;
 use App\Enums\SubstanceUseFrequency;
 use App\Enums\TreatmentOutcome;
 use App\Models\Enquiry;
+use App\Models\People;
 use App\Models\ServiceUser;
 use App\Services\AddressLookupService;
 use Filament\Actions\Action;
@@ -181,9 +182,62 @@ final class ServiceUserForm
 
                                             Section::make('Emergency Contact')
                                                 ->schema([
-                                                    TextInput::make('emergency_contact_name'),
-                                                    PhoneInput::make('emergency_contact_number')
-                                                        ->initialCountry('gb'),
+                                                    Select::make('emergency_contact_id')
+                                                        ->label('Emergency Contact')
+                                                        ->options(fn (): array => People::query()
+                                                            ->when(
+                                                                Filament::getTenant(),
+                                                                fn ($query, $tenant) => $query->where('team_id', $tenant->getKey()),
+                                                            )
+                                                            ->orderBy('name')
+                                                            ->pluck('name', 'id')
+                                                            ->all())
+                                                        ->searchable()
+                                                        ->preload()
+                                                        ->native(false)
+                                                        ->live()
+                                                        ->nullable()
+                                                        ->createOptionForm([
+                                                            TextInput::make('first_name')
+                                                                ->required()
+                                                                ->maxLength(255),
+                                                            TextInput::make('last_name')
+                                                                ->required()
+                                                                ->maxLength(255),
+                                                            TextInput::make('email')
+                                                                ->email()
+                                                                ->maxLength(255),
+                                                            TextInput::make('phone')
+                                                                ->maxLength(255),
+                                                        ])
+                                                        ->createOptionModalHeading('Create emergency contact')
+                                                        ->createOptionUsing(function (array $data): int {
+                                                            $tenant = Filament::getTenant();
+
+                                                            return People::create([
+                                                                'team_id' => $tenant?->getKey(),
+                                                                'first_name' => $data['first_name'],
+                                                                'last_name' => $data['last_name'],
+                                                                'email' => $data['email'] ?? null,
+                                                                'phone' => $data['phone'] ?? null,
+                                                            ])->getKey();
+                                                        }),
+                                                    Select::make('emergency_contact_relation_type')
+                                                        ->label('Relationship')
+                                                        ->options([
+                                                            'mother' => 'Mother',
+                                                            'father' => 'Father',
+                                                            'spouse' => 'Spouse',
+                                                            'partner' => 'Partner',
+                                                            'sibling' => 'Sibling',
+                                                            'child' => 'Child',
+                                                            'friend' => 'Friend',
+                                                            'other' => 'Other',
+                                                        ])
+                                                        ->visible(fn (Get $get): bool => filled($get('emergency_contact_id')))
+                                                        ->required(fn (Get $get): bool => filled($get('emergency_contact_id')))
+                                                        ->dehydrated(fn (Get $get): bool => filled($get('emergency_contact_id')))
+                                                        ->nullable(),
                                                 ])->columns(2),
 
                                             Section::make('Consent & GDPR')
@@ -205,11 +259,12 @@ final class ServiceUserForm
                                                 ->schema([
                                                     CheckboxList::make("{$profilePrefix}addictions")
                                                         ->options([
-                                                            'smoking' => 'Smoking',
+                                                            'alcohol' => 'Alcohol',
+                                                            'compulsive_behavior' => 'Compulsive Behavior',
                                                             'drugs' => 'Drugs',
                                                             'gambling' => 'Gambling',
-                                                            'compulsive_behavior' => 'Compulsive Behavior',
                                                             'pornography' => 'Pornography',
+                                                            'smoking' => 'Smoking',
                                                         ])
                                                         ->columns(3),
                                                     CheckboxList::make("{$profilePrefix}substances_used")

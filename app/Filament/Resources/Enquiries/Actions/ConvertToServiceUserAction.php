@@ -61,8 +61,10 @@ final class ConvertToServiceUserAction
                         'treatment_outcome', 'internal_notes',
                     ];
 
+                    $emergencyContactId = $data['emergency_contact_id'] ?? null;
+                    $emergencyContactRelationType = $data['emergency_contact_relation_type'] ?? null;
                     $profileData = Arr::only($data, $profileFields);
-                    $identityData = Arr::except($data, array_merge($profileFields, ['password']));
+                    $identityData = Arr::except($data, array_merge($profileFields, ['password', 'emergency_contact_id', 'emergency_contact_relation_type']));
 
                     $person->update(array_merge($identityData, [
                         'user_id' => $user->id,
@@ -73,6 +75,11 @@ final class ConvertToServiceUserAction
                     $person->serviceUserProfile()->updateOrCreate(
                         ['team_id' => $person->team_id],
                         $profileData
+                    );
+
+                    $person->syncEmergencyContact(
+                        $emergencyContactId ? (int) $emergencyContactId : null,
+                        $emergencyContactRelationType ? (string) $emergencyContactRelationType : null,
                     );
 
                     // 4. Update Enquiry Status
