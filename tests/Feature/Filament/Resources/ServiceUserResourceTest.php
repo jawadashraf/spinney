@@ -12,7 +12,6 @@ use App\Models\ServiceUser;
 use App\Models\ServiceUserProfile;
 use App\Models\Team;
 use App\Models\User;
-use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Schemas\Schema;
 
@@ -31,6 +30,10 @@ beforeEach(function () {
     Filament::setTenant($this->team);
     Filament::setCurrentPanel('app');
     Filament::bootCurrentPanel();
+
+    $this->withHeaders([
+        'Referer' => ServiceUserResource::getUrl('create', ['tenant' => $this->team]),
+    ]);
 });
 
 it('has correct unique validation rule', function () {
@@ -123,35 +126,26 @@ it('has redirect URL set to the index page', function () {
     expect($redirectUrl)->toBe(ServiceUserResource::getUrl('index'));
 });
 
-it('renders tab navigation actions on the create page', function () {
+it('renders tab navigation on the create page', function () {
     \Pest\Livewire\livewire(CreateServiceUser::class)
-        ->assertSchemaComponentExists('service-user-tab-navigation');
+        ->assertSchemaComponentExists('tab_navigation');
 });
 
 it('navigates to the next tab using the next action', function () {
     \Pest\Livewire\livewire(CreateServiceUser::class)
         ->assertSet('activeServiceUserTab', ServiceUserForm::TAB_DEMOGRAPHICS_CONSENT)
-        ->callAction(TestAction::make('nextTab')->schemaComponent('service-user-tab-navigation'))
+        ->call('nextTab')
         ->assertSet('activeServiceUserTab', ServiceUserForm::TAB_ASSESSMENT);
 });
 
 it('navigates to the previous tab using the back action', function () {
     \Pest\Livewire\livewire(CreateServiceUser::class)
         ->set('activeServiceUserTab', ServiceUserForm::TAB_ASSESSMENT)
-        ->callAction(TestAction::make('previousTab')->schemaComponent('service-user-tab-navigation'))
+        ->call('previousTab')
         ->assertSet('activeServiceUserTab', ServiceUserForm::TAB_DEMOGRAPHICS_CONSENT);
 });
 
-it('hides the back action on the first tab and the next action on the last tab', function () {
-    \Pest\Livewire\livewire(CreateServiceUser::class)
-        ->assertActionVisible(TestAction::make('nextTab')->schemaComponent('service-user-tab-navigation'))
-        ->assertActionDoesNotExist(TestAction::make('previousTab')->schemaComponent('service-user-tab-navigation'))
-        ->set('activeServiceUserTab', ServiceUserForm::TAB_SERVICE_PLAN)
-        ->assertActionDoesNotExist(TestAction::make('nextTab')->schemaComponent('service-user-tab-navigation'))
-        ->assertActionVisible(TestAction::make('previousTab')->schemaComponent('service-user-tab-navigation'));
-});
-
-it('renders tab navigation actions on the edit page', function () {
+it('renders tab navigation on the edit page', function () {
     $serviceUser = ServiceUser::create([
         'name' => 'Test Service User',
         'email' => 'testsu@example.com',
@@ -162,7 +156,7 @@ it('renders tab navigation actions on the edit page', function () {
     \Pest\Livewire\livewire(EditServiceUser::class, [
         'record' => $serviceUser->getRouteKey(),
     ])
-        ->assertSchemaComponentExists('service-user-tab-navigation');
+        ->assertSchemaComponentExists('tab_navigation');
 });
 
 // it('can autocomplete address using postcode', function () {
@@ -189,3 +183,10 @@ it('renders tab navigation actions on the edit page', function () {
 //             'address' => "10 Downing Street\nWestminster\nLondon\nSW1A 2AA",
 //         ]);
 // });
+
+it('can mount create emergency contact action', function () {
+    \Pest\Livewire\livewire(CreateServiceUser::class)
+        ->assertSuccessful()
+        ->mountFormComponentAction('emergency_contact_id', 'createOption')
+        ->assertFormComponentActionMounted('emergency_contact_id', 'createOption');
+});

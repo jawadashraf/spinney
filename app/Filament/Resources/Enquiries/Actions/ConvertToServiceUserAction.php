@@ -32,7 +32,7 @@ final class ConvertToServiceUserAction
             ->modalHeading('Convert Enquiry to Service User')
             ->modalDescription('This will promote the caller to a formal Service User record and capture essential case file details.')
             ->modalWidth('4xl')
-            ->schema(fn (Schema $schema): Schema => $schema->components(ServiceUserForm::getComponents('')))
+            ->schema(fn (Schema $schema): Schema => $schema->components(ServiceUserForm::getComponents('', false, false)))
             ->action(function (array $data, Enquiry $record): void {
                 DB::transaction(function () use ($data, $record): void {
                     /** @var People $person */
@@ -61,10 +61,8 @@ final class ConvertToServiceUserAction
                         'treatment_outcome', 'internal_notes',
                     ];
 
-                    $emergencyContactId = $data['emergency_contact_id'] ?? null;
-                    $emergencyContactRelationType = $data['emergency_contact_relation_type'] ?? null;
                     $profileData = Arr::only($data, $profileFields);
-                    $identityData = Arr::except($data, array_merge($profileFields, ['password', 'emergency_contact_id', 'emergency_contact_relation_type']));
+                    $identityData = Arr::except($data, array_merge($profileFields, ['password']));
 
                     $person->update(array_merge($identityData, [
                         'user_id' => $user->id,
@@ -77,11 +75,6 @@ final class ConvertToServiceUserAction
                         $profileData
                     );
 
-                    $person->syncEmergencyContact(
-                        $emergencyContactId ? (int) $emergencyContactId : null,
-                        $emergencyContactRelationType ? (string) $emergencyContactRelationType : null,
-                    );
-
                     // 4. Update Enquiry Status
                     $record->update([
                         'status' => EnquiryStatus::CONVERTED,
@@ -89,7 +82,10 @@ final class ConvertToServiceUserAction
                     ]);
 
                     // 5. Notify Staff (super_admin and safeguarding)
-                    User::role(['admin'])->get()->each(function (User $staff) use ($person): void {
+                    $admins = User::withoutGlobalScopes()->role(['admin'])->get();
+                    $systemAdmins = User::withoutGlobalScopes()->where('is_system_admin', true)->get();
+
+                    $admins->merge($systemAdmins)->unique('id')->each(function (User $staff) use ($person): void {
                         $staff->notify(new ServiceUserPromotedNotification($person));
                     });
                 });

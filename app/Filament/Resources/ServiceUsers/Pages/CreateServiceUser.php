@@ -47,11 +47,8 @@ final class CreateServiceUser extends CreateRecord
             'treatment_outcome', 'internal_notes',
         ];
 
-        $emergencyContactId = $data['emergency_contact_id'] ?? null;
-        $emergencyContactRelationType = $data['emergency_contact_relation_type'] ?? null;
-
         $profileData = Arr::only($data['profile'] ?? [], $profileFields);
-        $identityData = Arr::except($data, ['password', 'profile', 'emergency_contact_id', 'emergency_contact_relation_type']);
+        $identityData = Arr::except($data, ['password', 'profile']);
 
         $identityData['creation_source'] = CreationSource::WEB->value;
 
@@ -67,13 +64,7 @@ final class CreateServiceUser extends CreateRecord
             ]);
         }
 
-        // 5. Sync emergency contact relationship
-        $record->syncEmergencyContact(
-            $emergencyContactId ? (int) $emergencyContactId : null,
-            $emergencyContactRelationType ? (string) $emergencyContactRelationType : null,
-        );
-
-        // 6. Create the linked User account
+        // 5. Create the linked User account
         $user = User::create([
             'first_name' => $record->first_name,
             'last_name' => $record->last_name,

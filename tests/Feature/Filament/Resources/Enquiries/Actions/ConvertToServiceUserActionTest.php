@@ -14,8 +14,10 @@ use App\Enums\TreatmentOutcome;
 use App\Filament\Resources\Enquiries\Pages\ListEnquiries;
 use App\Models\Enquiry;
 use App\Models\People;
+use App\Models\Team;
 use App\Models\User;
 use App\Notifications\ServiceUserPromotedNotification;
+use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
@@ -27,11 +29,12 @@ use function Pest\Laravel\assertDatabaseHas;
 it('can convert an enquiry to a service user with comprehensive data', function () {
     Notification::fake();
 
-    $staff = User::factory()->withPersonalTeam()->create();
-    $staff->assignRole('super_admin');
-    $team = $staff->personalTeam();
+    $team = Team::where('name', 'Spinney Hill')->first();
 
-    $superAdmin = User::factory()->create(['email' => 'admin@example.com']);
+    $staff = User::factory()->create(['is_system_admin' => true, 'current_team_id' => $team->id]);
+    $staff->assignRole('super_admin');
+
+    $superAdmin = User::factory()->create(['email' => 'admin@example.com', 'is_system_admin' => true, 'current_team_id' => $team->id]);
     $superAdmin->assignRole('super_admin');
 
     $person = People::factory()->create(['team_id' => $team->id, 'email' => 'caller@example.com']);
@@ -44,9 +47,15 @@ it('can convert an enquiry to a service user with comprehensive data', function 
 
     actingAs($staff);
 
+    Filament::setCurrentPanel('app');
+    Filament::setTenant($team);
+    Filament::bootCurrentPanel();
+
     Livewire::test(ListEnquiries::class)
         ->assertSuccessful()
         ->callTableAction('convertToServiceUser', $enquiry, data: [
+            'first_name' => $person->first_name,
+            'last_name' => $person->last_name,
             'email' => 'new-service-user@example.com',
             'password' => 'password123',
             'date_of_birth' => '1990-01-01',
@@ -101,22 +110,19 @@ it('can convert an enquiry to a service user with comprehensive data', function 
     expect($person->is_service_user)->toBeTrue();
     expect($person->user_id)->toBe($newUser->id);
     expect($person->date_of_birth->format('Y-m-d'))->toBe('1990-01-01');
-    expect($person->addictions)->toBe(['drugs', 'gambling']);
-    expect($person->substances_used)->toBe(['heroin', 'cocaine', 'beer']);
-    expect($person->frequency_of_use)->toBe(SubstanceUseFrequency::DAILY->value);
-    expect($person->overdosed_last_month)->toBeTrue();
-    expect($person->registered_with_gp)->toBeTrue();
-    expect($person->gp_name)->toBe('Dr. Smith');
+    expect($person->serviceUserProfile->addictions)->toBe(['drugs', 'gambling']);
+    expect($person->serviceUserProfile->substances_used)->toBe(['heroin', 'cocaine', 'beer']);
+    expect($person->serviceUserProfile->frequency_of_use)->toBe(SubstanceUseFrequency::DAILY->value);
+    expect($person->serviceUserProfile->overdosed_last_month)->toBeTrue();
+    expect($person->serviceUserProfile->registered_with_gp)->toBeTrue();
+    expect($person->serviceUserProfile->gp_name)->toBe('Dr. Smith');
     expect($person->consent_data_storage)->toBeTrue();
     expect($person->ethnicity)->toBe('white_british');
 
-    // Assert emergency contact relationship created
-    assertDatabaseHas('person_relationships', [
-        'person_id' => $person->id,
-        'related_person_id' => $emergencyContact->id,
-        'is_emergency_contact' => true,
-        'relation_type' => 'mother',
-    ]);
+    // Assert emergency contact columns set
+    $person->refresh();
+    expect($person->emergency_contact_id)->toBe($emergencyContact->id);
+    expect($person->emergency_contact_relation_type)->toBe('mother');
 
     // Assert Enquiry updated
     $enquiry->refresh();

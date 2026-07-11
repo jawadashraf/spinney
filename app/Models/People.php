@@ -103,6 +103,14 @@ class People extends Model implements HasCustomFieldsContract
     }
 
     /**
+     * @return BelongsTo<People, $this>
+     */
+    public function emergencyContact(): BelongsTo
+    {
+        return $this->belongsTo(People::class, 'emergency_contact_id');
+    }
+
+    /**
      * @param  Builder<People>  $query
      * @return Builder<People>
      */
@@ -175,28 +183,6 @@ class People extends Model implements HasCustomFieldsContract
         return $this->belongsToMany(People::class, 'person_relationships', 'related_person_id', 'person_id')
             ->withPivot('relation_type', 'is_emergency_contact')
             ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany<People, $this>
-     */
-    public function emergencyContacts(): BelongsToMany
-    {
-        return $this->relatedPeople()
-            ->wherePivot('is_emergency_contact', true);
-    }
-
-    public function syncEmergencyContact(?int $contactId, ?string $relationType = null): void
-    {
-        $this->emergencyContacts()->detach();
-
-        if ($contactId && $relationType) {
-            $this->relatedPeople()->attach($contactId, [
-                'is_emergency_contact' => true,
-                'relation_type' => $relationType,
-                'team_id' => $this->team_id,
-            ]);
-        }
     }
 
     /**

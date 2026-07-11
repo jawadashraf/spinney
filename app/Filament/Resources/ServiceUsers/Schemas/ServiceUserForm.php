@@ -11,8 +11,6 @@ use App\Enums\ReferralType;
 use App\Enums\ServiceTeam;
 use App\Enums\SubstanceUseFrequency;
 use App\Enums\TreatmentOutcome;
-use App\Filament\Resources\ServiceUsers\Pages\CreateServiceUser;
-use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
 use App\Models\Enquiry;
 use App\Models\People;
 use App\Models\ServiceUser;
@@ -26,7 +24,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Actions;
+use Filament\Forms\Components\ViewField;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -35,8 +33,6 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\Alignment;
-use Filament\Support\Enums\IconPosition;
 use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
@@ -72,7 +68,7 @@ final class ServiceUserForm
     /**
      * @return array<int, Component>
      */
-    public static function getComponents(string $profilePrefix = 'profile.'): array
+    public static function getComponents(string $profilePrefix = 'profile.', bool $useRelationships = true, bool $useTabNavigation = true): array
     {
         return [
             Group::make()
@@ -114,7 +110,10 @@ final class ServiceUserForm
                         ->schema([
                             Tabs::make('Profile Information')
                                 ->contained(false)
-                                ->livewireProperty('activeServiceUserTab')
+                                ->when(
+                                    $useTabNavigation,
+                                    fn (Tabs $component) => $component->livewireProperty('activeServiceUserTab')
+                                )
                                 ->tabs([
                                     self::TAB_DEMOGRAPHICS_CONSENT => Tab::make('Demographics & Consent')
                                         ->icon('heroicon-o-user')
@@ -186,14 +185,15 @@ final class ServiceUserForm
                                                 ->schema([
                                                     Select::make('emergency_contact_id')
                                                         ->label('Emergency Contact')
-                                                        ->options(fn (): array => People::query()
-                                                            ->when(
-                                                                Filament::getTenant(),
-                                                                fn ($query, $tenant) => $query->where('team_id', $tenant->getKey()),
+                                                        ->when(
+                                                            $useRelationships,
+                                                            fn (Select $component) => $component->relationship(
+                                                                name: 'emergencyContact',
+                                                                titleAttribute: 'name',
+                                                                modifyQueryUsing: fn ($query) => $query->orderBy('name')
                                                             )
-                                                            ->orderBy('name')
-                                                            ->pluck('name', 'id')
-                                                            ->all())
+                                                        )
+                                                        ->options(fn (): array => self::getEmergencyContactOptions())
                                                         ->searchable()
                                                         ->preload()
                                                         ->native(false)
@@ -213,17 +213,7 @@ final class ServiceUserForm
                                                                 ->maxLength(255),
                                                         ])
                                                         ->createOptionModalHeading('Create emergency contact')
-                                                        ->createOptionUsing(function (array $data): int {
-                                                            $tenant = Filament::getTenant();
-
-                                                            return People::create([
-                                                                'team_id' => $tenant?->getKey(),
-                                                                'first_name' => $data['first_name'],
-                                                                'last_name' => $data['last_name'],
-                                                                'email' => $data['email'] ?? null,
-                                                                'phone' => $data['phone'] ?? null,
-                                                            ])->getKey();
-                                                        }),
+                                                        ->createOptionUsing(fn (array $data): int => self::createEmergencyContact($data)),
                                                     Select::make('emergency_contact_relation_type')
                                                         ->label('Relationship')
                                                         ->options([
@@ -392,39 +382,45 @@ final class ServiceUserForm
                                         ]),
                                 ])->columnSpanFull(),
 
-                            Actions::make([
-                                Action::make('previousTab')
-                                    ->label('Back')
-                                    ->icon('heroicon-m-arrow-left')
-                                    ->color('gray')
-                                    ->visible(fn (CreateServiceUser|EditServiceUser $livewire): bool => $livewire->activeServiceUserTab !== self::TAB_DEMOGRAPHICS_CONSENT)
-                                    ->action(function (CreateServiceUser|EditServiceUser $livewire): void {
-                                        $currentIndex = array_search($livewire->activeServiceUserTab, self::TABS, true);
-
-                                        if ($currentIndex !== false && $currentIndex > 0) {
-                                            $livewire->activeServiceUserTab = self::TABS[$currentIndex - 1];
-                                        }
-                                    }),
-                                Action::make('nextTab')
-                                    ->label('Next')
-                                    ->icon('heroicon-m-arrow-right')
-                                    ->iconPosition(IconPosition::After)
-                                    ->visible(fn (CreateServiceUser|EditServiceUser $livewire): bool => $livewire->activeServiceUserTab !== self::TAB_SERVICE_PLAN)
-                                    ->action(function (CreateServiceUser|EditServiceUser $livewire): void {
-                                        $currentIndex = array_search($livewire->activeServiceUserTab, self::TABS, true);
-
-                                        if ($currentIndex !== false && $currentIndex < count(self::TABS) - 1) {
-                                            $livewire->activeServiceUserTab = self::TABS[$currentIndex + 1];
-                                        }
-                                    }),
-                            ])
-                                ->key('service-user-tab-navigation')
-                                ->alignment(Alignment::Between)
-                                ->columnSpanFull(),
+                            // ViewField::make('tab_navigation')
+                            //     ->view('filament.components.tab-navigation')
+                            //     ->columnSpanFull()
+                            //     ->visible($useTabNavigation),
                         ])->collapsible(),
 
                 ])
                 ->columnSpanFull(),
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getEmergencyContactOptions(): array
+    {
+        return People::query()
+            ->when(
+                Filament::getTenant(),
+                fn ($query, $tenant) => $query->where('team_id', $tenant->getKey()),
+            )
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public static function createEmergencyContact(array $data): int
+    {
+        $tenant = Filament::getTenant();
+
+        return People::create([
+            'team_id' => $tenant?->getKey(),
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'email' => $data['email'] ?? null,
+            'phone' => $data['phone'] ?? null,
+        ])->getKey();
     }
 }
