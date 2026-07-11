@@ -125,18 +125,24 @@ final class ServiceUserForm
                                                             'female' => 'Female',
                                                             'other' => 'Other',
                                                         ]),
-                                                    Radio::make('ethnicity')
-                                                        ->options(Ethnicity::class)
-                                                        ->columns(3)
-                                                        ->columnSpanFull()
-                                                        ->live(),
-                                                    TextInput::make('ethnicity_other')
-                                                        ->label('Other ethnicity (please specify)')
-                                                        ->visible(fn ($get): bool => $get('ethnicity') === 'other' ||
-                                                            ($get('ethnicity') instanceof Ethnicity && $get('ethnicity')->value === 'other') ||
-                                                            (is_array($get('ethnicity')) && in_array('other', $get('ethnicity'), true)) ||
-                                                            (is_string($get('ethnicity')) && in_array('other', json_decode($get('ethnicity'), true) ?? [], true))
-                                                        )
+                                                    Section::make('Ethnicity')
+                                                        ->schema([
+                                                            Radio::make('ethnicity')
+                                                                ->options(Ethnicity::class)
+                                                                ->columns(3)
+                                                                ->columnSpanFull()
+                                                                ->live(),
+                                                            TextInput::make('ethnicity_other')
+                                                                ->label('Other ethnicity (please specify)')
+                                                                ->visible(fn ($get): bool => $get('ethnicity') === 'other' ||
+                                                                    ($get('ethnicity') instanceof Ethnicity && $get('ethnicity')->value === 'other') ||
+                                                                    (is_array($get('ethnicity')) && in_array('other', $get('ethnicity'), true)) ||
+                                                                    (is_string($get('ethnicity')) && in_array('other', json_decode($get('ethnicity'), true) ?? [], true))
+                                                                )
+                                                                ->columnSpanFull(),
+                                                        ])
+                                                        ->collapsible()
+                                                        ->collapsed()
                                                         ->columnSpanFull(),
                                                     PhoneInput::make('phone')
                                                         ->initialCountry('gb'),
@@ -233,7 +239,7 @@ final class ServiceUserForm
                                                             'pornography' => 'Pornography',
                                                             'smoking' => 'Smoking',
                                                         ])
-                                                        ->columns(3),
+                                                        ->columns(6),
                                                     CheckboxList::make("{$profilePrefix}substances_used")
                                                         ->options([
                                                             'heroin' => 'Heroin',
@@ -246,7 +252,7 @@ final class ServiceUserForm
                                                             'wine' => 'Wine',
                                                             'beer' => 'Beer',
                                                         ])
-                                                        ->columns(3),
+                                                        ->columns(9),
                                                     Select::make("{$profilePrefix}frequency_of_use")
                                                         ->options(SubstanceUseFrequency::class),
                                                     TextInput::make("{$profilePrefix}amount_of_use"),
@@ -257,11 +263,11 @@ final class ServiceUserForm
                                                             'oral' => 'Oral',
                                                             'inject' => 'Inject',
                                                         ])
-                                                        ->columns(4),
+                                                        ->columns(6),
                                                     TextInput::make("{$profilePrefix}age_first_used"),
                                                     Toggle::make("{$profilePrefix}overdosed_last_month"),
                                                     Radio::make("{$profilePrefix}injection_history")
-                                                        ->options(InjectionHistory::class),
+                                                        ->options(InjectionHistory::class)->columns(6),
                                                 ]),
 
                                             Section::make('GP & Health')
@@ -283,7 +289,7 @@ final class ServiceUserForm
                                             Section::make('Referral Details')
                                                 ->schema([
                                                     Radio::make("{$profilePrefix}referral_type")
-                                                        ->options(ReferralType::class),
+                                                        ->options(ReferralType::class)->columns(6),
                                                     TextInput::make("{$profilePrefix}referral_source_specify")
                                                         ->label('Specify source'),
                                                     CheckboxList::make("{$profilePrefix}previous_input")
@@ -293,7 +299,7 @@ final class ServiceUserForm
                                                             'drug_agency' => 'Drug Agency',
                                                             'other' => 'Other',
                                                         ])
-                                                        ->columns(3),
+                                                        ->columns(6),
                                                     CheckboxList::make("{$profilePrefix}other_issues")
                                                         ->options([
                                                             'criminal_justice' => 'Criminal Justice',
@@ -302,7 +308,7 @@ final class ServiceUserForm
                                                             'finance' => 'Finance',
                                                             'health' => 'Health',
                                                         ])
-                                                        ->columns(3),
+                                                        ->columns(6),
                                                     Textarea::make("{$profilePrefix}reason_for_referral")
                                                         ->rows(3)
                                                         ->columnSpanFull(),
@@ -336,7 +342,7 @@ final class ServiceUserForm
                                                             'alternative_therapy' => 'Referral to Alternative Therapy',
                                                             'family_support' => 'Referral to Family support',
                                                         ])
-                                                        ->columns(2),
+                                                        ->columns(4),
                                                     TextInput::make("{$profilePrefix}referral_agency_specify")
                                                         ->label('Specify Agency'),
                                                     CheckboxList::make("{$profilePrefix}intervention_offered")
@@ -347,7 +353,7 @@ final class ServiceUserForm
                                                             'spiritual' => 'Spiritual',
                                                             'family_support' => 'Family support',
                                                         ])
-                                                        ->columns(3),
+                                                        ->columns(6),
                                                     Select::make("{$profilePrefix}treatment_outcome")
                                                         ->options(TreatmentOutcome::class),
                                                     Textarea::make("{$profilePrefix}internal_notes")

@@ -10,6 +10,7 @@ use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Models\ServiceUser;
 use App\Models\User;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
@@ -88,5 +89,10 @@ final class CreateServiceUser extends CreateRecord
         }
 
         return $this->getResource()::getUrl('index');
+    }
+
+    public function getFooter(): ?View
+    {
+        return view('filament.resources.service-users.footer');
     }
 }

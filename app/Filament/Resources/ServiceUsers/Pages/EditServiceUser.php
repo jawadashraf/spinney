@@ -11,6 +11,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
@@ -88,5 +89,10 @@ final class EditServiceUser extends EditRecord
         }
 
         return $record;
+    }
+
+    public function getFooter(): ?View
+    {
+        return view('filament.resources.service-users.footer');
     }
 }
