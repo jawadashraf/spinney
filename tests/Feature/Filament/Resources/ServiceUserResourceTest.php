@@ -96,6 +96,9 @@ it('populates profile fields in edit mode', function () {
         'target_service_team' => ServiceTeam::ASSESSMENT,
         'engagement_status' => EngagementStatus::ACTIVE,
         'gp_name' => 'Dr. Smith',
+        'emergency_contact_name' => 'John Doe',
+        'emergency_contact_number' => '1234567890',
+        'emergency_contact_relation_type' => 'friend',
     ]);
 
     expect($serviceUser->fresh()->profile)->not->toBeNull();
@@ -108,6 +111,9 @@ it('populates profile fields in edit mode', function () {
             'profile.gp_name' => 'Dr. Smith',
             'profile.target_service_team' => ServiceTeam::ASSESSMENT->value,
             'profile.engagement_status' => EngagementStatus::ACTIVE->value,
+            'profile.emergency_contact_name' => 'John Doe',
+            'profile.emergency_contact_number' => '1234567890',
+            'profile.emergency_contact_relation_type' => 'friend',
         ]);
 });
 
@@ -183,10 +189,3 @@ it('renders tab navigation on the edit page', function () {
 //             'address' => "10 Downing Street\nWestminster\nLondon\nSW1A 2AA",
 //         ]);
 // });
-
-it('can mount create emergency contact action', function () {
-    \Pest\Livewire\livewire(CreateServiceUser::class)
-        ->assertSuccessful()
-        ->mountFormComponentAction('emergency_contact_id', 'createOption')
-        ->assertFormComponentActionMounted('emergency_contact_id', 'createOption');
-});

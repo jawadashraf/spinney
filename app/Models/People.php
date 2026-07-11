@@ -102,13 +102,7 @@ class People extends Model implements HasCustomFieldsContract
         return $this->hasOne(ServiceUserProfile::class, 'person_id');
     }
 
-    /**
-     * @return BelongsTo<People, $this>
-     */
-    public function emergencyContact(): BelongsTo
-    {
-        return $this->belongsTo(People::class, 'emergency_contact_id');
-    }
+
 
     /**
      * @param  Builder<People>  $query

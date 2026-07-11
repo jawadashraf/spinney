@@ -12,11 +12,9 @@ use App\Enums\ServiceTeam;
 use App\Enums\SubstanceUseFrequency;
 use App\Enums\TreatmentOutcome;
 use App\Models\Enquiry;
-use App\Models\People;
 use App\Models\ServiceUser;
 use App\Services\AddressLookupService;
 use Filament\Actions\Action;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
@@ -183,38 +181,14 @@ final class ServiceUserForm
 
                                             Section::make('Emergency Contact')
                                                 ->schema([
-                                                    Select::make('emergency_contact_id')
-                                                        ->label('Emergency Contact')
-                                                        ->when(
-                                                            $useRelationships,
-                                                            fn (Select $component) => $component->relationship(
-                                                                name: 'emergencyContact',
-                                                                titleAttribute: 'name',
-                                                                modifyQueryUsing: fn ($query) => $query->orderBy('name')
-                                                            )
-                                                        )
-                                                        ->options(fn (): array => self::getEmergencyContactOptions())
-                                                        ->searchable()
-                                                        ->preload()
-                                                        ->native(false)
-                                                        ->live()
-                                                        ->nullable()
-                                                        ->createOptionForm([
-                                                            TextInput::make('first_name')
-                                                                ->required()
-                                                                ->maxLength(255),
-                                                            TextInput::make('last_name')
-                                                                ->required()
-                                                                ->maxLength(255),
-                                                            TextInput::make('email')
-                                                                ->email()
-                                                                ->maxLength(255),
-                                                            TextInput::make('phone')
-                                                                ->maxLength(255),
-                                                        ])
-                                                        ->createOptionModalHeading('Create emergency contact')
-                                                        ->createOptionUsing(fn (array $data): int => self::createEmergencyContact($data)),
-                                                    Select::make('emergency_contact_relation_type')
+                                                    TextInput::make("{$profilePrefix}emergency_contact_name")
+                                                        ->label('Emergency Contact Name')
+                                                        ->live(onBlur: true)
+                                                        ->maxLength(255),
+                                                    PhoneInput::make("{$profilePrefix}emergency_contact_number")
+                                                        ->label('Emergency Contact Phone')
+                                                        ->initialCountry('gb'),
+                                                    Select::make("{$profilePrefix}emergency_contact_relation_type")
                                                         ->label('Relationship')
                                                         ->options([
                                                             'mother' => 'Mother',
@@ -226,11 +200,10 @@ final class ServiceUserForm
                                                             'friend' => 'Friend',
                                                             'other' => 'Other',
                                                         ])
-                                                        ->visible(fn (Get $get): bool => filled($get('emergency_contact_id')))
-                                                        ->required(fn (Get $get): bool => filled($get('emergency_contact_id')))
-                                                        ->dehydrated(fn (Get $get): bool => filled($get('emergency_contact_id')))
+                                                        ->native(false)
+                                                        ->visible(fn (Get $get): bool => filled($get("{$profilePrefix}emergency_contact_name")))
                                                         ->nullable(),
-                                                ])->columns(2),
+                                                ])->columns(3),
 
                                             Section::make('Consent & GDPR')
                                                 ->schema([
@@ -238,9 +211,11 @@ final class ServiceUserForm
                                                         ->label('Consent for Data Storage')
                                                         ->required(),
                                                     Toggle::make('consent_referrals')
-                                                        ->label('Consent for Referrals'),
+                                                        ->label('Consent for Referrals')
+                                                        ->required(),
                                                     Toggle::make('consent_communications')
-                                                        ->label('Consent for Communications'),
+                                                        ->label('Consent for Communications')
+                                                        ->required(),
                                                 ])->columns(3),
                                         ]),
 
@@ -382,45 +357,14 @@ final class ServiceUserForm
                                         ]),
                                 ])->columnSpanFull(),
 
-                            // ViewField::make('tab_navigation')
-                            //     ->view('filament.components.tab-navigation')
-                            //     ->columnSpanFull()
-                            //     ->visible($useTabNavigation),
+                            ViewField::make('tab_navigation')
+                                ->view('filament.components.tab-navigation')
+                                ->columnSpanFull()
+                                ->visible($useTabNavigation),
                         ])->collapsible(),
 
                 ])
                 ->columnSpanFull(),
         ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public static function getEmergencyContactOptions(): array
-    {
-        return People::query()
-            ->when(
-                Filament::getTenant(),
-                fn ($query, $tenant) => $query->where('team_id', $tenant->getKey()),
-            )
-            ->orderBy('name')
-            ->pluck('name', 'id')
-            ->all();
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public static function createEmergencyContact(array $data): int
-    {
-        $tenant = Filament::getTenant();
-
-        return People::create([
-            'team_id' => $tenant?->getKey(),
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'email' => $data['email'] ?? null,
-            'phone' => $data['phone'] ?? null,
-        ])->getKey();
     }
 }

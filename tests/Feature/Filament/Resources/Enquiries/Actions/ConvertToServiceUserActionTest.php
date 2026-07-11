@@ -38,7 +38,6 @@ it('can convert an enquiry to a service user with comprehensive data', function 
     $superAdmin->assignRole('super_admin');
 
     $person = People::factory()->create(['team_id' => $team->id, 'email' => 'caller@example.com']);
-    $emergencyContact = People::factory()->create(['team_id' => $team->id]);
     $enquiry = Enquiry::factory()->create([
         'people_id' => $person->id,
         'team_id' => $team->id,
@@ -65,7 +64,8 @@ it('can convert an enquiry to a service user with comprehensive data', function 
             'postcode' => 'LE1 1AA',
             'address' => '123 Spinney Hill Road',
             'no_fixed_address' => false,
-            'emergency_contact_id' => $emergencyContact->id,
+            'emergency_contact_name' => 'Jane Doe',
+            'emergency_contact_number' => '0987654321',
             'emergency_contact_relation_type' => 'mother',
             'consent_data_storage' => true,
             'consent_referrals' => true,
@@ -121,8 +121,9 @@ it('can convert an enquiry to a service user with comprehensive data', function 
 
     // Assert emergency contact columns set
     $person->refresh();
-    expect($person->emergency_contact_id)->toBe($emergencyContact->id);
-    expect($person->emergency_contact_relation_type)->toBe('mother');
+    expect($person->serviceUserProfile->emergency_contact_name)->toBe('Jane Doe');
+    expect($person->serviceUserProfile->emergency_contact_number)->toBe('0987654321');
+    expect($person->serviceUserProfile->emergency_contact_relation_type)->toBe('mother');
 
     // Assert Enquiry updated
     $enquiry->refresh();

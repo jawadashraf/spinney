@@ -65,6 +65,7 @@ final class EditServiceUser extends EditRecord
             'reason_for_referral', 'target_service_team', 'engagement_status',
             'referral_targets', 'referral_agency_specify', 'intervention_offered',
             'treatment_outcome', 'internal_notes',
+            'emergency_contact_name', 'emergency_contact_number', 'emergency_contact_relation_type',
         ];
 
         $profileData = Arr::only($data['profile'] ?? [], $profileFields);
