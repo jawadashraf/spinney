@@ -359,6 +359,7 @@ final class ServiceUserForm
 
                             ViewField::make('tab_navigation')
                                 ->view('filament.components.tab-navigation')
+                                ->dehydrated(false)
                                 ->columnSpanFull()
                                 ->visible($useTabNavigation),
                         ])->collapsible(),
