@@ -5,7 +5,7 @@
         "opencode",
         "antigravity"
     ],
-    "cloud": false,
+    "cloud": true,
     "guidelines": true,
     "mcp": true,
     "nightwatch": false,
@@ -16,7 +16,8 @@
         "laraveljutsu/zap",
         "relaticle/flowforge",
         "spatie/laravel-activitylog",
-        "achyutn/filament-log-viewer"
+        "achyutn/filament-log-viewer",
+        "alizharb/filament-activity-log"
     ],
     "sail": false,
     "skills": [
@@ -30,6 +31,7 @@
         "filament-log-viewer-development",
         "flowforge-development",
         "medialibrary-development",
-        "filament-security-audit"
+        "filament-security-audit",
+        "deploying-laravel-cloud"
     ]
 }
