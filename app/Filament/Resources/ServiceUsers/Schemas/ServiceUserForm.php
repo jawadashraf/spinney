@@ -93,6 +93,14 @@ final class ServiceUserForm
                                         $set('email', null);
                                     }
                                 })
+                                ->afterStateHydrated(function (Toggle $component, ?Model $record) {
+                                    if ($record === null) {
+                                        return;
+                                    }
+                                    $domain = config('app.temp_email_domain', 'spinney.local');
+                                    $hasNoEmail = str_contains((string) ($record->email ?? ''), '@'.$domain);
+                                    $component->state($hasNoEmail);
+                                })
                                 ->default(fn (?Model $record): bool => (bool) ($record && str_contains((string) ($record->email ?? ''), '@'.config('app.temp_email_domain', 'spinney.local'))))
                                 ->dehydrated(false),
                             TextInput::make('email')

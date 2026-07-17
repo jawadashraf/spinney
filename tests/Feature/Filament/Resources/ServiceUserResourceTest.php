@@ -229,3 +229,33 @@ it('creates a service user and linked user with a temporary email when has_no_em
     expect($user)->not->toBeNull();
     expect($user->email)->toBe($serviceUser->email);
 });
+
+it('hydrates has_no_email toggle correctly in edit mode', function () {
+    $tempServiceUser = ServiceUser::create([
+        'name' => 'Temp Email User',
+        'email' => 'temp_1234567890@'.config('app.temp_email_domain', 'spinney.local'),
+        'team_id' => $this->team->id,
+        'is_service_user' => true,
+    ]);
+
+    \Pest\Livewire\livewire(EditServiceUser::class, [
+        'record' => $tempServiceUser->getRouteKey(),
+    ])
+        ->assertFormSet([
+            'has_no_email' => true,
+        ]);
+
+    $normalServiceUser = ServiceUser::create([
+        'name' => 'Normal Email User',
+        'email' => 'normal@example.com',
+        'team_id' => $this->team->id,
+        'is_service_user' => true,
+    ]);
+
+    \Pest\Livewire\livewire(EditServiceUser::class, [
+        'record' => $normalServiceUser->getRouteKey(),
+    ])
+        ->assertFormSet([
+            'has_no_email' => false,
+        ]);
+});
