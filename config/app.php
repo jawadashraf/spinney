@@ -100,6 +100,8 @@ return [
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
+    'temp_email_domain' => env('TEMP_EMAIL_DOMAIN', 'spinney.local'),
+
     /*
     |--------------------------------------------------------------------------
     | Encryption Key

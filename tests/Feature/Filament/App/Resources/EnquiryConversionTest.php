@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 use App\Enums\EnquiryStatus;
 use App\Enums\ServiceTeam;
-use App\Filament\Resources\Enquiries\Actions\ConvertToServiceUserAction;
 use App\Filament\Resources\Enquiries\Pages\ListEnquiries;
-use App\Models\CustomField;
 use App\Models\Enquiry;
 use App\Models\People;
 use App\Models\User;
 use Database\Seeders\ServiceUserCustomFieldSeeder;
+use Illuminate\Support\Facades\Notification;
 
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
+    Notification::fake();
+
     $this->user = User::factory()->create();
     $this->user->assignRole('super_admin');
     $this->actingAs($this->user);
@@ -30,7 +31,7 @@ it('hides conversion action for already converted enquiries', function (): void 
     ]);
 
     livewire(ListEnquiries::class)
-        ->assertTableActionHidden(ConvertToServiceUserAction::class, $enquiry);
+        ->assertTableActionHidden('convertToServiceUser', $enquiry);
 });
 
 it('hides conversion action for enquiries without linked caller', function (): void {
@@ -40,12 +41,13 @@ it('hides conversion action for enquiries without linked caller', function (): v
     ]);
 
     livewire(ListEnquiries::class)
-        ->assertTableActionHidden(ConvertToServiceUserAction::class, $enquiry);
+        ->assertTableActionHidden('convertToServiceUser', $enquiry);
 });
 
 it('can convert open enquiry to service user', function (): void {
     $person = People::factory()->create([
         'is_service_user' => false,
+        'email' => 'caller@example.com',
     ]);
 
     $enquiry = Enquiry::factory()->create([
@@ -59,7 +61,6 @@ it('can convert open enquiry to service user', function (): void {
     livewire(ListEnquiries::class)
         ->assertTableActionExists('convertToServiceUser')
         ->mountTableAction('convertToServiceUser', $enquiry)
-        ->dump()
         ->setTableActionData([
             'consent_data_storage' => true,
             'consent_referrals' => true,
@@ -86,9 +87,6 @@ it('can convert open enquiry to service user', function (): void {
     ]);
 
     // Verify Custom Fields
-    $consentField = CustomField::where('code', 'consent_data_storage')->first();
-    $teamField = CustomField::where('code', 'service_team')->first();
-
-    expect($person->refresh()->getCustomFieldValue($consentField))->toBeTrue();
-    expect($person->getCustomFieldValue($teamField))->toBe(ServiceTeam::ASSESSMENT->value);
+    expect($person->refresh()->consent_data_storage)->toBeTrue();
+    expect($person->serviceUserProfile->target_service_team)->toBe(ServiceTeam::ASSESSMENT);
 });

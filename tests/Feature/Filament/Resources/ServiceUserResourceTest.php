@@ -8,6 +8,7 @@ use App\Filament\Resources\ServiceUsers\Pages\CreateServiceUser;
 use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
 use App\Filament\Resources\ServiceUsers\Schemas\ServiceUserForm;
 use App\Filament\Resources\ServiceUsers\ServiceUserResource;
+use App\Models\Role;
 use App\Models\ServiceUser;
 use App\Models\ServiceUserProfile;
 use App\Models\Team;
@@ -189,3 +190,42 @@ it('renders tab navigation on the edit page', function () {
 //             'address' => "10 Downing Street\nWestminster\nLondon\nSW1A 2AA",
 //         ]);
 // });
+
+it('generates a temporary email when no email is available', function () {
+    $component = \Pest\Livewire\livewire(CreateServiceUser::class)
+        ->set('data.has_no_email', true);
+
+    $email = $component->get('data.email');
+    expect($email)->toStartWith('temp_')
+        ->toEndWith('@'.config('app.temp_email_domain', 'spinney.local'));
+
+    $component->assertFormFieldDisabled('email');
+});
+
+it('creates a service user and linked user with a temporary email when has_no_email is enabled', function () {
+    setPermissionsTeamId($this->team->id);
+    Role::findOrCreate('service_user');
+
+    \Pest\Livewire\livewire(CreateServiceUser::class)
+        ->fillForm([
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'has_no_email' => true,
+            'profile.target_service_team' => ServiceTeam::ASSESSMENT->value,
+            'profile.engagement_status' => EngagementStatus::ACTIVE->value,
+            'consent_data_storage' => true,
+            'consent_referrals' => true,
+            'consent_communications' => true,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    $serviceUser = ServiceUser::where('first_name', 'John')->where('last_name', 'Doe')->first();
+    expect($serviceUser)->not->toBeNull();
+    expect($serviceUser->email)->toStartWith('temp_')->toEndWith('@'.config('app.temp_email_domain', 'spinney.local'));
+
+    $user = User::where('first_name', 'John')->where('last_name', 'Doe')->first();
+    expect($user)->not->toBeNull();
+    expect($user->email)->toBe($serviceUser->email);
+});
