@@ -211,8 +211,13 @@ final class ServiceUserForm
                                                     Textarea::make('address')
                                                         ->rows(2)
                                                         ->columnSpanFull(),
-                                                    TextInput::make('availability')
-                                                        ->placeholder('e.g. Weekdays after 5pm'),
+                                                    Select::make('availability')
+                                                        ->options([
+                                                            'before_12' => 'Before 12',
+                                                            'after_12' => 'After 12',
+                                                            'anytime' => 'Anytime',
+                                                        ])
+                                                        ->native(false),
                                                 ])->columns(3),
 
                                             Section::make('Emergency Contact')
