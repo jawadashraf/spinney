@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\MySchedules\Schemas;
 
+use Carbon\Carbon;
+use Closure;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -64,6 +66,36 @@ final class MyScheduleForm
                             ->inline()
                             ->required(fn (Get $get): bool => $get('is_recurring') === true)
                             ->visible(fn (Get $get): bool => $get('is_recurring') === true)
+                            ->rule(function (Get $get) {
+                                return function (string $attribute, $value, Closure $fail) use ($get) {
+                                    $startDate = $get('start_date');
+                                    $endDate = $get('end_date');
+
+                                    if (! $startDate || ! $endDate || ! $get('is_recurring')) {
+                                        return;
+                                    }
+
+                                    $start = Carbon::parse($startDate);
+                                    $end = Carbon::parse($endDate);
+
+                                    if ($start->diffInDays($end) >= 6) {
+                                        return;
+                                    }
+
+                                    $rangeDays = [];
+                                    for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+                                        $rangeDays[] = strtolower($date->format('l'));
+                                    }
+
+                                    $selectedDays = (array) $value;
+                                    $invalidDays = array_diff($selectedDays, $rangeDays);
+
+                                    if (! empty($invalidDays)) {
+                                        $invalidDaysList = collect($invalidDays)->map(fn ($d) => ucfirst(substr($d, 0, 3)))->join(', ');
+                                        $fail("The selected weekdays ({$invalidDaysList}) do not fall within the date range ({$start->format('M j')} - {$end->format('M j')}).");
+                                    }
+                                };
+                            })
                             ->columnSpanFull(),
 
                         Toggle::make('is_active')
