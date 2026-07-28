@@ -12,6 +12,7 @@ use App\Filament\Pages\LiaisonDashboard;
 use App\Filament\Pages\Tenancy\EditOrganization;
 use App\Filament\Pages\Tenancy\RegisterOrganization;
 use App\Filament\Resources\CompanyResource;
+use App\Http\Middleware\EnsureVolunteerWorkHours;
 use App\Http\Middleware\SyncSpatiePermissionsTeamId;
 use App\Models\Team;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -174,6 +175,7 @@ final class AppPanelProvider extends PanelProvider
             ->authPasswordBroker('users')
             ->authMiddleware([
                 Authenticate::class,
+                EnsureVolunteerWorkHours::class,
             ])
             ->renderHook(
                 PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,

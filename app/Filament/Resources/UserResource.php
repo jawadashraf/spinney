@@ -14,6 +14,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -56,10 +57,29 @@ final class UserResource extends Resource
             DateTimePicker::make('email_verified_at')
                 ->label('Email Verified At'),
             Select::make('roles')
-                ->relationship('roles', 'name')
+                ->relationship(
+                    name: 'roles',
+                    titleAttribute: 'name',
+                    modifyQueryUsing: function ($query) {
+                        $team = Filament::getTenant() ?? auth()->user()?->currentTeam ?? auth()->user()?->allTeams()->first();
+                        if ($team) {
+                            setPermissionsTeamId($team->getKey());
+                        }
+
+                        return $query;
+                    }
+                )
                 ->multiple()
                 ->preload()
-                ->searchable(),
+                ->searchable()
+                ->saveRelationshipsUsing(function (User $record, $state): void {
+                    $team = Filament::getTenant() ?? $record->currentTeam ?? $record->allTeams()->first() ?? auth()->user()?->currentTeam;
+                    if ($team) {
+                        setPermissionsTeamId($team->getKey());
+                    }
+
+                    $record->syncRoles($state ?? []);
+                }),
         ]);
     }
 
@@ -125,6 +145,7 @@ final class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
+            UserResource\RelationManagers\SchedulesRelationManager::class,
             ActivitiesRelationManager::class,
         ];
     }

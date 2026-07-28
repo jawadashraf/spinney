@@ -4,21 +4,34 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Team;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 final class SimplifiedRolePermissionSeeder extends Seeder
 {
-    public function run(): void
+    public function run(?int $teamId = null): void
     {
-        $teamId = Team::first()->id;
+        $teamId = $teamId ?? (env('TEAM_ID') ? (int) env('TEAM_ID') : null);
         // Define roles with their permissions
         $rolePermissions = [
             'liaison' => [
                 'display_name' => 'Liaison',
                 'permissions' => ['ViewAny:Company', 'ViewAny:Schedule', 'View:Schedule'],
+            ],
+            'volunteer_liaison' => [
+                'display_name' => 'Volunteer Liaison',
+                'permissions' => [
+                    'ViewAny:Company',
+                    'ViewAny:Schedule',
+                    'View:Schedule',
+                    'Create:Schedule',
+                    'ViewAny:Task',
+                    'View:Task',
+                    'Update:Task',
+                    'ViewAny:ServiceUser',
+                    'View:ServiceUser',
+                ],
             ],
             'assessor' => [
                 'display_name' => 'Assessor',
@@ -63,9 +76,12 @@ final class SimplifiedRolePermissionSeeder extends Seeder
         setPermissionsTeamId($teamId);
 
         foreach ($rolePermissions as $roleName => $config) {
-            $role = Role::firstOrCreate(
-                ['name' => $roleName, 'guard_name' => 'web'],
-            );
+            $attributes = ['name' => $roleName, 'guard_name' => 'web'];
+            if ($teamId !== null) {
+                $attributes['team_id'] = $teamId;
+            }
+
+            $role = Role::firstOrCreate($attributes);
 
             if ($config['permissions'] === '*') {
                 $role->syncPermissions(Permission::all());
@@ -73,9 +89,9 @@ final class SimplifiedRolePermissionSeeder extends Seeder
                 $role->syncPermissions($config['permissions']);
             }
 
-            $this->command->info("Role '{$roleName}' created with permissions.");
+            $this->command?->info("Role '{$roleName}' created with permissions.");
         }
 
-        $this->command->info('All roles and permissions have been seeded successfully.');
+        $this->command?->info('All roles and permissions have been seeded successfully.');
     }
 }

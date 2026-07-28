@@ -8,8 +8,10 @@ use App\Enums\CounselorType;
 use App\Models\Concerns\HasProfilePhoto;
 use App\Models\Pivots\DepartmentUser;
 use App\Models\Pivots\TaskUser;
+use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Exception;
+use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasTenants;
@@ -46,6 +48,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Models\Concerns\HasActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
+use Zap\Data\FrequencyConfig;
 use Zap\Models\Concerns\HasSchedules;
 
 #[Appends([
@@ -133,6 +136,65 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
                 $user->attributes['name'] = "{$user->first_name} {$user->last_name}";
             }
         });
+    }
+
+    public function isVolunteerLiaison(): bool
+    {
+        if (class_exists(Filament::class)) {
+            $team = Filament::getTenant() ?? $this->currentTeam ?? $this->allTeams()->first();
+            if ($team) {
+                setPermissionsTeamId($team->getKey());
+            }
+        }
+
+        return $this->hasRole('volunteer_liaison');
+    }
+
+    public function isWithinWorkHours(?CarbonInterface $at = null): bool
+    {
+        $at = $at ? Carbon::instance($at) : Carbon::now();
+        $dateStr = $at->format('Y-m-d');
+        $timeStr = $at->format('H:i');
+
+        $availabilitySchedules = $this->schedules()
+            ->active()
+            ->availability()
+            ->forDate($dateStr)
+            ->with('periods')
+            ->get();
+
+        foreach ($availabilitySchedules as $schedule) {
+            if (! $schedule->isActiveOn($dateStr)) {
+                continue;
+            }
+
+            if ($schedule->is_recurring) {
+                $config = $schedule->frequency_config;
+                if ($config instanceof FrequencyConfig && ! $config->shouldCreateRecurringInstance($schedule, $at)) {
+                    continue;
+                }
+            }
+
+            foreach ($schedule->periods as $period) {
+                if (! $period->start_time || ! $period->end_time) {
+                    continue;
+                }
+
+                $startTime = substr((string) $period->start_time, 0, 5);
+                $endTime = substr((string) $period->end_time, 0, 5);
+
+                if ($timeStr >= $startTime && $timeStr <= $endTime) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function getWeeklyScheduledMinutes(string $startDate, string $endDate): int
+    {
+        return $this->getTotalScheduledTime($startDate, $endDate);
     }
 
     public function hasSpecialty(CounselorType $type): bool

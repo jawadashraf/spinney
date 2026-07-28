@@ -8,7 +8,7 @@ use Filament\Facades\Filament;
 
 /**
  * Ensures Spatie Permission's team context is set before authorization
- * checks run on Livewire update requests.
+ * checks and model relationship updates run.
  *
  * The tenant middleware (SyncSpatiePermissionsTeamId) only runs on initial
  * page loads, not on Livewire POST requests to /livewire/update. This trait
@@ -24,9 +24,24 @@ trait SyncsPermissionTeamId
         parent::authorizeAccess();
     }
 
+    protected function beforeFill(): void
+    {
+        $this->syncSpatieTeamId();
+    }
+
+    protected function beforeSave(): void
+    {
+        $this->syncSpatieTeamId();
+    }
+
+    protected function beforeCreate(): void
+    {
+        $this->syncSpatieTeamId();
+    }
+
     protected function syncSpatieTeamId(): void
     {
-        $tenant = Filament::getTenant();
+        $tenant = Filament::getTenant() ?? auth()->user()?->currentTeam ?? auth()->user()?->allTeams()->first();
 
         if ($tenant) {
             setPermissionsTeamId($tenant->getKey());

@@ -6,6 +6,7 @@ namespace App\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use Zap\Models\Schedule;
 
 final class SchedulePolicy
 {
@@ -26,13 +27,21 @@ final class SchedulePolicy
         return $authUser->can('Create:Schedule');
     }
 
-    public function update(AuthUser $authUser): bool
+    public function update(AuthUser $authUser, ?Schedule $schedule = null): bool
     {
+        if ($schedule && ($schedule->metadata['is_approved'] ?? false)) {
+            return $authUser->can('Unlock:Schedule') || ($authUser->can('Update:Schedule') && ($authUser->hasRole('admin') || $authUser->hasRole('manager')));
+        }
+
         return $authUser->can('Update:Schedule');
     }
 
-    public function delete(AuthUser $authUser): bool
+    public function delete(AuthUser $authUser, ?Schedule $schedule = null): bool
     {
+        if ($schedule && ($schedule->metadata['is_approved'] ?? false)) {
+            return $authUser->can('Unlock:Schedule') || ($authUser->can('Delete:Schedule') && ($authUser->hasRole('admin') || $authUser->hasRole('manager')));
+        }
+
         return $authUser->can('Delete:Schedule');
     }
 
