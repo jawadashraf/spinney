@@ -18,6 +18,7 @@ use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -81,7 +82,23 @@ final class SchedulesRelationManager extends RelationManager
                             ])
                             ->columns(2)
                             ->defaultItems(1)
-                            ->required(),
+                            ->required()
+                            ->mutateRelationshipDataBeforeCreateUsing(function (array $data, Get $get): array {
+                                $startDate = $get('start_date') ?? now()->toDateString();
+                                $data['date'] = is_string($startDate) ? substr($startDate, 0, 10) : now()->toDateString();
+                                $data['is_available'] = true;
+
+                                return $data;
+                            })
+                            ->mutateRelationshipDataBeforeSaveUsing(function (array $data, Get $get): array {
+                                if (empty($data['date'])) {
+                                    $startDate = $get('start_date') ?? now()->toDateString();
+                                    $data['date'] = is_string($startDate) ? substr($startDate, 0, 10) : now()->toDateString();
+                                }
+                                $data['is_available'] = true;
+
+                                return $data;
+                            }),
                     ]),
             ]);
     }
@@ -97,7 +114,7 @@ final class SchedulesRelationManager extends RelationManager
 
                 TextColumn::make('schedule_type')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn (string|ScheduleTypes|null $state): string => match ($state instanceof ScheduleTypes ? $state->value : (string) $state) {
                         'availability' => 'success',
                         'blocked' => 'danger',
                         default => 'gray',

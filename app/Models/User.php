@@ -141,7 +141,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     public function isVolunteerLiaison(): bool
     {
         if (class_exists(Filament::class)) {
-            $team = Filament::getTenant() ?? $this->currentTeam ?? $this->allTeams()->first();
+            $team = Filament::getTenant() ?? $this->currentTeam ?? $this->teams()->first() ?? auth()->user()?->currentTeam ?? Team::first();
             if ($team) {
                 setPermissionsTeamId($team->getKey());
             }
@@ -152,7 +152,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
 
     public function isWithinWorkHours(?CarbonInterface $at = null): bool
     {
-        $at = $at ? Carbon::instance($at) : Carbon::now();
+        $at = $at ? Carbon::parse($at->format('Y-m-d H:i:s'), 'Europe/London') : Carbon::now('Europe/London');
         $dateStr = $at->format('Y-m-d');
         $timeStr = $at->format('H:i');
 
