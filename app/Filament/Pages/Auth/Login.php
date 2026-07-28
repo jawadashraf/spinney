@@ -56,12 +56,10 @@ final class Login extends \Filament\Auth\Pages\Login
             /** @var User|null $user */
             $user = Auth::getProvider()->retrieveByCredentials($credentials);
 
-            if ($user && Auth::getProvider()->validateCredentials($user, $credentials)) {
-                if ($user->isVolunteerLiaison() && ! $user->isWithinWorkHours()) {
-                    throw ValidationException::withMessages([
-                        'data.email' => __('Login Restricted: You can only log in during your assigned work hours.'),
-                    ]);
-                }
+            if ($user && Auth::getProvider()->validateCredentials($user, $credentials) && ($user->isVolunteerLiaison() && ! $user->isWithinWorkHours())) {
+                throw ValidationException::withMessages([
+                    'data.email' => __('Login Restricted: You can only log in during your assigned work hours.'),
+                ]);
             }
         }
 

@@ -41,6 +41,7 @@ test('user isWithinWorkHours evaluates availability periods accurately', functio
         'frequency' => Frequency::WEEKLY->value,
         'frequency_config' => ['days' => ['tuesday']],
         'is_active' => true,
+        'metadata' => ['is_approved' => true],
     ]);
 
     $schedule->periods()->create([

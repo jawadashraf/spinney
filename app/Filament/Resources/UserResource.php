@@ -61,7 +61,7 @@ final class UserResource extends Resource
                     name: 'roles',
                     titleAttribute: 'name',
                     modifyQueryUsing: function ($query) {
-                        $team = Filament::getTenant() ?? auth()->user()?->currentTeam ?? auth()->user()?->allTeams()->first();
+                        $team = Filament::getTenant() ?? auth()->user()->currentTeam ?? auth()->user()->allTeams()->first();
                         if ($team) {
                             setPermissionsTeamId($team->getKey());
                         }

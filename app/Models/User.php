@@ -141,7 +141,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     public function isVolunteerLiaison(): bool
     {
         if (class_exists(Filament::class)) {
-            $team = Filament::getTenant() ?? $this->currentTeam ?? $this->teams()->first() ?? auth()->user()?->currentTeam ?? Team::first();
+            $team = Filament::getTenant() ?? $this->currentTeam ?? $this->teams()->first() ?? auth()->user()->currentTeam ?? Team::first();
             if ($team) {
                 setPermissionsTeamId($team->getKey());
             }
@@ -152,7 +152,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
 
     public function isWithinWorkHours(?CarbonInterface $at = null): bool
     {
-        $at = $at ? Carbon::parse($at->format('Y-m-d H:i:s'), 'Europe/London') : Carbon::now('Europe/London');
+        $at = $at instanceof CarbonInterface ? Carbon::parse($at->format('Y-m-d H:i:s'), 'Europe/London') : Carbon::now('Europe/London');
         $dateStr = $at->format('Y-m-d');
         $timeStr = $at->format('H:i');
 
@@ -164,6 +164,10 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
             ->get();
 
         foreach ($availabilitySchedules as $schedule) {
+            if (! ($schedule->metadata['is_approved'] ?? false)) {
+                continue;
+            }
+
             if (! $schedule->isActiveOn($dateStr)) {
                 continue;
             }
@@ -176,10 +180,12 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
             }
 
             foreach ($schedule->periods as $period) {
-                if (! $period->start_time || ! $period->end_time) {
+                if (! $period->start_time) {
                     continue;
                 }
-
+                if (! $period->end_time) {
+                    continue;
+                }
                 $startTime = substr((string) $period->start_time, 0, 5);
                 $endTime = substr((string) $period->end_time, 0, 5);
 
@@ -220,7 +226,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     {
         /** @var array<int, string> $types */
         $types = $this->counselor_types ?? [];
-        $types = array_filter($types, fn ($t): bool => $t !== $type->value);
+        $types = array_filter($types, fn (string $t): bool => $t !== $type->value);
         $this->forceFill(['counselor_types' => array_values($types)]);
         $this->save();
     }

@@ -28,7 +28,7 @@ final class NotesRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return NoteForm::get($schema, ['companies']);
+        return NoteForm::get($schema);
     }
 
     public function table(Table $table): Table

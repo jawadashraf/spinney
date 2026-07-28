@@ -91,7 +91,7 @@ final class EditServiceUser extends EditRecord
         return $record;
     }
 
-    public function getFooter(): ?View
+    public function getFooter(): View
     {
         return view('filament.resources.service-users.footer');
     }

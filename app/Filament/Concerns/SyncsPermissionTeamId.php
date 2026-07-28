@@ -41,7 +41,7 @@ trait SyncsPermissionTeamId
 
     protected function syncSpatieTeamId(): void
     {
-        $tenant = Filament::getTenant() ?? auth()->user()?->currentTeam ?? auth()->user()?->allTeams()->first();
+        $tenant = Filament::getTenant() ?? auth()->user()->currentTeam ?? auth()->user()->allTeams()->first();
 
         if ($tenant) {
             setPermissionsTeamId($tenant->getKey());

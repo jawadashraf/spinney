@@ -85,7 +85,7 @@ final class ServiceUserForm
                             Toggle::make('has_no_email')
                                 ->label('No email address available')
                                 ->live()
-                                ->afterStateUpdated(function (Get $get, Set $set, ?bool $state) {
+                                ->afterStateUpdated(function (Get $get, Set $set, ?bool $state): void {
                                     if ($state) {
                                         $domain = config('app.temp_email_domain', 'spinney.local');
                                         $set('email', 'temp_'.strtolower(Str::random(10)).'@'.$domain);
@@ -93,15 +93,15 @@ final class ServiceUserForm
                                         $set('email', null);
                                     }
                                 })
-                                ->afterStateHydrated(function (Toggle $component, ?Model $record) {
-                                    if ($record === null) {
+                                ->afterStateHydrated(function (Toggle $component, ?Model $record): void {
+                                    if (! $record instanceof Model) {
                                         return;
                                     }
                                     $domain = config('app.temp_email_domain', 'spinney.local');
                                     $hasNoEmail = str_contains((string) ($record->email ?? ''), '@'.$domain);
                                     $component->state($hasNoEmail);
                                 })
-                                ->default(fn (?Model $record): bool => (bool) ($record && str_contains((string) ($record->email ?? ''), '@'.config('app.temp_email_domain', 'spinney.local'))))
+                                ->default(fn (?Model $record): bool => $record && str_contains((string) ($record->email ?? ''), '@'.config('app.temp_email_domain', 'spinney.local')))
                                 ->dehydrated(false),
                             TextInput::make('email')
                                 ->email()
@@ -140,7 +140,7 @@ final class ServiceUserForm
                                 ->contained(false)
                                 ->when(
                                     $useTabNavigation,
-                                    fn (Tabs $component) => $component->livewireProperty('activeServiceUserTab')
+                                    fn (Tabs $component): Tabs => $component->livewireProperty('activeServiceUserTab')
                                 )
                                 ->tabs([
                                     self::TAB_DEMOGRAPHICS_CONSENT => Tab::make('Demographics & Consent')

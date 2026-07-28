@@ -68,12 +68,11 @@ final class NoteForm
     }
 
     /**
-     * @param  array<string>  $excludeFields  Fields to exclude from the form.
      * @return Schema The modified form instance with the schema applied.
      *
      * @throws \Exception
      */
-    public static function get(Schema $schema, array $excludeFields = []): Schema
+    public static function get(Schema $schema): Schema
     {
         return $schema
             ->components(self::getFormComponents())

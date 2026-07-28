@@ -12,7 +12,7 @@ final class SimplifiedRolePermissionSeeder extends Seeder
 {
     public function run(?int $teamId = null): void
     {
-        $teamId = $teamId ?? (env('TEAM_ID') ? (int) env('TEAM_ID') : null);
+        $teamId ??= env('TEAM_ID') ? (int) env('TEAM_ID') : null;
         // Define roles with their permissions
         $rolePermissions = [
             'liaison' => [

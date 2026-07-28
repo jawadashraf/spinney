@@ -131,6 +131,7 @@ test('volunteer liaison can log in during active scheduled work hours', function
         'frequency' => Frequency::WEEKLY->value,
         'frequency_config' => ['days' => ['tuesday']],
         'is_active' => true,
+        'metadata' => ['is_approved' => true],
     ]);
 
     $schedule->periods()->create([

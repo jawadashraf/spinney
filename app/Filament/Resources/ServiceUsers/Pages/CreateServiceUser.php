@@ -91,7 +91,7 @@ final class CreateServiceUser extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 
-    public function getFooter(): ?View
+    public function getFooter(): View
     {
         return view('filament.resources.service-users.footer');
     }
