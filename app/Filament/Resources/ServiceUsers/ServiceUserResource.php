@@ -13,6 +13,7 @@ use App\Filament\Resources\ServiceUsers\RelationManagers\ThirdPartyCarePlansRela
 use App\Filament\Resources\ServiceUsers\Schemas\ServiceUserForm;
 use App\Filament\Resources\ServiceUsers\Tables\ServiceUsersTable;
 use App\Models\ServiceUser;
+use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -73,14 +74,33 @@ final class ServiceUserResource extends Resource
                 SoftDeletingScope::class,
             ]);
 
-        return $query;
+        return self::applyVolunteerLiaisonScope($query);
     }
 
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
-        return parent::getRecordRouteBindingEloquentQuery()
+        /** @var Builder<ServiceUser> $query */
+        $query = parent::getRecordRouteBindingEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+
+        return self::applyVolunteerLiaisonScope($query);
+    }
+
+    /**
+     * @param  Builder<ServiceUser>  $query
+     * @return Builder<ServiceUser>
+     */
+    protected static function applyVolunteerLiaisonScope(Builder $query): Builder
+    {
+        /** @var User|null $user */
+        $user = auth()->user();
+
+        if ($user && $user->isRestrictedVolunteerLiaison()) {
+            $query->visibleToVolunteerLiaison($user);
+        }
+
+        return $query;
     }
 }

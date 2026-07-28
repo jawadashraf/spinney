@@ -102,8 +102,6 @@ class People extends Model implements HasCustomFieldsContract
         return $this->hasOne(ServiceUserProfile::class, 'person_id');
     }
 
-
-
     /**
      * @param  Builder<People>  $query
      * @return Builder<People>
@@ -185,6 +183,20 @@ class People extends Model implements HasCustomFieldsContract
     public function tasks(): MorphToMany
     {
         return $this->morphToMany(Task::class, 'taskable');
+    }
+
+    /**
+     * @param  Builder<People>  $query
+     * @return Builder<People>
+     */
+    #[Scope]
+    protected function visibleToVolunteerLiaison(Builder $query, User $user): Builder
+    {
+        return $query->whereHas('tasks', function (Builder $taskQuery) use ($user): void {
+            $taskQuery->whereHas('assignees', function (Builder $assigneeQuery) use ($user): void {
+                $assigneeQuery->where('users.id', $user->id);
+            });
+        });
     }
 
     /**

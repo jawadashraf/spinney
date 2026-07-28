@@ -130,7 +130,18 @@ final class AppointmentForm
                                     ->required(),
 
                                 Select::make('metadata.service_user_id')
-                                    ->relationship('serviceUser', 'name')
+                                    ->relationship(
+                                        name: 'serviceUser',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: function (Builder $query): Builder {
+                                            /** @var User|null $user */
+                                            $user = auth()->user();
+
+                                            return $user && $user->isRestrictedVolunteerLiaison()
+                                                ? $query->visibleToVolunteerLiaison($user)
+                                                : $query;
+                                        },
+                                    )
                                     ->searchable()
                                     ->preload()
                                     ->visible(fn (Get $get): bool => ($get('metadata.attendee_type') ?? '') === AttendeeType::SERVICE_USER->value)

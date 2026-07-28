@@ -150,6 +150,12 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
         return $this->hasRole('volunteer_liaison');
     }
 
+    public function isRestrictedVolunteerLiaison(): bool
+    {
+        return $this->isVolunteerLiaison()
+            && $this->roles->where('name', '!=', 'volunteer_liaison')->isEmpty();
+    }
+
     public function isWithinWorkHours(?CarbonInterface $at = null): bool
     {
         $at = $at instanceof CarbonInterface ? Carbon::parse($at->format('Y-m-d H:i:s'), 'Europe/London') : Carbon::now('Europe/London');
