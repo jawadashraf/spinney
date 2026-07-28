@@ -20,7 +20,7 @@ final class SchedulePolicy
 
     public function view(AuthUser $authUser, ?Schedule $schedule = null): bool
     {
-        if ($schedule && $schedule->schedulable_type === User::class && (int) $schedule->schedulable_id === (int) $authUser->id) {
+        if ($schedule && $schedule->schedulable_type === (new User)->getMorphClass() && (int) $schedule->schedulable_id === (int) $authUser->id) {
             return true;
         }
 
@@ -34,7 +34,7 @@ final class SchedulePolicy
 
     public function update(AuthUser $authUser, ?Schedule $schedule = null): bool
     {
-        if ($schedule && $schedule->schedulable_type === User::class && (int) $schedule->schedulable_id === (int) $authUser->id) {
+        if ($schedule && $schedule->schedulable_type === (new User)->getMorphClass() && (int) $schedule->schedulable_id === (int) $authUser->id) {
             return true;
         }
 
@@ -51,7 +51,7 @@ final class SchedulePolicy
 
     public function delete(AuthUser $authUser, ?Schedule $schedule = null): bool
     {
-        if ($schedule && $schedule->schedulable_type === User::class && (int) $schedule->schedulable_id === (int) $authUser->id) {
+        if ($schedule && $schedule->schedulable_type === (new User)->getMorphClass() && (int) $schedule->schedulable_id === (int) $authUser->id) {
             return true;
         }
 

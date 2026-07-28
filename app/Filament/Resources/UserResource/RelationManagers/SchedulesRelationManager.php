@@ -16,6 +16,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -62,6 +63,23 @@ final class SchedulesRelationManager extends RelationManager
                         Toggle::make('is_recurring')
                             ->default(true)
                             ->live(),
+
+                        ToggleButtons::make('days_of_week')
+                            ->multiple()
+                            ->options([
+                                'monday' => 'Mon',
+                                'tuesday' => 'Tue',
+                                'wednesday' => 'Wed',
+                                'thursday' => 'Thu',
+                                'friday' => 'Fri',
+                                'saturday' => 'Sat',
+                                'sunday' => 'Sun',
+                            ])
+                            ->default(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'])
+                            ->inline()
+                            ->required(fn (Get $get): bool => $get('is_recurring') === true)
+                            ->visible(fn (Get $get): bool => $get('is_recurring') === true)
+                            ->columnSpanFull(),
 
                         Toggle::make('is_active')
                             ->default(true),
@@ -124,6 +142,27 @@ final class SchedulesRelationManager extends RelationManager
                     ->label('Recurring')
                     ->boolean(),
 
+                TextColumn::make('shift_dates')
+                    ->label('Dates')
+                    ->state(function (Schedule $record): string {
+                        $start = $record->start_date ? $record->start_date->format('M j, Y') : '';
+                        $end = $record->end_date ? ' - '.$record->end_date->format('M j, Y') : '';
+
+                        return $start.$end;
+                    }),
+
+                TextColumn::make('days')
+                    ->label('Days')
+                    ->state(function (Schedule $record): string {
+                        if (! $record->is_recurring) {
+                            return 'N/A';
+                        }
+                        $config = is_array($record->frequency_config) ? $record->frequency_config : (method_exists($record->frequency_config, 'toArray') ? $record->frequency_config->toArray() : []);
+                        $days = $config['days'] ?? [];
+
+                        return collect($days)->map(fn ($day) => ucfirst(substr($day, 0, 3)))->join(', ');
+                    }),
+
                 IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean(),
@@ -147,9 +186,11 @@ final class SchedulesRelationManager extends RelationManager
                         if (! empty($data['is_recurring'])) {
                             $data['frequency'] = Frequency::WEEKLY->value;
                             $data['frequency_config'] = [
-                                'days' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+                                'days' => $data['days_of_week'] ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+                                'startsOn' => is_string($data['start_date'] ?? null) ? substr($data['start_date'], 0, 10) : now()->toDateString(),
                             ];
                         }
+                        unset($data['days_of_week']);
 
                         return $data;
                     }),
@@ -165,7 +206,32 @@ final class SchedulesRelationManager extends RelationManager
                         $meta['is_approved'] = ! ($meta['is_approved'] ?? false);
                         $record->update(['metadata' => $meta]);
                     }),
-                EditAction::make(),
+                EditAction::make()
+                    ->mutateRecordDataUsing(function (array $data): array {
+                        if (! empty($data['is_recurring']) && isset($data['frequency_config']['days'])) {
+                            $data['days_of_week'] = $data['frequency_config']['days'];
+                        }
+
+                        return $data;
+                    })
+                    ->mutateFormDataUsing(function (array $data, Schedule $record): array {
+                        if (! empty($data['is_recurring'])) {
+                            $data['frequency'] = Frequency::WEEKLY->value;
+
+                            $config = is_array($record->frequency_config) ? $record->frequency_config : (method_exists($record->frequency_config, 'toArray') ? $record->frequency_config->toArray() : []);
+                            $config['days'] = $data['days_of_week'] ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+                            $config['startsOn'] = is_string($data['start_date'] ?? null) ? substr($data['start_date'], 0, 10) : ($config['startsOn'] ?? now()->toDateString());
+
+                            $data['frequency_config'] = $config;
+                        } else {
+                            $data['frequency'] = null;
+                            $data['frequency_config'] = null;
+                        }
+
+                        unset($data['days_of_week']);
+
+                        return $data;
+                    }),
                 DeleteAction::make(),
             ])
             ->toolbarActions([

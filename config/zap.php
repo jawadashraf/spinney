@@ -104,7 +104,7 @@ return [
     |
     */
     'models' => [
-        'schedule' => Schedule::class,
+        'schedule' => App\Models\Schedule::class,
         'schedule_period' => SchedulePeriod::class,
     ],
 ];

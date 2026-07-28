@@ -63,7 +63,7 @@ test('volunteer can view only their own schedules in MyScheduleResource', functi
 
     $mySchedule = Schedule::create([
         'team_id' => $this->team->id,
-        'schedulable_type' => User::class,
+        'schedulable_type' => (new User)->getMorphClass(),
         'schedulable_id' => $volunteer->id,
         'name' => 'My Volunteer Shift',
         'schedule_type' => ScheduleTypes::AVAILABILITY->value,
@@ -74,7 +74,7 @@ test('volunteer can view only their own schedules in MyScheduleResource', functi
 
     $otherSchedule = Schedule::create([
         'team_id' => $this->team->id,
-        'schedulable_type' => User::class,
+        'schedulable_type' => (new User)->getMorphClass(),
         'schedulable_id' => $otherUser->id,
         'name' => 'Other User Shift',
         'schedule_type' => ScheduleTypes::AVAILABILITY->value,
@@ -117,7 +117,7 @@ test('volunteer creating schedule automatically sets schedulable to self and is_
     $schedule = Schedule::where('name', 'New Requested Shift')->first();
     expect($schedule)->not()->toBeNull();
     expect($schedule->schedulable_id)->toBe($volunteer->id);
-    expect($schedule->schedulable_type)->toBe(User::class);
+    expect($schedule->schedulable_type)->toBe((new User)->getMorphClass());
     expect($schedule->metadata['is_approved'] ?? null)->toBeFalse();
 });
 
@@ -128,7 +128,7 @@ test('volunteer editing schedule resets is_approved to false', function (): void
 
     $schedule = Schedule::create([
         'team_id' => $this->team->id,
-        'schedulable_type' => User::class,
+        'schedulable_type' => (new User)->getMorphClass(),
         'schedulable_id' => $volunteer->id,
         'name' => 'My Approved Shift',
         'schedule_type' => ScheduleTypes::AVAILABILITY->value,

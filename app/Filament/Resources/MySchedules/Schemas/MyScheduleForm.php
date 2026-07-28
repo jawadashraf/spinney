@@ -10,6 +10,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -47,6 +48,23 @@ final class MyScheduleForm
                         Toggle::make('is_recurring')
                             ->default(true)
                             ->live(),
+
+                        ToggleButtons::make('days_of_week')
+                            ->multiple()
+                            ->options([
+                                'monday' => 'Mon',
+                                'tuesday' => 'Tue',
+                                'wednesday' => 'Wed',
+                                'thursday' => 'Thu',
+                                'friday' => 'Fri',
+                                'saturday' => 'Sat',
+                                'sunday' => 'Sun',
+                            ])
+                            ->default(['monday', 'tuesday', 'wednesday', 'thursday', 'friday'])
+                            ->inline()
+                            ->required(fn (Get $get): bool => $get('is_recurring') === true)
+                            ->visible(fn (Get $get): bool => $get('is_recurring') === true)
+                            ->columnSpanFull(),
 
                         Toggle::make('is_active')
                             ->default(true),

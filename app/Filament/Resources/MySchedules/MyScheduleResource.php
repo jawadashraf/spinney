@@ -45,8 +45,9 @@ final class MyScheduleResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('schedulable_type', User::class)
-            ->where('schedulable_id', auth()->id());
+            ->where('schedulable_type', (new User)->getMorphClass())
+            ->where('schedulable_id', auth()->id())
+            ->availability();
     }
 
     public static function getPages(): array

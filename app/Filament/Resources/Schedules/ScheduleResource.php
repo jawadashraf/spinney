@@ -33,6 +33,11 @@ final class ScheduleResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'manager']) ?? false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ScheduleForm::configure($schema);

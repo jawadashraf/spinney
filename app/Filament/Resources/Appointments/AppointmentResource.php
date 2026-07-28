@@ -35,6 +35,11 @@ final class AppointmentResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'manager']) ?? false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return AppointmentForm::configure($schema);

@@ -15,16 +15,17 @@ final class CreateMySchedule extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['schedulable_type'] = User::class;
+        $data['schedulable_type'] = (new User)->getMorphClass();
         $data['schedulable_id'] = auth()->id();
 
         if (! empty($data['is_recurring'])) {
             $data['frequency'] = Frequency::WEEKLY->value;
             $data['frequency_config'] = [
-                'days' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+                'days' => $data['days_of_week'] ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
                 'startsOn' => is_string($data['start_date'] ?? null) ? substr($data['start_date'], 0, 10) : now()->toDateString(),
             ];
         }
+        unset($data['days_of_week']);
 
         $meta = $data['metadata'] ?? [];
         if (! (auth()->user()?->hasAnyRole(['admin', 'manager']) ?? false)) {
