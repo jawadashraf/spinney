@@ -80,6 +80,15 @@ final class UserResource extends Resource
 
                     $record->syncRoles($state ?? []);
                 }),
+            Select::make('departments')
+                ->relationship(
+                    name: 'departments',
+                    titleAttribute: 'name',
+                    modifyQueryUsing: fn ($query) => $query->where('departments.team_id', Filament::getTenant()?->id ?? auth()->user()?->current_team_id)
+                )
+                ->multiple()
+                ->preload()
+                ->searchable(),
         ]);
     }
 
@@ -104,6 +113,10 @@ final class UserResource extends Resource
                     ->label('Current Team')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('departments.name')
+                    ->label('Departments')
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('roles.name')
                     ->label('Roles')
                     ->badge()
