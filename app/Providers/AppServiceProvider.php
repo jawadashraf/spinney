@@ -183,6 +183,7 @@ final class AppServiceProvider extends ServiceProvider
             'note' => Note::class,
             'import' => Import::class,
             'third_party_care_plan' => ThirdPartyCarePlan::class,
+            'service_user_profile' => \App\Models\ServiceUserProfile::class,
         ]);
 
         // Bind our custom Import model to the Filament Import model

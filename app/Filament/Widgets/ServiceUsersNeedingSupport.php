@@ -8,6 +8,7 @@ use App\Enums\SupportStatus;
 use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Models\ServiceUser;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -54,16 +55,8 @@ final class ServiceUsersNeedingSupport extends BaseWidget
 
                         return $note ? strip_tags($note->body) : null;
                     }),
-                Tables\Columns\TextColumn::make('latest_support_date')
+                Tables\Columns\TextColumn::make('profile.support_flagged_at')
                     ->label('Flagged At')
-                    ->state(function (ServiceUser $record) {
-                        $note = $record->notes()
-                            ->whereIn('support_status', [SupportStatus::NeedsAttention, SupportStatus::UrgentAttention])
-                            ->latest()
-                            ->first();
-
-                        return $note ? $note->created_at : null;
-                    })
                     ->dateTime()
                     ->sortable(),
             ])
@@ -76,16 +69,31 @@ final class ServiceUsersNeedingSupport extends BaseWidget
                     ->label('Mark as Resolved')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->requiresConfirmation()
+                    ->form([
+                        Textarea::make('resolution_note')
+                            ->label('Resolution Details')
+                            ->required(false)
+                            ->maxLength(500),
+                    ])
                     ->modalHeading('Resolve Support Flag')
-                    ->modalDescription('Are you sure you want to mark this service user as resolved? Their status will return to Normal.')
-                    ->action(function (ServiceUser $record): void {
-                        $record->profile()->update(['support_status' => SupportStatus::Normal]);
+                    ->modalDescription('Are you sure you want to mark this service user as resolved? You can optionally leave a resolution note for the audit trail.')
+                    ->action(function (ServiceUser $record, array $data): void {
+                        $record->profile()->update([
+                            'support_status' => SupportStatus::Resolved,
+                            'support_resolved_at' => now(),
+                        ]);
 
-                        // We also need to reset the active notes to normal to prevent them from showing up again if re-evaluated.
                         $record->notes()
                             ->whereIn('support_status', [SupportStatus::NeedsAttention, SupportStatus::UrgentAttention])
-                            ->update(['support_status' => SupportStatus::Normal]);
+                            ->update(['support_status' => SupportStatus::Resolved]);
+
+                        if (! empty($data['resolution_note'])) {
+                            $record->notes()->create([
+                                'title' => 'Support Flag Resolved',
+                                'body' => strip_tags($data['resolution_note']),
+                                'support_status' => SupportStatus::Resolved,
+                            ]);
+                        }
                     }),
             ]);
     }

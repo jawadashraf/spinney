@@ -22,4 +22,12 @@ final class ServiceUser extends People
     {
         return $this->hasOne(ServiceUserProfile::class, 'person_id');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany<\Spatie\Activitylog\Models\Activity, $this>
+     */
+    public function activities(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(\Spatie\Activitylog\Models\Activity::class, 'subject');
+    }
 }

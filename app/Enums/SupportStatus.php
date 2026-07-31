@@ -13,6 +13,7 @@ enum SupportStatus: string implements HasColor, HasIcon, HasLabel
     case Normal = 'normal';
     case NeedsAttention = 'needs_attention';
     case UrgentAttention = 'urgent_attention';
+    case Resolved = 'resolved';
 
     public function getLabel(): ?string
     {
@@ -20,6 +21,7 @@ enum SupportStatus: string implements HasColor, HasIcon, HasLabel
             self::Normal => 'Normal',
             self::NeedsAttention => 'Needs Attention',
             self::UrgentAttention => 'Urgent Attention',
+            self::Resolved => 'Resolved',
         };
     }
 
@@ -29,6 +31,7 @@ enum SupportStatus: string implements HasColor, HasIcon, HasLabel
             self::Normal => 'gray',
             self::NeedsAttention => 'warning',
             self::UrgentAttention => 'danger',
+            self::Resolved => 'success',
         };
     }
 
@@ -38,6 +41,7 @@ enum SupportStatus: string implements HasColor, HasIcon, HasLabel
             self::Normal => 'heroicon-o-check-circle',
             self::NeedsAttention => 'heroicon-o-exclamation-circle',
             self::UrgentAttention => 'heroicon-o-exclamation-triangle',
+            self::Resolved => 'heroicon-o-check-badge',
         };
     }
 }
