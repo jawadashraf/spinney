@@ -4,26 +4,21 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\User;
-use App\Models\User as AuthUser;
+use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Models\Schedule;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Zap\Models\Schedule;
 
-final class SchedulePolicy
+class SchedulePolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Schedule');
     }
 
-    public function view(AuthUser $authUser, ?Schedule $schedule = null): bool
+    public function view(AuthUser $authUser, Schedule $schedule): bool
     {
-        if ($schedule && $schedule->schedulable_type === (new User)->getMorphClass() && (int) $schedule->schedulable_id === (int) $authUser->id) {
-            return true;
-        }
-
         return $authUser->can('View:Schedule');
     }
 
@@ -32,46 +27,22 @@ final class SchedulePolicy
         return $authUser->can('Create:Schedule');
     }
 
-    public function update(AuthUser $authUser, ?Schedule $schedule = null): bool
+    public function update(AuthUser $authUser, Schedule $schedule): bool
     {
-        if ($schedule && $schedule->schedulable_type === (new User)->getMorphClass() && (int) $schedule->schedulable_id === (int) $authUser->id) {
-            return true;
-        }
-
-        if ($schedule && ($schedule->metadata['is_approved'] ?? false)) {
-            if ($authUser->can('Unlock:Schedule')) {
-                return true;
-            }
-
-            return $authUser->can('Update:Schedule') && ($authUser->hasRole('admin') || $authUser->hasRole('manager'));
-        }
-
         return $authUser->can('Update:Schedule');
     }
 
-    public function delete(AuthUser $authUser, ?Schedule $schedule = null): bool
+    public function delete(AuthUser $authUser, Schedule $schedule): bool
     {
-        if ($schedule && $schedule->schedulable_type === (new User)->getMorphClass() && (int) $schedule->schedulable_id === (int) $authUser->id) {
-            return true;
-        }
-
-        if ($schedule && ($schedule->metadata['is_approved'] ?? false)) {
-            if ($authUser->can('Unlock:Schedule')) {
-                return true;
-            }
-
-            return $authUser->can('Delete:Schedule') && ($authUser->hasRole('admin') || $authUser->hasRole('manager'));
-        }
-
         return $authUser->can('Delete:Schedule');
     }
 
-    public function restore(AuthUser $authUser): bool
+    public function restore(AuthUser $authUser, Schedule $schedule): bool
     {
         return $authUser->can('Restore:Schedule');
     }
 
-    public function forceDelete(AuthUser $authUser): bool
+    public function forceDelete(AuthUser $authUser, Schedule $schedule): bool
     {
         return $authUser->can('ForceDelete:Schedule');
     }
@@ -86,7 +57,7 @@ final class SchedulePolicy
         return $authUser->can('RestoreAny:Schedule');
     }
 
-    public function replicate(AuthUser $authUser): bool
+    public function replicate(AuthUser $authUser, Schedule $schedule): bool
     {
         return $authUser->can('Replicate:Schedule');
     }
@@ -95,4 +66,5 @@ final class SchedulePolicy
     {
         return $authUser->can('Reorder:Schedule');
     }
+
 }

@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Models\Opportunity;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class OpportunityPolicy
+class OpportunityPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Opportunity');
     }
 
-    public function view(AuthUser $authUser): bool
+    public function view(AuthUser $authUser, Opportunity $opportunity): bool
     {
         return $authUser->can('View:Opportunity');
     }
@@ -26,22 +27,22 @@ final class OpportunityPolicy
         return $authUser->can('Create:Opportunity');
     }
 
-    public function update(AuthUser $authUser): bool
+    public function update(AuthUser $authUser, Opportunity $opportunity): bool
     {
         return $authUser->can('Update:Opportunity');
     }
 
-    public function delete(AuthUser $authUser): bool
+    public function delete(AuthUser $authUser, Opportunity $opportunity): bool
     {
         return $authUser->can('Delete:Opportunity');
     }
 
-    public function restore(AuthUser $authUser): bool
+    public function restore(AuthUser $authUser, Opportunity $opportunity): bool
     {
         return $authUser->can('Restore:Opportunity');
     }
 
-    public function forceDelete(AuthUser $authUser): bool
+    public function forceDelete(AuthUser $authUser, Opportunity $opportunity): bool
     {
         return $authUser->can('ForceDelete:Opportunity');
     }
@@ -56,7 +57,7 @@ final class OpportunityPolicy
         return $authUser->can('RestoreAny:Opportunity');
     }
 
-    public function replicate(AuthUser $authUser): bool
+    public function replicate(AuthUser $authUser, Opportunity $opportunity): bool
     {
         return $authUser->can('Replicate:Opportunity');
     }
@@ -65,4 +66,5 @@ final class OpportunityPolicy
     {
         return $authUser->can('Reorder:Opportunity');
     }
+
 }

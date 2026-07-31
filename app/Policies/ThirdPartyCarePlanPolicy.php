@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Models\ThirdPartyCarePlan;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class ThirdPartyCarePlanPolicy
+class ThirdPartyCarePlanPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:ThirdPartyCarePlan');
     }
 
-    public function view(AuthUser $authUser): bool
+    public function view(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
         return $authUser->can('View:ThirdPartyCarePlan');
     }
@@ -26,22 +27,22 @@ final class ThirdPartyCarePlanPolicy
         return $authUser->can('Create:ThirdPartyCarePlan');
     }
 
-    public function update(AuthUser $authUser): bool
+    public function update(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
         return $authUser->can('Update:ThirdPartyCarePlan');
     }
 
-    public function delete(AuthUser $authUser): bool
+    public function delete(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
         return $authUser->can('Delete:ThirdPartyCarePlan');
     }
 
-    public function restore(AuthUser $authUser): bool
+    public function restore(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
         return $authUser->can('Restore:ThirdPartyCarePlan');
     }
 
-    public function forceDelete(AuthUser $authUser): bool
+    public function forceDelete(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
         return $authUser->can('ForceDelete:ThirdPartyCarePlan');
     }
@@ -56,7 +57,7 @@ final class ThirdPartyCarePlanPolicy
         return $authUser->can('RestoreAny:ThirdPartyCarePlan');
     }
 
-    public function replicate(AuthUser $authUser): bool
+    public function replicate(AuthUser $authUser, ThirdPartyCarePlan $thirdPartyCarePlan): bool
     {
         return $authUser->can('Replicate:ThirdPartyCarePlan');
     }
@@ -65,4 +66,5 @@ final class ThirdPartyCarePlanPolicy
     {
         return $authUser->can('Reorder:ThirdPartyCarePlan');
     }
+
 }

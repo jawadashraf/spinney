@@ -65,6 +65,7 @@ final class SimplifiedRolePermissionSeeder extends Seeder
                     'Delete:Schedule',
                     'Lock:Schedule',
                     'Unlock:Schedule',
+                    'Assign:ServiceUser',
                 ],
             ],
             'admin' => [

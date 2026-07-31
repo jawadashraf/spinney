@@ -354,6 +354,7 @@ final class ServiceUserForm
                                         ->icon('heroicon-o-briefcase')
                                         ->schema([
                                             Section::make('Service Assignment')
+                                                ->visible(fn (): bool => auth()->user()?->can('Assign:ServiceUser') ?? false)
                                                 ->schema([
                                                     Select::make("{$profilePrefix}target_service_team")
                                                         ->label('Service Team')

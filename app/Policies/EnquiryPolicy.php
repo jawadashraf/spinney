@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Models\Enquiry;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class EnquiryPolicy
+class EnquiryPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Enquiry');
     }
 
-    public function view(AuthUser $authUser): bool
+    public function view(AuthUser $authUser, Enquiry $enquiry): bool
     {
         return $authUser->can('View:Enquiry');
     }
@@ -26,22 +27,22 @@ final class EnquiryPolicy
         return $authUser->can('Create:Enquiry');
     }
 
-    public function update(AuthUser $authUser): bool
+    public function update(AuthUser $authUser, Enquiry $enquiry): bool
     {
         return $authUser->can('Update:Enquiry');
     }
 
-    public function delete(AuthUser $authUser): bool
+    public function delete(AuthUser $authUser, Enquiry $enquiry): bool
     {
         return $authUser->can('Delete:Enquiry');
     }
 
-    public function restore(AuthUser $authUser): bool
+    public function restore(AuthUser $authUser, Enquiry $enquiry): bool
     {
         return $authUser->can('Restore:Enquiry');
     }
 
-    public function forceDelete(AuthUser $authUser): bool
+    public function forceDelete(AuthUser $authUser, Enquiry $enquiry): bool
     {
         return $authUser->can('ForceDelete:Enquiry');
     }
@@ -56,7 +57,7 @@ final class EnquiryPolicy
         return $authUser->can('RestoreAny:Enquiry');
     }
 
-    public function replicate(AuthUser $authUser): bool
+    public function replicate(AuthUser $authUser, Enquiry $enquiry): bool
     {
         return $authUser->can('Replicate:Enquiry');
     }
@@ -66,8 +67,9 @@ final class EnquiryPolicy
         return $authUser->can('Reorder:Enquiry');
     }
 
-    public function convertToServiceUser(AuthUser $authUser): bool
+    public function convertToServiceUser(AuthUser $authUser, Enquiry $enquiry): bool
     {
         return $authUser->can('ConvertToServiceUser:Enquiry');
     }
+
 }

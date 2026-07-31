@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Models\ServiceUser;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class ServiceUserPolicy
+class ServiceUserPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:ServiceUser');
     }
 
-    public function view(AuthUser $authUser): bool
+    public function view(AuthUser $authUser, ServiceUser $serviceUser): bool
     {
         return $authUser->can('View:ServiceUser');
     }
@@ -26,22 +27,22 @@ final class ServiceUserPolicy
         return $authUser->can('Create:ServiceUser');
     }
 
-    public function update(AuthUser $authUser): bool
+    public function update(AuthUser $authUser, ServiceUser $serviceUser): bool
     {
         return $authUser->can('Update:ServiceUser');
     }
 
-    public function delete(AuthUser $authUser): bool
+    public function delete(AuthUser $authUser, ServiceUser $serviceUser): bool
     {
         return $authUser->can('Delete:ServiceUser');
     }
 
-    public function restore(AuthUser $authUser): bool
+    public function restore(AuthUser $authUser, ServiceUser $serviceUser): bool
     {
         return $authUser->can('Restore:ServiceUser');
     }
 
-    public function forceDelete(AuthUser $authUser): bool
+    public function forceDelete(AuthUser $authUser, ServiceUser $serviceUser): bool
     {
         return $authUser->can('ForceDelete:ServiceUser');
     }
@@ -56,7 +57,7 @@ final class ServiceUserPolicy
         return $authUser->can('RestoreAny:ServiceUser');
     }
 
-    public function replicate(AuthUser $authUser): bool
+    public function replicate(AuthUser $authUser, ServiceUser $serviceUser): bool
     {
         return $authUser->can('Replicate:ServiceUser');
     }
@@ -65,4 +66,10 @@ final class ServiceUserPolicy
     {
         return $authUser->can('Reorder:ServiceUser');
     }
+
+    public function assign(AuthUser $authUser, ServiceUser $serviceUser): bool
+    {
+        return $authUser->can('Assign:ServiceUser');
+    }
+
 }
