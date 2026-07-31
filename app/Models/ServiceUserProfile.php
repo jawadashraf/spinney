@@ -34,10 +34,11 @@ final class ServiceUserProfile extends Model
             ->logOnly(['support_status', 'engagement_status', 'target_service_team']);
     }
 
-    public function tapActivity(Activity $activity, string $eventName): void
+    public function beforeActivityLogged(Activity $activity, string $eventName): void
     {
         $activity->subject_type = $this->person->getMorphClass();
         $activity->subject_id = $this->person_id;
+        $activity->team_id = $this->team_id;
     }
 
     /**
