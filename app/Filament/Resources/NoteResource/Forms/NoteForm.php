@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\NoteResource\Forms;
 
+use App\Enums\SupportStatus;
 use App\Models\User;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\MentionProvider;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -21,7 +23,14 @@ final class NoteForm
             TextInput::make('title')
                 ->label('Title')
                 ->rules(['max:255'])
-                ->columnSpanFull()
+                ->columnSpan(1)
+                ->required(),
+
+            Select::make('support_status')
+                ->label('Support Status')
+                ->options(SupportStatus::class)
+                ->default(SupportStatus::Normal)
+                ->columnSpan(1)
                 ->required(),
 
             RichEditor::make('body')

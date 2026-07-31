@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CreationSource;
+use App\Enums\SupportStatus;
 use App\Models\Concerns\HasCreator;
 use App\Models\Concerns\HasCustomFields;
 use App\Models\Concerns\HasTeam;
@@ -65,6 +66,7 @@ final class Note extends Model implements HasCustomFieldsContract
     {
         return [
             'creation_source' => CreationSource::class,
+            'support_status' => SupportStatus::class,
         ];
     }
 

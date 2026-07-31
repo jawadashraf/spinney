@@ -47,6 +47,7 @@ final class ServiceUserProfile extends Model
             'engagement_status' => EngagementStatus::class,
             'overdosed_last_month' => 'boolean',
             'registered_with_gp' => 'boolean',
+            'support_status' => \App\Enums\SupportStatus::class,
         ];
     }
 
