@@ -67,12 +67,8 @@ final class TaskPolicy
         return $authUser->can('Reorder:Task');
     }
 
-    public function attachPeople(AuthUser $authUser, ?Task $task = null): bool
+    public function attachPeople(AuthUser $authUser): bool
     {
-        if ($task !== null && $task->team_id !== $authUser->current_team_id) {
-            return false;
-        }
-
         return $authUser->can('AttachPeople:Task');
     }
 }

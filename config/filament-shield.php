@@ -141,7 +141,6 @@ return [
             'forceDeleteAny',
             'restoreAny',
             'reorder',
-            'attachPeople',
         ],
     ],
 
