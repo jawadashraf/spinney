@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Task;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-class TaskPolicy
+final class TaskPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Task');
@@ -67,4 +67,12 @@ class TaskPolicy
         return $authUser->can('Reorder:Task');
     }
 
+    public function attachPeople(AuthUser $authUser, ?Task $task = null): bool
+    {
+        if ($task !== null && $task->team_id !== $authUser->current_team_id) {
+            return false;
+        }
+
+        return $authUser->can('AttachPeople:Task');
+    }
 }

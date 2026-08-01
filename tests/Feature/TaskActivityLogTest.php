@@ -9,6 +9,7 @@ use App\Models\Task;
 use App\Models\Team;
 use App\Models\User;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Permission;
 
 use function Pest\Laravel\actingAs;
 
@@ -101,4 +102,12 @@ it('automatically logs activity when custom field status is saved as Done', func
 
     expect($completionActivity)->not->toBeNull()
         ->and($completionActivity->description)->toBe('Task marked as Done');
+});
+
+it('authorizes attachPeople policy for users with AttachPeople:Task permission', function () {
+    [$user, $team] = createTaskUser();
+    Permission::firstOrCreate(['name' => 'AttachPeople:Task', 'guard_name' => 'web']);
+    $user->givePermissionTo('AttachPeople:Task');
+
+    expect($user->can('attachPeople', Task::class))->toBeTrue();
 });

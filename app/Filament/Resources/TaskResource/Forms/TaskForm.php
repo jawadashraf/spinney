@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Resources\TaskResource\Forms;
 
 use App\Enums\TaskType;
+use App\Models\Task;
+use App\Models\User;
 use App\Support\CustomFields;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -23,7 +25,8 @@ final class TaskForm
     public static function get(Schema $schema, array $excludeFields = []): Schema
     {
         $user = auth()->user();
-        $isAdminOrManager = $user->hasAnyRole(['super_admin', 'admin', 'manager']);
+        $isAdminOrManager = $user instanceof User && ($user->hasAnyRole(['super_admin', 'admin', 'manager']) || $user->is_system_admin);
+        $canManagePeople = $user instanceof User && $user->can('attachPeople', Task::class);
 
         $components = [
             Select::make('type')
@@ -39,7 +42,7 @@ final class TaskForm
                 ->searchable()
                 ->preload()
                 ->visible($isAdminOrManager)
-                ->default(fn (): ?int => $user->departments()->first()?->id)
+                ->default(fn (): ?int => $user?->departments()->first()?->id)
                 ->columnSpan(1),
 
             TextInput::make('title')
@@ -65,7 +68,8 @@ final class TaskForm
                 ->label('People')
                 ->multiple()
                 ->relationship('people', 'name')
-                ->required(fn (Get $get): bool => $get('type') === TaskType::FollowUpCall->value);
+                ->disabled(! $canManagePeople)
+                ->required(fn (Get $get): bool => $canManagePeople && $get('type') === TaskType::FollowUpCall->value);
         }
 
         $components[] = Select::make('assignees')

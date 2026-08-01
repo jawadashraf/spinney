@@ -3,6 +3,7 @@
 declare(strict_types=1);
 use App\Filament\Resources\Enquiries\EnquiryResource;
 use App\Filament\Resources\ServiceUsers\ServiceUserResource;
+use App\Filament\Resources\TaskResource;
 use App\Models\Team;
 use App\Models\User;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
@@ -140,6 +141,7 @@ return [
             'forceDeleteAny',
             'restoreAny',
             'reorder',
+            'attachPeople',
         ],
     ],
 
@@ -185,6 +187,9 @@ return [
             ],
             ServiceUserResource::class => [
                 'assign',
+            ],
+            TaskResource::class => [
+                'attachPeople',
             ],
         ],
         'exclude' => [

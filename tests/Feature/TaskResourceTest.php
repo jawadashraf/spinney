@@ -21,21 +21,20 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->team = Team::where('name', 'Spinney Hill')->first();
+    $this->team = Team::firstOrCreate(['name' => 'Spinney Hill', 'personal_team' => false, 'user_id' => 1]);
     setPermissionsTeamId($this->team->id);
 
-    $this->admin = User::where('email', 'admin@test.com')->first();
-    $this->admin->current_team_id = $this->team->id;
-    $this->admin->save();
+    $this->admin = User::factory()->create(['current_team_id' => $this->team->id]);
+    $this->admin->assignRole('admin');
 
-    $this->liaisonUser = User::where('email', 'liaison@test.com')->first();
-    $this->liaisonUser->current_team_id = $this->team->id;
-    $this->liaisonUser->save();
+    $this->liaisonUser = User::factory()->create(['current_team_id' => $this->team->id]);
+    $this->liaisonUser->assignRole('liaison');
 
-    $this->liaisonDept = Department::where('name', 'Liaison')->where('team_id', $this->team->id)->first();
-    $this->mgmtDept = Department::where('name', 'Management')->where('team_id', $this->team->id)->first();
+    $this->liaisonDept = Department::firstOrCreate(['name' => 'Liaison', 'team_id' => $this->team->id]);
+    $this->mgmtDept = Department::firstOrCreate(['name' => 'Management', 'team_id' => $this->team->id]);
 
     actingAs($this->admin);
+    Filament::setCurrentPanel(Filament::getPanel('app'));
     Filament::setTenant($this->team);
 
     // Provision basic custom fields for the team
@@ -110,8 +109,9 @@ describe('Authorization & Scoping', function () {
 });
 
 describe('Validation', function () {
-    it('requires people when task type is follow-up call', function () {
-        actingAs($this->liaisonUser);
+    it('requires people when task type is follow-up call for admin or manager', function () {
+        actingAs($this->admin);
+        Filament::setTenant($this->team);
 
         livewire(ManageTasks::class)
             ->callAction(CreateAction::class, data: [
@@ -123,7 +123,8 @@ describe('Validation', function () {
     });
 
     it('does not require people when task type is general task', function () {
-        actingAs($this->liaisonUser);
+        actingAs($this->admin);
+        Filament::setTenant($this->team);
 
         livewire(ManageTasks::class)
             ->callAction(CreateAction::class, data: [
@@ -148,10 +149,11 @@ describe('Record Outcome Action', function () {
         ]);
 
         actingAs($this->admin);
+        Filament::setTenant($this->team);
 
         livewire(ManageTasks::class)
-            ->assertActionVisible('recordOutcome', $followUpTask)
-            ->assertActionHidden('recordOutcome', $generalTask);
+            ->assertTableActionVisible('recordOutcome', $followUpTask)
+            ->assertTableActionHidden('recordOutcome', $generalTask);
     });
 
     it('creates notes on linked people and marks task as done', function () {
@@ -166,13 +168,14 @@ describe('Record Outcome Action', function () {
         $followUpTask->people()->attach([$person1->id, $person2->id]);
 
         actingAs($this->admin);
+        Filament::setTenant($this->team);
 
         livewire(ManageTasks::class)
-            ->callAction('recordOutcome', data: [
+            ->callTableAction('recordOutcome', $followUpTask, data: [
                 'outcome' => 'Spoke to them, all good.',
                 'call_date' => now()->toDateString(),
-            ], record: $followUpTask)
-            ->assertHasNoActionErrors()
+            ])
+            ->assertHasNoTableActionErrors()
             ->assertNotified();
 
         // Verify notes created
@@ -204,6 +207,7 @@ describe('Filters', function () {
         $followUpTask = Task::factory()->create(['team_id' => $this->team->id, 'type' => TaskType::FollowUpCall]);
 
         actingAs($this->admin);
+        Filament::setTenant($this->team);
 
         livewire(ManageTasks::class)
             ->filterTable('type', [TaskType::FollowUpCall->value])
@@ -216,6 +220,7 @@ describe('Filters', function () {
         $nextWeekTask = Task::factory()->create(['team_id' => $this->team->id, 'title' => 'Next Week', 'due_date' => now()->addWeek()]);
 
         actingAs($this->admin);
+        Filament::setTenant($this->team);
 
         livewire(ManageTasks::class)
             ->assertCanSeeTableRecords([$thisWeekTask])

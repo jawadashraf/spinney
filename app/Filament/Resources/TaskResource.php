@@ -41,6 +41,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Activitylog\Models\Activity;
 
 final class TaskResource extends Resource
 {
@@ -104,6 +105,12 @@ final class TaskResource extends Resource
                     ->sortable()
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: false),
+                TextColumn::make('completed_at')
+                    ->label('Completed At')
+                    ->dateTime('d M Y, H:i')
+                    ->sortable()
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -284,10 +291,22 @@ final class TaskResource extends Resource
      */
     public static function getEloquentQuery(): Builder
     {
+        $taskInstance = new Task;
+        $morphClass = $taskInstance->getMorphClass();
+
         /** @var Builder<Task> $query */
         $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
+            ])
+            ->addSelect([
+                'completed_at' => Activity::query()
+                    ->select('created_at')
+                    ->whereColumn('subject_id', 'tasks.id')
+                    ->whereIn('subject_type', [Task::class, $morphClass])
+                    ->where('event', 'completed')
+                    ->latest()
+                    ->limit(1),
             ]);
 
         $user = auth()->user();
