@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use AlizHarb\ActivityLog\Actions\ActivityLogTimelineTableAction;
+use AlizHarb\ActivityLog\RelationManagers\ActivitiesRelationManager;
 use App\Enums\CreationSource;
 use App\Enums\TaskType;
 use App\Filament\Resources\TaskResource\Forms\TaskForm;
@@ -205,6 +207,7 @@ final class TaskResource extends Resource
                         }),
                     RestoreAction::make(),
                     RecordOutcomeAction::make(),
+                    ActivityLogTimelineTableAction::make(),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),
                 ]),
@@ -267,6 +270,13 @@ final class TaskResource extends Resource
                         ->where($field->getValueColumn(), $key);
                 });
             });
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            ActivitiesRelationManager::class,
+        ];
     }
 
     /**

@@ -16,6 +16,7 @@ use App\Models\Pivots\Taskable;
 use App\Models\Pivots\TaskUser;
 use App\Observers\TaskObserver;
 use Database\Factories\TaskFactory;
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,6 +28,9 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 use Spatie\EloquentSortable\SortableTrait;
 
 /**
@@ -65,8 +69,24 @@ final class Task extends Model implements HasCustomFieldsContract
     use HasNotes;
     use HasTeam;
     use InvalidatesRelatedAiSummaries;
+    use LogsActivity;
     use SoftDeletes;
     use SortableTrait;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges()
+            ->logOnly(['title', 'due_date', 'department_id', 'type', 'priority']);
+    }
+
+    public function beforeActivityLogged(Activity $activity, string $eventName): void
+    {
+        $tenant = Filament::getTenant();
+        $teamId = $tenant ? $tenant->getKey() : $this->team_id;
+        $activity->setAttribute('team_id', $teamId);
+    }
 
     /**
      * @var array<string, mixed>

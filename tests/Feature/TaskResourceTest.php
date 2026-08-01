@@ -56,7 +56,7 @@ beforeEach(function () {
         'team_id' => $this->team->id,
         'code' => TaskField::CALL_NOTES->value,
         'entity_type' => Task::class,
-        'type' => 'rich_editor',
+        'type' => 'rich-editor',
     ]);
 });
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\CustomFields;
 
+use App\Enums\CustomFieldType;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Models\CustomField;
 use Filament\Support\Colors\Color;
@@ -68,8 +69,10 @@ final class TableBuilder
         // Add specific formatting based on type if needed
         if ($field->type === 'date') {
             $column->date();
-        } elseif ($field->type === 'datetime') {
+        } elseif ($field->type === 'datetime' || $field->type === CustomFieldType::DATE_TIME->value) {
             $column->dateTime();
+        } elseif ($field->type === CustomFieldType::RICH_EDITOR->value || $field->type === CustomFieldType::MARKDOWN_EDITOR->value) {
+            $column->html();
         }
 
         if ($fieldSettings['enable_option_colors'] ?? false) {

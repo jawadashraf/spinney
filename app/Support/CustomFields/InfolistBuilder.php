@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\CustomFields;
 
+use App\Enums\CustomFieldType;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Models\CustomField;
 use App\Models\CustomFieldSection;
@@ -154,6 +155,10 @@ final class InfolistBuilder
                     return null;
                 });
             }
+        }
+
+        if ($field->type === CustomFieldType::RICH_EDITOR->value || $field->type === CustomFieldType::MARKDOWN_EDITOR->value) {
+            $entry->html();
         }
 
         if ($this->hiddenLabels) {
