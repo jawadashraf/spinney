@@ -27,6 +27,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
@@ -128,7 +129,7 @@ final class TaskResource extends Resource
                     ->toggle(),
                 SelectFilter::make('assignees')
                     ->multiple()
-                    ->relationship('assignees', 'name')
+                    ->relationship('assignees', 'name', fn (Builder $query) => $query->whereHas('roles', fn (Builder $query) => $query->whereIn('name', ['liaison', 'volunteer_liaison', 'manager', 'admin'])))
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('creation_source')
@@ -151,7 +152,7 @@ final class TaskResource extends Resource
                     ->toggle()
                     ->default(true)
                     ->query(fn (Builder $query): Builder => $query->whereBetween('due_date', [now()->startOfWeek(), now()->endOfWeek()])),
-            ])
+            ], layout: FiltersLayout::AboveContentCollapsible)
             ->groups(array_filter([
                 ...collect(['status', 'priority'])->map(fn (string $fieldCode): ?\Filament\Tables\Grouping\Group => $customFields->contains('code', $fieldCode) ? self::makeCustomFieldGroup($fieldCode, $customFields, $valueResolver) : null
                 )->filter()->toArray(),

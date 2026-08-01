@@ -152,8 +152,10 @@ final class FormBuilder
     {
         $component = match ($field->type) {
             'text', 'string', 'url', 'email' => TextInput::make($field->code),
-            'richtext', 'longText' => RichEditor::make($field->code),
-            'textarea' => Textarea::make($field->code),
+            'richtext', 'rich-editor', 'longText' => RichEditor::make($field->code)
+                ->extraInputAttributes(['style' => 'min-height: '.($field->settings->min_height ?? '12rem').';']),
+            'textarea' => Textarea::make($field->code)
+                ->rows($field->settings->rows ?? 5),
             'select' => Select::make($field->code)
                 ->options($field->options->pluck('name', 'id'))
                 ->searchable(),

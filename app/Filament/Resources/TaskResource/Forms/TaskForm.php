@@ -11,6 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 final class TaskForm
 {
@@ -70,7 +71,7 @@ final class TaskForm
         $components[] = Select::make('assignees')
             ->label('Assignees')
             ->multiple()
-            ->relationship('assignees', 'name')
+            ->relationship('assignees', 'name', fn (Builder $query) => $query->whereHas('roles', fn (Builder $query) => $query->whereIn('name', ['liaison', 'volunteer_liaison', 'manager', 'admin'])))
             ->visible($isAdminOrManager)
             ->nullable();
 
