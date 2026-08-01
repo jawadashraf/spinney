@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Pivots;
 
+use App\Models\Note;
+use App\Models\Task;
 use App\Models\User;
+use App\Notifications\TaskNoteAddedNotification;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
@@ -32,6 +35,22 @@ final class Noteable extends MorphPivot
                 /** @var User $user */
                 $user = auth()->user();
                 $pivot->team_id = $user->current_team_id;
+            }
+        });
+
+        self::created(function (Noteable $pivot): void {
+            if ($pivot->noteable_type === Task::class) {
+                $task = Task::find($pivot->noteable_id);
+                $note = Note::find($pivot->note_id);
+
+                if ($task && $note) {
+                    foreach ($task->assignees as $assignee) {
+                        // Only notify if note was posted by someone else
+                        if ($assignee->id !== $note->creator_id) {
+                            $assignee->notify(new TaskNoteAddedNotification($task, $note));
+                        }
+                    }
+                }
             }
         });
     }

@@ -8,6 +8,7 @@ use App\Enums\CreationSource;
 use App\Enums\TaskType;
 use App\Models\Concerns\HasCreator;
 use App\Models\Concerns\HasCustomFields;
+use App\Models\Concerns\HasNotes;
 use App\Models\Concerns\HasTeam;
 use App\Models\Concerns\InvalidatesRelatedAiSummaries;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
@@ -53,9 +54,10 @@ final class Task extends Model implements HasCustomFieldsContract
 {
     use HasCreator;
     use HasCustomFields;
-
     /** @use HasFactory<TaskFactory> */
     use HasFactory;
+
+    use HasNotes;
 
     use HasTeam;
     use InvalidatesRelatedAiSummaries;

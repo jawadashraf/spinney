@@ -114,7 +114,10 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
      */
     public function tasks(): MorphToMany
     {
-        return $this->morphToMany(Task::class, 'taskable');
+        return $this->morphToMany(Task::class, 'taskable')
+            ->using(\App\Models\Pivots\Taskable::class)
+            ->withPivot(['team_id'])
+            ->withTimestamps();
     }
 
     /** @return BelongsTo<Team, $this> */

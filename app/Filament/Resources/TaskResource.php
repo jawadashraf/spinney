@@ -10,10 +10,13 @@ use App\Filament\Resources\TaskResource\Forms\TaskForm;
 use App\Filament\Resources\TaskResource\Pages\ManageTasks;
 use App\Filament\Resources\Tasks\Actions\RecordOutcomeAction;
 use App\Models\CustomField;
+use App\Models\CustomFieldOption;
 use App\Models\Task;
 use App\Models\User;
+use App\Notifications\TaskAssignedNotification;
+use App\Notifications\TaskPriorityChangedNotification;
+use App\Notifications\TaskUnassignedNotification;
 use App\Support\CustomFields\ValueResolver;
-use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -23,7 +26,6 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -34,12 +36,9 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Throwable;
 
 final class TaskResource extends Resource
 {
@@ -160,51 +159,49 @@ final class TaskResource extends Resource
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()
-                        ->using(function (Task $record, array $data): Task {
-                            try {
-                                DB::beginTransaction();
+                        ->before(function (Task $record) {
+                            $record->old_assignees = $record->assignees->pluck('id')->toArray();
 
-                                $record->update($data);
+                            $customFields = CustomField::where('entity_type', Task::class)->get();
+                            $priorityField = $customFields->firstWhere('code', 'priority');
+                            $record->old_priority = $priorityField ? $record->getCustomFieldValue($priorityField) : null;
+                        })
+                        ->after(function (Task $record) {
+                            $oldAssignees = $record->old_assignees ?? [];
+                            $newAssignees = $record->assignees()->pluck('users.id')->toArray();
 
-                                /** @var Collection<int, User> $assignees */
-                                $assignees = $record->assignees;
+                            $added = array_diff($newAssignees, $oldAssignees);
+                            $removed = array_diff($oldAssignees, $newAssignees);
 
-                                // TODO: Improve the logic to check if the task is already assigned to the user
-                                // Send notifications to assignees if they haven't been notified about this task yet
-                                if ($assignees->isNotEmpty()) {
-                                    $assignees->each(function (User $recipient) use ($record): void {
-                                        /** @var User $recipient */
-                                        // Check if a notification for this task already exists for this user
-                                        $notificationExists = $recipient->notifications()
-                                            ->where('data->viewData->task_id', $record->id)
-                                            ->exists();
-
-                                        // Only send notification if one doesn't already exist
-                                        if (! $notificationExists) {
-                                            Notification::make()
-                                                ->title('New Task Assignment: '.$record->title)
-                                                ->actions([
-                                                    Action::make('view')
-                                                        ->button()
-                                                        ->label('View Task')
-                                                        ->url(ManageTasks::getUrl(['record' => $record]))
-                                                        ->markAsRead(),
-                                                ])
-                                                ->icon('heroicon-o-check-circle')
-                                                ->iconColor('primary')
-                                                ->viewData(['task_id' => $record->id]) // Store task ID in notification data
-                                                ->sendToDatabase($recipient);
-                                        }
-                                    });
+                            foreach ($added as $userId) {
+                                $user = User::find($userId);
+                                if ($user) {
+                                    $user->notify(new TaskAssignedNotification($record));
                                 }
-
-                                DB::commit();
-                            } catch (Throwable $e) {
-                                DB::rollBack();
-                                throw $e;
                             }
 
-                            return $record;
+                            foreach ($removed as $userId) {
+                                $user = User::find($userId);
+                                if ($user) {
+                                    $user->notify(new TaskUnassignedNotification($record));
+                                }
+                            }
+
+                            $customFields = CustomField::where('entity_type', Task::class)->get();
+                            $priorityField = $customFields->firstWhere('code', 'priority');
+                            if ($priorityField) {
+                                $newPriority = $record->getCustomFieldValue($priorityField);
+
+                                if ($newPriority !== $record->old_priority) {
+                                    $option = CustomFieldOption::find($newPriority);
+                                    if ($option && strtolower($option->name) === 'urgent') {
+                                        $notifiables = collect($record->assignees)->push($record->creator)->filter()->unique('id');
+                                        foreach ($notifiables as $user) {
+                                            $user->notify(new TaskPriorityChangedNotification($record));
+                                        }
+                                    }
+                                }
+                            }
                         }),
                     RestoreAction::make(),
                     RecordOutcomeAction::make(),

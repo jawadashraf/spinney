@@ -182,7 +182,10 @@ class People extends Model implements HasCustomFieldsContract
      */
     public function tasks(): MorphToMany
     {
-        return $this->morphToMany(Task::class, 'taskable');
+        return $this->morphToMany(Task::class, 'taskable')
+            ->using(\App\Models\Pivots\Taskable::class)
+            ->withPivot(['team_id'])
+            ->withTimestamps();
     }
 
     /**
