@@ -15,7 +15,7 @@ use Filament\Schemas\Schema;
 final class NoteForm
 {
     /**
-     * @return array<int, TextInput|RichEditor>
+     * @return array<int, TextInput|Select|RichEditor>
      */
     public static function getFormComponents(): array
     {

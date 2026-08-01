@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\MySchedules\Pages;
 
 use App\Filament\Resources\MySchedules\MyScheduleResource;
+use App\Models\Schedule;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Zap\Enums\Frequency;
@@ -33,7 +34,10 @@ final class EditMySchedule extends EditRecord
     {
         if (! empty($data['is_recurring'])) {
             $data['frequency'] = Frequency::WEEKLY->value;
-            $config = is_array($this->record->frequency_config) ? $this->record->frequency_config : (method_exists($this->record->frequency_config, 'toArray') ? $this->record->frequency_config->toArray() : []);
+            /** @var Schedule $record */
+            $record = $this->getRecord();
+            $freqConfig = $record->frequency_config;
+            $config = is_array($freqConfig) ? $freqConfig : ($freqConfig ? $freqConfig->toArray() : []);
             $config['days'] = $data['days_of_week'] ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
             $config['startsOn'] = is_string($data['start_date'] ?? null) ? substr($data['start_date'], 0, 10) : ($config['startsOn'] ?? now()->toDateString());
             $data['frequency_config'] = $config;

@@ -18,6 +18,9 @@ use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
+/**
+ * @property SupportStatus|null $support_status
+ */
 final class ServiceUserProfile extends Model
 {
     /** @use HasFactory<ServiceUserProfileFactory> */

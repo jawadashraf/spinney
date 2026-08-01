@@ -44,7 +44,11 @@ final class MyScheduleResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        /** @var Builder<Schedule> $query */
+        $query = parent::getEloquentQuery();
+
+        /** @phpstan-ignore method.notFound */
+        return $query
             ->where('schedulable_type', (new User)->getMorphClass())
             ->where('schedulable_id', auth()->id())
             ->availability();

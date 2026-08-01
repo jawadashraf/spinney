@@ -27,6 +27,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Zap\Data\DailyFrequencyConfig;
 use Zap\Data\MonthlyFrequencyConfig\AnnuallyFrequencyConfig;
@@ -369,10 +370,11 @@ final class ScheduleForm
                             ->relationship(
                                 name: 'serviceUser',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: function (Builder $query): Builder {
+                                modifyQueryUsing: function ($query): Builder {
                                     /** @var User|null $user */
                                     $user = auth()->user();
 
+                                    /** @var Builder<People> $query */
                                     return $user && $user->isRestrictedVolunteerLiaison()
                                         ? $query->visibleToVolunteerLiaison($user)
                                         : $query;

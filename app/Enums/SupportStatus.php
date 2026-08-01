@@ -15,7 +15,7 @@ enum SupportStatus: string implements HasColor, HasIcon, HasLabel
     case UrgentAttention = 'urgent_attention';
     case Resolved = 'resolved';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::Normal => 'Normal',
@@ -25,7 +25,7 @@ enum SupportStatus: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string|array|null
+    public function getColor(): string
     {
         return match ($this) {
             self::Normal => 'gray',
@@ -35,7 +35,7 @@ enum SupportStatus: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): string
     {
         return match ($this) {
             self::Normal => 'heroicon-o-check-circle',

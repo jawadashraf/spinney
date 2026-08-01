@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property Carbon|null $deleted_at
  * @property CreationSource $creation_source
+ * @property SupportStatus|null $support_status
  */
 #[ObservedBy(NoteObserver::class)]
 final class Note extends Model implements HasCustomFieldsContract

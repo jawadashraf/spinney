@@ -44,16 +44,18 @@ final class NotesRelationManager extends RelationManager
                     ->after(function ($action, Note $record, RelationManager $livewire): void {
                         $owner = $livewire->getOwnerRecord();
                         if ($owner instanceof ServiceUser) {
-                            if ($record->support_status) {
+                            $status = $record->support_status;
+                            if ($status) {
                                 $profile = $owner->profile;
+                                $profileStatus = $profile?->support_status;
                                 if ($profile) {
-                                    if ($record->support_status === SupportStatus::UrgentAttention) {
+                                    if ($status === SupportStatus::UrgentAttention) {
                                         $profile->update([
                                             'support_status' => SupportStatus::UrgentAttention,
                                             'support_flagged_at' => now(),
                                             'support_resolved_at' => null,
                                         ]);
-                                    } elseif ($record->support_status === SupportStatus::NeedsAttention && $profile->support_status !== SupportStatus::UrgentAttention) {
+                                    } elseif ($status === SupportStatus::NeedsAttention && $profileStatus !== SupportStatus::UrgentAttention) {
                                         $profile->update([
                                             'support_status' => SupportStatus::NeedsAttention,
                                             'support_flagged_at' => now(),
@@ -70,16 +72,18 @@ final class NotesRelationManager extends RelationManager
                     ->after(function ($action, Note $record, RelationManager $livewire): void {
                         $owner = $livewire->getOwnerRecord();
                         if ($owner instanceof ServiceUser) {
-                            if ($record->support_status) {
+                            $status = $record->support_status;
+                            if ($status) {
                                 $profile = $owner->profile;
+                                $profileStatus = $profile?->support_status;
                                 if ($profile) {
-                                    if ($record->support_status === SupportStatus::UrgentAttention) {
+                                    if ($status === SupportStatus::UrgentAttention) {
                                         $profile->update([
                                             'support_status' => SupportStatus::UrgentAttention,
                                             'support_flagged_at' => now(),
                                             'support_resolved_at' => null,
                                         ]);
-                                    } elseif ($record->support_status === SupportStatus::NeedsAttention && $profile->support_status !== SupportStatus::UrgentAttention) {
+                                    } elseif ($status === SupportStatus::NeedsAttention && $profileStatus !== SupportStatus::UrgentAttention) {
                                         $profile->update([
                                             'support_status' => SupportStatus::NeedsAttention,
                                             'support_flagged_at' => now(),

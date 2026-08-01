@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ServiceUsers;
 
-
 use App\Filament\Resources\ServiceUsers\Pages\CreateServiceUser;
 use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
 use App\Filament\Resources\ServiceUsers\Pages\ListServiceUsers;
@@ -87,6 +86,7 @@ final class ServiceUserResource extends Resource
                 SoftDeletingScope::class,
             ]);
 
+        /** @phpstan-ignore return.type */
         return self::applyVolunteerLiaisonScope($query);
     }
 

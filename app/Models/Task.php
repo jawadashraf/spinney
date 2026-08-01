@@ -33,6 +33,7 @@ use Spatie\EloquentSortable\SortableTrait;
  * @property int $id
  * @property Carbon|null $deleted_at
  * @property CreationSource $creation_source
+ * @property-read string $createdBy
  * @property TaskType|string $type
  * @property string $title
  * @property Carbon|null $due_date
