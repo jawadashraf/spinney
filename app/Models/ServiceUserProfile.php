@@ -31,14 +31,24 @@ final class ServiceUserProfile extends Model
         return LogOptions::defaults()
             ->logOnlyDirty()
             ->dontLogEmptyChanges()
-            ->logOnly(['support_status', 'engagement_status', 'target_service_team']);
+            ->logOnly(['support_status', 'support_flagged_at', 'support_resolved_at', 'engagement_status', 'target_service_team']);
     }
 
     public function beforeActivityLogged(Activity $activity, string $eventName): void
     {
-        $activity->subject_type = $this->person->getMorphClass();
-        $activity->subject_id = $this->person_id;
-        $activity->team_id = $this->team_id;
+        $teamId = \Filament\Facades\Filament::getTenant()?->id ?? $this->team_id;
+        $activity->team_id = $teamId;
+
+        if ($eventName === 'updated' && $activity->attribute_changes) {
+            $old = $activity->attribute_changes->get('old', []);
+            $new = $activity->attribute_changes->get('attributes', []);
+
+            if (isset($old['support_status']) && isset($new['support_status']) && $old['support_status'] !== $new['support_status']) {
+                $oldStatus = str($old['support_status'])->headline();
+                $newStatus = str($new['support_status'])->headline();
+                $activity->description = "Changed support status from {$oldStatus} to {$newStatus}";
+            }
+        }
     }
 
     /**

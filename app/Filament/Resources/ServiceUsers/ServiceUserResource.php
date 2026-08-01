@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ServiceUsers;
 
-use AlizHarb\ActivityLog\RelationManagers\ActivitiesRelationManager;
+
 use App\Filament\Resources\ServiceUsers\Pages\CreateServiceUser;
 use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
 use App\Filament\Resources\ServiceUsers\Pages\ListServiceUsers;
@@ -52,7 +52,7 @@ final class ServiceUserResource extends Resource
             NotesRelationManager::class,
             ThirdPartyCarePlansRelationManager::class,
             ServiceUserAppointmentsRelationManager::class,
-            ActivitiesRelationManager::class,
+            RelationManagers\ServiceUserActivitiesRelationManager::class,
         ];
     }
 
