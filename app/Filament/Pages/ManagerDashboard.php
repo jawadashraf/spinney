@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\DepartmentWorkloadChart;
+use App\Filament\Widgets\ManagerStatsOverview;
+use App\Filament\Widgets\OverdueCallsWidget;
+use App\Filament\Widgets\SafeguardingAlertsWidget;
 use App\Filament\Widgets\ServiceUsersNeedingSupport;
 use Filament\Pages\Dashboard;
 
@@ -19,13 +23,23 @@ final class ManagerDashboard extends Dashboard
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole('manager') ?? false;
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->is_system_admin || $user->hasAnyRole(['manager', 'admin', 'super_admin']);
     }
 
     public function getWidgets(): array
     {
         return [
+            ManagerStatsOverview::class,
             ServiceUsersNeedingSupport::class,
+            SafeguardingAlertsWidget::class,
+            DepartmentWorkloadChart::class,
+            OverdueCallsWidget::class,
         ];
     }
 }
