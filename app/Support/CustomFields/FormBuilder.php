@@ -155,7 +155,7 @@ final class FormBuilder
             'richtext', 'rich-editor', 'longText' => RichEditor::make($field->code)
                 ->extraInputAttributes(['style' => 'min-height: '.($field->settings->min_height ?? '12rem').';']),
             'textarea' => Textarea::make($field->code)
-                ->rows($field->settings->rows ?? 5),
+                ->rows((int) ($field->settings->rows ?? 5)),
             'select' => Select::make($field->code)
                 ->options($field->options->pluck('name', 'id'))
                 ->searchable(),

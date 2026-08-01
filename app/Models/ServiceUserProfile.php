@@ -9,13 +9,14 @@ use App\Enums\ServiceTeam;
 use App\Enums\SupportStatus;
 use App\Models\Concerns\HasTeam;
 use Database\Factories\ServiceUserProfileFactory;
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 final class ServiceUserProfile extends Model
 {
@@ -36,8 +37,9 @@ final class ServiceUserProfile extends Model
 
     public function beforeActivityLogged(Activity $activity, string $eventName): void
     {
-        $teamId = \Filament\Facades\Filament::getTenant()?->id ?? $this->team_id;
-        $activity->team_id = $teamId;
+        $tenant = Filament::getTenant();
+        $teamId = $tenant ? $tenant->getKey() : $this->team_id;
+        $activity->setAttribute('team_id', $teamId);
 
         if ($eventName === 'updated' && $activity->attribute_changes) {
             $old = $activity->attribute_changes->get('old', []);

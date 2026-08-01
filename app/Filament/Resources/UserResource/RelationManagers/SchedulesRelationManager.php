@@ -177,7 +177,7 @@ final class SchedulesRelationManager extends RelationManager
                 TextColumn::make('shift_dates')
                     ->label('Dates')
                     ->state(function (Schedule $record): string {
-                        $start = $record->start_date ? $record->start_date->format('M j, Y') : '';
+                        $start = $record->start_date->format('M j, Y');
                         $end = $record->end_date ? ' - '.$record->end_date->format('M j, Y') : '';
 
                         return $start.$end;
@@ -190,9 +190,10 @@ final class SchedulesRelationManager extends RelationManager
                             return 'N/A';
                         }
                         $config = is_array($record->frequency_config) ? $record->frequency_config : (method_exists($record->frequency_config, 'toArray') ? $record->frequency_config->toArray() : []);
-                        $days = $config['days'] ?? [];
+                        /** @var array<int, string> $days */
+                        $days = is_array($config['days'] ?? null) ? $config['days'] : [];
 
-                        return collect($days)->map(fn ($day) => ucfirst(substr($day, 0, 3)))->join(', ');
+                        return collect($days)->map(fn (string $day) => ucfirst(substr($day, 0, 3)))->join(', ');
                     }),
 
                 IconColumn::make('is_active')

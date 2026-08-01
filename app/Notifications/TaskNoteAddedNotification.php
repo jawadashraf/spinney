@@ -33,7 +33,7 @@ final class TaskNoteAddedNotification extends Notification implements ShouldQueu
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $creatorName = $this->note->user ? $this->note->user->name : 'Someone';
+        $creatorName = $this->note->creator ? $this->note->creator->name : 'Someone';
 
         return (new MailMessage)
             ->subject('New Note Added to Task: '.$this->task->title)
@@ -49,7 +49,7 @@ final class TaskNoteAddedNotification extends Notification implements ShouldQueu
      */
     public function toDatabase(object $notifiable): array
     {
-        $creatorName = $this->note->user ? $this->note->user->name : 'Someone';
+        $creatorName = $this->note->creator ? $this->note->creator->name : 'Someone';
 
         return [
             'task_id' => $this->task->id,

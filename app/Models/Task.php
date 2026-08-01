@@ -33,8 +33,11 @@ use Spatie\EloquentSortable\SortableTrait;
  * @property int $id
  * @property Carbon|null $deleted_at
  * @property CreationSource $creation_source
- * @property string $createdBy
- * @property TaskType $type
+ * @property TaskType|string $type
+ * @property string $title
+ * @property Carbon|null $due_date
+ * @property array<int, int>|null $old_assignees
+ * @property string|null $old_priority
  *
  * @method void saveCustomFieldValue(CustomField $field, mixed $value)
  */
@@ -54,11 +57,11 @@ final class Task extends Model implements HasCustomFieldsContract
 {
     use HasCreator;
     use HasCustomFields;
+
     /** @use HasFactory<TaskFactory> */
     use HasFactory;
 
     use HasNotes;
-
     use HasTeam;
     use InvalidatesRelatedAiSummaries;
     use SoftDeletes;
@@ -170,6 +173,6 @@ final class Task extends Model implements HasCustomFieldsContract
 
     public function isFollowUpCall(): bool
     {
-        return $this->type === TaskType::FollowUpCall;
+        return $this->type === TaskType::FollowUpCall || $this->type === TaskType::FollowUpCall->value;
     }
 }

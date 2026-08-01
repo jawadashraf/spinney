@@ -84,7 +84,7 @@ final class UserResource extends Resource
                 ->relationship(
                     name: 'departments',
                     titleAttribute: 'name',
-                    modifyQueryUsing: fn ($query) => $query->where('departments.team_id', Filament::getTenant()?->id ?? auth()->user()?->current_team_id)
+                    modifyQueryUsing: fn ($query) => $query->where('departments.team_id', ($tenant = Filament::getTenant()) ? $tenant->getKey() : auth()->user()?->current_team_id)
                 )
                 ->multiple()
                 ->preload()

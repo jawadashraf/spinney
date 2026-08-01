@@ -11,6 +11,7 @@ use App\Models\Concerns\HasCustomFields;
 use App\Models\Concerns\HasNotes;
 use App\Models\Concerns\HasTeam;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
+use App\Models\Pivots\Taskable;
 use App\Observers\CompanyObserver;
 use App\Services\AvatarService;
 use Database\Factories\CompanyFactory;
@@ -110,12 +111,12 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
     }
 
     /**
-     * @return MorphToMany<Task, $this>
+     * @return MorphToMany<Task, $this, Taskable>
      */
     public function tasks(): MorphToMany
     {
         return $this->morphToMany(Task::class, 'taskable')
-            ->using(\App\Models\Pivots\Taskable::class)
+            ->using(Taskable::class)
             ->withPivot(['team_id'])
             ->withTimestamps();
     }

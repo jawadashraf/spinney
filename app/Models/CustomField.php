@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property \stdClass|null $settings
+ */
 #[Fillable([
     'team_id',
     'custom_field_section_id',

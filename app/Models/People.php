@@ -178,7 +178,7 @@ class People extends Model implements HasCustomFieldsContract
     }
 
     /**
-     * @return MorphToMany<Task, $this>
+     * @return MorphToMany<Task, $this, \App\Models\Pivots\Taskable>
      */
     public function tasks(): MorphToMany
     {

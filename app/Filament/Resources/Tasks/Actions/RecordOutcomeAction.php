@@ -6,7 +6,6 @@ namespace App\Filament\Resources\Tasks\Actions;
 
 use App\Enums\CreationSource;
 use App\Enums\CustomFields\TaskField;
-use App\Enums\TaskType;
 use App\Models\CustomField;
 use App\Models\CustomFieldOption;
 use App\Models\Task;
@@ -24,7 +23,7 @@ final class RecordOutcomeAction
             ->label('Record Outcome')
             ->icon('heroicon-o-chat-bubble-left-ellipsis')
             ->color('success')
-            ->visible(fn (Task $record): bool => $record->type === TaskType::FollowUpCall)
+            ->visible(fn (Task $record): bool => $record->isFollowUpCall())
             ->modalHeading('Record Call Outcome')
             ->modalDescription('Record the outcome of this follow-up call. A note will be created on all linked people records.')
             ->modalSubmitActionLabel('Save Outcome & Mark Done')

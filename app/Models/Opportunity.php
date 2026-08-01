@@ -11,6 +11,7 @@ use App\Models\Concerns\HasCustomFields;
 use App\Models\Concerns\HasNotes;
 use App\Models\Concerns\HasTeam;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
+use App\Models\Pivots\Taskable;
 use App\Observers\OpportunityObserver;
 use Database\Factories\OpportunityFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -81,12 +82,12 @@ final class Opportunity extends Model implements HasCustomFieldsContract
     }
 
     /**
-     * @return MorphToMany<Task, $this>
+     * @return MorphToMany<Task, $this, Taskable>
      */
     public function tasks(): MorphToMany
     {
         return $this->morphToMany(Task::class, 'taskable')
-            ->using(\App\Models\Pivots\Taskable::class)
+            ->using(Taskable::class)
             ->withPivot(['team_id'])
             ->withTimestamps();
     }

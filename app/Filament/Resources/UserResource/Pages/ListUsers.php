@@ -6,10 +6,10 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\UserResource;
+use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Facades\Filament;
 use Filament\Resources\Pages\ListRecords;
-use App\Models\User;
 
 final class ListUsers extends ListRecords
 {
@@ -22,7 +22,8 @@ final class ListUsers extends ListRecords
         return [
             CreateAction::make()
                 ->mutateFormDataUsing(function (array $data): array {
-                    $teamId = Filament::getTenant()?->id ?? auth()->user()?->current_team_id;
+                    $tenant = Filament::getTenant();
+                    $teamId = $tenant ? $tenant->getKey() : auth()->user()?->current_team_id;
                     if ($teamId) {
                         $data['current_team_id'] = $teamId;
                     }
@@ -30,7 +31,8 @@ final class ListUsers extends ListRecords
                     return $data;
                 })
                 ->after(function (User $record): void {
-                    $teamId = Filament::getTenant()?->id ?? auth()->user()?->current_team_id;
+                    $tenant = Filament::getTenant();
+                    $teamId = $tenant ? $tenant->getKey() : auth()->user()?->current_team_id;
                     if ($teamId && ! $record->teams()->where('team_id', $teamId)->exists()) {
                         $record->teams()->attach($teamId);
                     }

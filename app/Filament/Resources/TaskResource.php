@@ -175,14 +175,14 @@ final class TaskResource extends Resource
 
                             foreach ($added as $userId) {
                                 $user = User::find($userId);
-                                if ($user) {
+                                if ($user instanceof User) {
                                     $user->notify(new TaskAssignedNotification($record));
                                 }
                             }
 
                             foreach ($removed as $userId) {
                                 $user = User::find($userId);
-                                if ($user) {
+                                if ($user instanceof User) {
                                     $user->notify(new TaskUnassignedNotification($record));
                                 }
                             }
@@ -193,9 +193,9 @@ final class TaskResource extends Resource
                                 $newPriority = $record->getCustomFieldValue($priorityField);
 
                                 if ($newPriority !== $record->old_priority) {
-                                    $option = CustomFieldOption::find($newPriority);
-                                    if ($option && strtolower($option->name) === 'urgent') {
-                                        $notifiables = collect($record->assignees)->push($record->creator)->filter()->unique('id');
+                                    $option = is_scalar($newPriority) ? CustomFieldOption::find($newPriority) : null;
+                                    if ($option instanceof CustomFieldOption && strtolower($option->name) === 'urgent') {
+                                        $notifiables = $record->assignees->push($record->creator)->filter()->unique('id');
                                         foreach ($notifiables as $user) {
                                             $user->notify(new TaskPriorityChangedNotification($record));
                                         }

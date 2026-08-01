@@ -36,9 +36,9 @@ final class ManageTasks extends ManageRecords
                     $priorityField = $customFields->firstWhere('code', 'priority');
                     if ($priorityField) {
                         $newPriority = $record->getCustomFieldValue($priorityField);
-                        $option = CustomFieldOption::find($newPriority);
-                        if ($option && strtolower($option->name) === 'urgent') {
-                            $notifiables = collect($record->assignees)->push($record->creator)->filter()->unique('id');
+                        $option = is_scalar($newPriority) ? CustomFieldOption::find($newPriority) : null;
+                        if ($option instanceof CustomFieldOption && strtolower($option->name) === 'urgent') {
+                            $notifiables = $record->assignees->push($record->creator)->filter()->unique('id');
                             foreach ($notifiables as $user) {
                                 $user->notify(new TaskPriorityChangedNotification($record));
                             }
