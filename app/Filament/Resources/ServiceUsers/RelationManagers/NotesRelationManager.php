@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ServiceUsers\RelationManagers;
 
 use App\Enums\SupportStatus;
+use App\Events\ServiceUserNeedsAttention;
 use App\Filament\Resources\NoteResource\Forms\NoteForm;
 use App\Models\Note;
 use App\Models\ServiceUser;
@@ -63,6 +64,10 @@ final class NotesRelationManager extends RelationManager
                                         ]);
                                     }
                                 }
+
+                                if (in_array($status, [SupportStatus::NeedsAttention, SupportStatus::UrgentAttention], true)) {
+                                    event(new ServiceUserNeedsAttention($owner, $record, $status));
+                                }
                             }
                         }
                     }),
@@ -90,6 +95,10 @@ final class NotesRelationManager extends RelationManager
                                             'support_resolved_at' => null,
                                         ]);
                                     }
+                                }
+
+                                if (in_array($status, [SupportStatus::NeedsAttention, SupportStatus::UrgentAttention], true)) {
+                                    event(new ServiceUserNeedsAttention($owner, $record, $status));
                                 }
                             }
                         }
