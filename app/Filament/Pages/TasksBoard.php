@@ -69,6 +69,14 @@ final class TasksBoard extends BoardPage
 
                 $departmentIds = $user->departments()->pluck('departments.id');
 
+                if ($user->hasRole('volunteer_liaison')) {
+                    return $query->forDepartments($departmentIds)
+                        ->where(function (Builder $query) use ($user): void {
+                            $query->where('tasks.creator_id', $user->id)
+                                ->orWhereHas('assignees', fn (Builder $q) => $q->where('users.id', $user->id));
+                        });
+                }
+
                 return $query->forDepartments($departmentIds);
             })
             ->recordTitleAttribute('title')

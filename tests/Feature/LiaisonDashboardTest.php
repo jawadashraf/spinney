@@ -9,23 +9,32 @@ use App\Filament\Pages\LiaisonDashboard;
 use App\Models\Enquiry;
 use App\Models\User;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    $this->user = User::factory()->create();
-    $this->user->assignRole('super_admin');
-    $this->actingAs($this->user);
-});
+function createSuperAdminUser(): User
+{
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    return $user;
+}
 
 it('can render the liaison dashboard', function () {
+    $user = createSuperAdminUser();
+    actingAs($user);
+
     livewire(LiaisonDashboard::class)
         ->assertOk();
 });
 
 it('shows correct enquiry stats for open enquiries', function () {
+    $user = createSuperAdminUser();
+    actingAs($user);
+
     Enquiry::factory()->count(3)->create([
         'status' => EnquiryStatus::OPEN,
-        'user_id' => $this->user->id,
+        'user_id' => $user->id,
     ]);
 
     livewire(LiaisonDashboard::class)
@@ -33,11 +42,14 @@ it('shows correct enquiry stats for open enquiries', function () {
 });
 
 it('shows overdue calls in widget', function () {
+    $user = createSuperAdminUser();
+    actingAs($user);
+
     Enquiry::factory()->create([
         'direction' => EnquiryDirection::OUTBOUND,
         'status' => EnquiryStatus::OPEN,
         'due_date' => now()->subDay(),
-        'user_id' => $this->user->id,
+        'user_id' => $user->id,
     ]);
 
     livewire(LiaisonDashboard::class)
@@ -45,11 +57,14 @@ it('shows overdue calls in widget', function () {
 });
 
 it('shows upcoming calls in widget', function () {
+    $user = createSuperAdminUser();
+    actingAs($user);
+
     Enquiry::factory()->create([
         'direction' => EnquiryDirection::OUTBOUND,
         'status' => EnquiryStatus::OPEN,
         'due_date' => now()->addDay(),
-        'user_id' => $this->user->id,
+        'user_id' => $user->id,
     ]);
 
     livewire(LiaisonDashboard::class)
@@ -57,10 +72,13 @@ it('shows upcoming calls in widget', function () {
 });
 
 it('shows safeguarding alerts in widget', function () {
+    $user = createSuperAdminUser();
+    actingAs($user);
+
     Enquiry::factory()->create([
         'safeguarding_flags' => true,
         'status' => EnquiryStatus::OPEN,
-        'user_id' => $this->user->id,
+        'user_id' => $user->id,
     ]);
 
     livewire(LiaisonDashboard::class)
@@ -68,10 +86,13 @@ it('shows safeguarding alerts in widget', function () {
 });
 
 it('shows emergency calls in safeguarding widget', function () {
+    $user = createSuperAdminUser();
+    actingAs($user);
+
     Enquiry::factory()->create([
         'call_type' => EnquiryCallType::EMERGENCY,
         'status' => EnquiryStatus::OPEN,
-        'user_id' => $this->user->id,
+        'user_id' => $user->id,
     ]);
 
     livewire(LiaisonDashboard::class)
@@ -79,8 +100,11 @@ it('shows emergency calls in safeguarding widget', function () {
 });
 
 it('shows recent enquiries in widget', function () {
+    $user = createSuperAdminUser();
+    actingAs($user);
+
     Enquiry::factory()->count(5)->create([
-        'user_id' => $this->user->id,
+        'user_id' => $user->id,
     ]);
 
     livewire(LiaisonDashboard::class)

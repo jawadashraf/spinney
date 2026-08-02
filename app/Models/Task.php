@@ -35,6 +35,8 @@ use Spatie\EloquentSortable\SortableTrait;
 
 /**
  * @property int $id
+ * @property int|null $user_id
+ * @property int|null $department_id
  * @property Carbon|null $deleted_at
  * @property CreationSource $creation_source
  * @property-read string $createdBy

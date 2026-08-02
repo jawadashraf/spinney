@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
@@ -19,7 +20,7 @@ final class TaskPolicy
 
     public function view(AuthUser $authUser, Task $task): bool
     {
-        return $authUser->can('View:Task');
+        return $this->isAllowedTaskForUser($authUser, $task) && $authUser->can('View:Task');
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,22 +30,22 @@ final class TaskPolicy
 
     public function update(AuthUser $authUser, Task $task): bool
     {
-        return $authUser->can('Update:Task');
+        return $this->isAllowedTaskForUser($authUser, $task) && $authUser->can('Update:Task');
     }
 
     public function delete(AuthUser $authUser, Task $task): bool
     {
-        return $authUser->can('Delete:Task');
+        return $this->isAllowedTaskForUser($authUser, $task) && $authUser->can('Delete:Task');
     }
 
     public function restore(AuthUser $authUser, Task $task): bool
     {
-        return $authUser->can('Restore:Task');
+        return $this->isAllowedTaskForUser($authUser, $task) && $authUser->can('Restore:Task');
     }
 
     public function forceDelete(AuthUser $authUser, Task $task): bool
     {
-        return $authUser->can('ForceDelete:Task');
+        return $this->isAllowedTaskForUser($authUser, $task) && $authUser->can('ForceDelete:Task');
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -59,7 +60,7 @@ final class TaskPolicy
 
     public function replicate(AuthUser $authUser, Task $task): bool
     {
-        return $authUser->can('Replicate:Task');
+        return $this->isAllowedTaskForUser($authUser, $task) && $authUser->can('Replicate:Task');
     }
 
     public function reorder(AuthUser $authUser): bool
@@ -70,5 +71,14 @@ final class TaskPolicy
     public function attachPeople(AuthUser $authUser): bool
     {
         return $authUser->can('AttachPeople:Task');
+    }
+
+    private function isAllowedTaskForUser(AuthUser $authUser, Task $task): bool
+    {
+        if ($authUser instanceof User && $authUser->hasRole('volunteer_liaison')) {
+            return $task->creator_id === $authUser->id || $task->assignees()->where('users.id', $authUser->id)->exists();
+        }
+
+        return true;
     }
 }

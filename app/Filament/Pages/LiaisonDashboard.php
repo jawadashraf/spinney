@@ -23,6 +23,15 @@ final class LiaisonDashboard extends BaseDashboard
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->can('ViewAny:Enquiry') ?? false;
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->hasAnyRole(['super_admin', 'admin', 'manager', 'liaison', 'volunteer_liaison'])
+            || $user->can('page_LiaisonDashboard')
+            || $user->can('View:LiaisonDashboard')
+            || $user->can('ViewAny:Enquiry');
     }
 }

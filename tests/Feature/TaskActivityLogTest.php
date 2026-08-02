@@ -10,6 +10,7 @@ use App\Models\Team;
 use App\Models\User;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 
@@ -110,4 +111,18 @@ it('authorizes attachPeople policy for users with AttachPeople:Task permission',
     $user->givePermissionTo('AttachPeople:Task');
 
     expect($user->can('attachPeople', Task::class))->toBeTrue();
+});
+
+it('restricts volunteer_liaison to only their assigned or created tasks in policy', function () {
+    [$vlUser, $team] = createTaskUser();
+    Role::firstOrCreate(['name' => 'volunteer_liaison', 'guard_name' => 'web']);
+    Permission::firstOrCreate(['name' => 'View:Task', 'guard_name' => 'web']);
+    $vlUser->assignRole('volunteer_liaison');
+    $vlUser->givePermissionTo('View:Task');
+
+    $ownTask = Task::factory()->create(['team_id' => $team->id, 'creator_id' => $vlUser->id]);
+    $otherTask = Task::factory()->create(['team_id' => $team->id]);
+
+    expect($vlUser->can('view', $ownTask))->toBeTrue()
+        ->and($vlUser->can('view', $otherTask))->toBeFalse();
 });
