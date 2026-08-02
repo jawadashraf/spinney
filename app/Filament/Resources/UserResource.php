@@ -54,8 +54,15 @@ final class UserResource extends Resource
                 ->email()
                 ->required()
                 ->maxLength(255),
+            TextInput::make('password')
+                ->password()
+                ->revealable()
+                ->required(fn (string $operation): bool => $operation === 'create')
+                ->dehydrated(fn (?string $state): bool => filled($state))
+                ->maxLength(255),
             DateTimePicker::make('email_verified_at')
-                ->label('Email Verified At'),
+                ->label('Email Verified At')
+                ->default(now()),
             Select::make('roles')
                 ->relationship(
                     name: 'roles',

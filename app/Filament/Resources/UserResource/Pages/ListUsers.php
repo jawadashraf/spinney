@@ -28,6 +28,8 @@ final class ListUsers extends ListRecords
                         $data['current_team_id'] = $teamId;
                     }
 
+                    $data['email_verified_at'] ??= now();
+
                     return $data;
                 })
                 ->after(function (User $record): void {

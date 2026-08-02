@@ -2,16 +2,32 @@
 
 declare(strict_types=1);
 
+use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
+use App\Models\Team;
 use App\Models\User;
+use Filament\Facades\Filament;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Hash;
 
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->team = Team::factory()->create();
+    $this->user = User::factory()->create([
+        'is_system_admin' => true,
+        'current_team_id' => $this->team->id,
+    ]);
+    if (! $this->user->teams()->where('team_id', $this->team->id)->exists()) {
+        $this->user->teams()->attach($this->team, ['role' => 'admin']);
+    }
     $this->user->assignRole('super_admin');
     $this->actingAs($this->user);
+
+    Filament::setTenant($this->team);
+    Filament::setCurrentPanel('app');
+    Filament::bootCurrentPanel();
 });
 
 it('can render the index page', function (): void {
@@ -21,6 +37,7 @@ it('can render the index page', function (): void {
 
 it('can render the view page', function (): void {
     $record = User::factory()->create();
+    $record->teams()->attach($this->team);
 
     livewire(ViewUser::class, ['record' => $record->getKey()])
         ->assertOk();
@@ -38,21 +55,27 @@ it('can render `:dataset` column', function (string $column): void {
 
 it('can search `:dataset` column', function (string $column): void {
     $records = User::factory(3)->create();
-    $search = data_get($records->first(), $column);
+    $records->each(fn (User $user) => $user->teams()->attach($this->team));
+    $search = (string) data_get($records->first(), $column);
+
+    $visibleRecords = $records->filter(fn (User $record) => (string) data_get($record, $column) === $search);
 
     livewire(ListUsers::class)
+        ->assertCanSeeTableRecords($records)
         ->searchTable($search)
-        ->assertCanSeeTableRecords($records->filter(fn (User $record) => data_get($record, $column) === $search));
+        ->assertCanSeeTableRecords($visibleRecords);
 })->with(['first_name', 'last_name', 'email']);
 
 it('can sort `:dataset` column', function (string $column): void {
-    User::factory(3)->create();
+    $records = User::factory(3)->create();
+    $records->each(fn (User $user) => $user->teams()->attach($this->team));
 
     livewire(ListUsers::class)
+        ->assertCanSeeTableRecords($records)
         ->sortTable($column)
-        ->assertOk()
+        ->assertCanSeeTableRecords($records->sortBy($column), inOrder: true)
         ->sortTable($column, 'desc')
-        ->assertOk();
+        ->assertCanSeeTableRecords($records->sortByDesc($column), inOrder: true);
 })->with(['first_name', 'last_name', 'email', 'created_at']);
 
 it('has `:dataset` filter', function (string $filter): void {
@@ -90,4 +113,32 @@ it('super admin cannot be impersonated', function (): void {
     $otherAdmin->assignRole('super_admin');
 
     expect($otherAdmin->canBeImpersonated())->toBeFalse();
+});
+
+it('has password and email_verified_at in UserResource form schema', function (): void {
+    $schema = UserResource::form(Schema::make());
+    $components = collect($schema->getComponents());
+
+    $passwordField = $components->first(fn ($c) => $c->getName() === 'password');
+    $emailVerifiedField = $components->first(fn ($c) => $c->getName() === 'email_verified_at');
+
+    expect($passwordField)->not->toBeNull()
+        ->and($emailVerifiedField)->not->toBeNull()
+        ->and($emailVerifiedField->getDefaultState())->not->toBeNull();
+});
+
+it('hashes password and defaults email_verified_at on user creation', function (): void {
+    $userData = [
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'email' => 'jane.doe@example.com',
+        'password' => 'secret-password-123',
+        'email_verified_at' => now(),
+    ];
+
+    $createdUser = User::create($userData);
+
+    expect($createdUser)->not->toBeNull()
+        ->and(Hash::check('secret-password-123', $createdUser->password))->toBeTrue()
+        ->and($createdUser->email_verified_at)->not->toBeNull();
 });
