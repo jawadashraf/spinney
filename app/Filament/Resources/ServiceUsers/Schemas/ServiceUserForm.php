@@ -189,13 +189,23 @@ final class ServiceUserForm
                                                                     Select::make('selected_address')
                                                                         ->label('Matching Addresses')
                                                                         ->placeholder('Select an address')
-                                                                        ->options(function () use ($get) {
-                                                                            $postcode = $get('postcode');
-                                                                            if (empty($postcode)) {
+                                                                        ->options(function () use ($get): array {
+                                                                            $postcode = (string) $get('postcode');
+                                                                            if (trim($postcode) === '') {
                                                                                 return [];
                                                                             }
 
-                                                                            return resolve(AddressLookupService::class)->lookup($postcode);
+                                                                            $detailed = resolve(AddressLookupService::class)->lookupDetailed($postcode);
+                                                                            $options = [];
+
+                                                                            foreach ($detailed as $item) {
+                                                                                $formatted = (string) ($item['formatted'] ?? '');
+                                                                                if ($formatted !== '') {
+                                                                                    $options[$formatted] = str_replace("\n", ', ', $formatted);
+                                                                                }
+                                                                            }
+
+                                                                            return $options;
                                                                         })
                                                                         ->required()
                                                                         ->searchable(),

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -29,13 +30,76 @@ final readonly class AddressLookupService
             return $this->getMockAddresses($postcode);
         }
 
+        $cleanPostcode = preg_replace('/[^A-Z0-9]/', '', $postcode) ?? $postcode;
+        $ttl = (int) config('services.ideal_postcodes.cache_ttl', 86400);
+        $cacheKey = "address_lookup:formatted:{$cleanPostcode}";
+
+        if ($ttl > 0) {
+            return Cache::remember($cacheKey, $ttl, fn (): array => $this->performLookup($postcode));
+        }
+
+        return $this->performLookup($postcode);
+    }
+
+    /**
+     * Look up detailed, structured address options for a given UK postcode.
+     *
+     * @param  string  $postcode  The postcode to search for.
+     * @return array<int, array<string, mixed>> List of structured address arrays.
+     */
+    public function lookupDetailed(string $postcode): array
+    {
+        $postcode = trim(strtoupper($postcode));
+
+        if ($postcode === '' || $postcode === '0') {
+            return [];
+        }
+
+        if (app()->runningUnitTests() && ! config('services.ideal_postcodes.enable_http_tests_override')) {
+            return $this->getMockDetailedAddresses($postcode);
+        }
+
+        $cleanPostcode = preg_replace('/[^A-Z0-9]/', '', $postcode) ?? $postcode;
+        $ttl = (int) config('services.ideal_postcodes.cache_ttl', 86400);
+        $cacheKey = "address_lookup:detailed:{$cleanPostcode}";
+
+        if ($ttl > 0) {
+            return Cache::remember($cacheKey, $ttl, fn (): array => $this->performLookupDetailed($postcode));
+        }
+
+        return $this->performLookupDetailed($postcode);
+    }
+
+    /**
+     * Internal handler to execute address lookup.
+     *
+     * @return array<string, string>
+     */
+    private function performLookup(string $postcode): array
+    {
         $apiKey = config('services.ideal_postcodes.api_key');
 
         if (! empty($apiKey)) {
-            return $this->lookupIdealPostcodes($postcode, $apiKey);
+            return $this->lookupIdealPostcodes($postcode, (string) $apiKey);
         }
 
         return $this->lookupPostcodesIo($postcode);
+    }
+
+    /**
+     * Internal handler to execute detailed address lookup.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function performLookupDetailed(string $postcode): array
+    {
+        $apiKey = config('services.ideal_postcodes.api_key');
+
+        if (! empty($apiKey)) {
+            return $this->lookupIdealPostcodesDetailed($postcode, (string) $apiKey);
+        }
+
+        return $this->lookupPostcodesIoDetailed($postcode);
     }
 
     /**
@@ -45,42 +109,96 @@ final readonly class AddressLookupService
      */
     private function lookupIdealPostcodes(string $postcode, string $apiKey): array
     {
+        $detailed = $this->lookupIdealPostcodesDetailed($postcode, $apiKey);
+
+        if (! empty($detailed)) {
+            $addresses = [];
+            foreach ($detailed as $address) {
+                $formatted = (string) ($address['formatted'] ?? '');
+                if ($formatted !== '') {
+                    $addresses[$formatted] = $formatted;
+                }
+            }
+
+            return $addresses;
+        }
+
+        return $this->lookupPostcodesIo($postcode);
+    }
+
+    /**
+     * Look up detailed address options using Ideal Postcodes API.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function lookupIdealPostcodesDetailed(string $postcode, string $apiKey): array
+    {
         try {
-            $response = Http::get("https://api.ideal-postcodes.co.uk/v1/postcodes/{$postcode}", [
-                'api_key' => $apiKey,
-            ]);
+            $baseUrl = rtrim((string) config('services.ideal_postcodes.base_url', 'https://api.ideal-postcodes.co.uk'), '/');
+            $timeout = (int) config('services.ideal_postcodes.timeout', 5);
+            $urlPostcode = rawurlencode($postcode);
+
+            $response = Http::timeout($timeout)
+                ->retry(2, 100)
+                ->get("{$baseUrl}/v1/postcodes/{$urlPostcode}", [
+                    'api_key' => $apiKey,
+                ]);
 
             if ($response->successful()) {
                 $result = $response->json('result') ?? [];
                 $addresses = [];
 
                 foreach ($result as $address) {
-                    $formatted = $this->formatIdealAddress($address);
-                    if ($formatted !== '') {
-                        $addresses[$formatted] = $formatted;
+                    if (is_array($address)) {
+                        $addresses[] = $this->transformIdealAddress($address);
                     }
                 }
 
                 return $addresses;
             }
 
-            Log::warning('Ideal Postcodes lookup returned error: '.$response->status());
+            $message = $response->json('message') ?? 'HTTP status '.$response->status();
+            Log::warning('Ideal Postcodes lookup returned error: '.$message);
         } catch (Exception $e) {
             Log::error('Ideal Postcodes exception: '.$e->getMessage());
         }
 
-        // Fall back to free lookup on failure
-        return $this->lookupPostcodesIo($postcode);
+        return [];
     }
 
     /**
-     * Format an Ideal Postcodes address block.
+     * Transform an Ideal Postcodes address block into a structured array.
+     *
+     * @param  array<string, mixed>  $address
+     * @return array<string, mixed>
+     */
+    private function transformIdealAddress(array $address): array
+    {
+        return [
+            'line_1' => (string) ($address['line_1'] ?? ''),
+            'line_2' => (string) ($address['line_2'] ?? ''),
+            'line_3' => (string) ($address['line_3'] ?? ''),
+            'post_town' => (string) ($address['post_town'] ?? ''),
+            'county' => (string) ($address['county'] ?? ''),
+            'country' => (string) ($address['country'] ?? 'United Kingdom'),
+            'postcode' => (string) ($address['postcode'] ?? ''),
+            'organisation_name' => (string) ($address['organisation_name'] ?? ''),
+            'premise' => (string) ($address['premise'] ?? ''),
+            'thoroughfare' => (string) ($address['thoroughfare'] ?? ''),
+            'udprn' => $address['udprn'] ?? null,
+            'formatted' => $this->formatIdealAddress($address),
+        ];
+    }
+
+    /**
+     * Format an Ideal Postcodes address block into a multi-line string.
      *
      * @param  array<string, mixed>  $address
      */
     private function formatIdealAddress(array $address): string
     {
         return collect([
+            $address['organisation_name'] ?? '',
             $address['line_1'] ?? '',
             $address['line_2'] ?? '',
             $address['line_3'] ?? '',
@@ -89,6 +207,7 @@ final readonly class AddressLookupService
         ])
             ->map(fn ($line): string => trim((string) $line))
             ->filter()
+            ->unique()
             ->implode("\n");
     }
 
@@ -99,35 +218,79 @@ final readonly class AddressLookupService
      */
     private function lookupPostcodesIo(string $postcode): array
     {
+        $detailed = $this->lookupPostcodesIoDetailed($postcode);
+        if (! empty($detailed)) {
+            $addresses = [];
+            foreach ($detailed as $item) {
+                $formatted = (string) ($item['formatted'] ?? '');
+                if ($formatted !== '') {
+                    $addresses[$formatted] = $formatted;
+                }
+            }
+
+            if (! empty($addresses)) {
+                return $addresses;
+            }
+        }
+
+        return $this->getMockAddresses($postcode);
+    }
+
+    /**
+     * Look up detailed location details from postcodes.io (Free option).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function lookupPostcodesIoDetailed(string $postcode): array
+    {
         try {
-            $response = Http::get("https://api.postcodes.io/postcodes/{$postcode}");
+            $timeout = (int) config('services.ideal_postcodes.timeout', 5);
+            $urlPostcode = rawurlencode($postcode);
+
+            $response = Http::timeout($timeout)
+                ->get("https://api.postcodes.io/postcodes/{$urlPostcode}");
 
             if ($response->successful()) {
                 $result = $response->json('result');
 
                 if (is_array($result)) {
-                    $town = $result['admin_district'] ?? $result['nhs_ha'] ?? '';
-                    $region = $result['region'] ?? '';
+                    $town = (string) ($result['admin_district'] ?? $result['nhs_ha'] ?? '');
+                    $region = (string) ($result['region'] ?? '');
+                    $formattedPostcode = (string) ($result['postcode'] ?? $postcode);
 
                     $formatted = collect([
-                        '', // Street line placeholder
+                        '',
                         $town,
                         $region,
-                        $postcode,
+                        $formattedPostcode,
                     ])
                         ->map(fn ($line): string => trim((string) $line))
                         ->filter()
                         ->implode("\n");
 
-                    return [$formatted => $formatted];
+                    return [
+                        [
+                            'line_1' => '',
+                            'line_2' => '',
+                            'line_3' => '',
+                            'post_town' => $town,
+                            'county' => $region,
+                            'country' => 'United Kingdom',
+                            'postcode' => $formattedPostcode,
+                            'organisation_name' => '',
+                            'premise' => '',
+                            'thoroughfare' => '',
+                            'udprn' => null,
+                            'formatted' => $formatted,
+                        ],
+                    ];
                 }
             }
         } catch (Exception $e) {
             Log::error('Postcodes.io lookup exception: '.$e->getMessage());
         }
 
-        // Fall back to mock addresses if even the free API fails
-        return $this->getMockAddresses($postcode);
+        return $this->getMockDetailedAddresses($postcode);
     }
 
     /**
@@ -145,5 +308,72 @@ final readonly class AddressLookupService
         ];
 
         return array_combine($addresses, $addresses);
+    }
+
+    /**
+     * Get mock detailed addresses for testing/local development.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function getMockDetailedAddresses(string $postcode): array
+    {
+        return [
+            [
+                'line_1' => '10 Downing Street',
+                'line_2' => '',
+                'line_3' => '',
+                'post_town' => 'London',
+                'county' => 'Westminster',
+                'country' => 'United Kingdom',
+                'postcode' => $postcode,
+                'organisation_name' => '',
+                'premise' => '10',
+                'thoroughfare' => 'Downing Street',
+                'udprn' => 10001,
+                'formatted' => "10 Downing Street\nWestminster\nLondon\n{$postcode}",
+            ],
+            [
+                'line_1' => 'Flat 3',
+                'line_2' => 'Baker Street',
+                'line_3' => '',
+                'post_town' => 'London',
+                'county' => 'Marylebone',
+                'country' => 'United Kingdom',
+                'postcode' => $postcode,
+                'organisation_name' => '',
+                'premise' => '3',
+                'thoroughfare' => 'Baker Street',
+                'udprn' => 10002,
+                'formatted' => "Flat 3, Baker Street\nMarylebone\nLondon\n{$postcode}",
+            ],
+            [
+                'line_1' => '15 High Street',
+                'line_2' => '',
+                'line_3' => '',
+                'post_town' => 'Manchester',
+                'county' => 'City Centre',
+                'country' => 'United Kingdom',
+                'postcode' => $postcode,
+                'organisation_name' => '',
+                'premise' => '15',
+                'thoroughfare' => 'High Street',
+                'udprn' => 10003,
+                'formatted' => "15 High Street\nCity Centre\nManchester\n{$postcode}",
+            ],
+            [
+                'line_1' => 'Royal Albert Dock',
+                'line_2' => '',
+                'line_3' => '',
+                'post_town' => 'Liverpool',
+                'county' => '',
+                'country' => 'United Kingdom',
+                'postcode' => $postcode,
+                'organisation_name' => '',
+                'premise' => '',
+                'thoroughfare' => 'Royal Albert Dock',
+                'udprn' => 10004,
+                'formatted' => "Royal Albert Dock\nLiverpool\n{$postcode}",
+            ],
+        ];
     }
 }

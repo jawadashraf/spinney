@@ -59,5 +59,8 @@ return [
 
     'ideal_postcodes' => [
         'api_key' => env('IDEAL_POSTCODES_API_KEY'),
+        'base_url' => env('IDEAL_POSTCODES_BASE_URL', 'https://api.ideal-postcodes.co.uk'),
+        'timeout' => (int) env('IDEAL_POSTCODES_TIMEOUT', 5),
+        'cache_ttl' => (int) env('IDEAL_POSTCODES_CACHE_TTL', 86400),
     ],
 ];
