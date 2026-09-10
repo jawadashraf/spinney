@@ -11,6 +11,7 @@ use App\Models\Import;
 use App\Models\Note;
 use App\Models\Opportunity;
 use App\Models\People;
+use App\Models\ServiceUserProfile;
 use App\Models\Task;
 use App\Models\Team;
 use App\Models\ThirdPartyCarePlan;
@@ -44,12 +45,7 @@ final class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::before(function (User $user, $ability) {
-            if ($user->is_system_admin) {
-                return true;
-            }
-
-            // Check if user has the super_admin role assigned for any team (global access)
-            if ($user->roles()->where('roles.name', 'super_admin')->exists()) {
+            if ($user->isSuperAdmin()) {
                 return true;
             }
 
@@ -76,7 +72,11 @@ final class AppServiceProvider extends ServiceProvider
     private function configureShield(): void
     {
         if (class_exists(FilamentShield::class)) {
-            FilamentShield::buildPermissionKeyUsing(function ($entity, $affix, $subject, $case, string $separator): string {
+            FilamentShield::buildPermissionKeyUsing(function ($entity, $affix, $subject, $case, string $separator): ?string {
+                if ($entity === 'custom') {
+                    return null;
+                }
+
                 if ($entity === AppointmentResource::class) {
                     $subject = 'Appointment';
                 }
@@ -183,7 +183,7 @@ final class AppServiceProvider extends ServiceProvider
             'note' => Note::class,
             'import' => Import::class,
             'third_party_care_plan' => ThirdPartyCarePlan::class,
-            'service_user_profile' => \App\Models\ServiceUserProfile::class,
+            'service_user_profile' => ServiceUserProfile::class,
         ]);
 
         // Bind our custom Import model to the Filament Import model

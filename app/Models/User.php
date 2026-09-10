@@ -42,6 +42,7 @@ use Illuminate\Support\Collection;
  *
  * @method array getBookableSlots(string $date, int $duration)
  */
+use Illuminate\Support\Facades\DB;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
@@ -284,11 +285,42 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     }
 
     /**
+     * Determine if this user is a system administrator or has super_admin role across any team.
+     */
+    public function isSuperAdmin(): bool
+    {
+        if ($this->is_system_admin) {
+            return true;
+        }
+
+        return $this->hasRoleInAnyTeam('super_admin');
+    }
+
+    /**
+     * Determine if this user has the given role in any team, ignoring the current permissions team context.
+     */
+    public function hasRoleInAnyTeam(string $roleName): bool
+    {
+        return DB::table(config('permission.table_names.model_has_roles', 'model_has_roles'))
+            ->join(
+                config('permission.table_names.roles', 'roles'),
+                config('permission.table_names.model_has_roles', 'model_has_roles').'.role_id',
+                '=',
+                config('permission.table_names.roles', 'roles').'.id'
+            )
+            ->where(config('permission.table_names.model_has_roles', 'model_has_roles').'.model_type', $this->getMorphClass())
+            ->where(config('permission.table_names.model_has_roles', 'model_has_roles').'.model_id', $this->getKey())
+            ->where(config('permission.table_names.roles', 'roles').'.name', $roleName)
+            ->exists();
+    }
+
+    /**
      * Determine if this user can impersonate other users.
      */
     public function canImpersonate(): bool
     {
-        return $this->hasRole('super_admin');
+        return $this->isSuperAdmin()
+            || $this->can('Impersonate:User');
     }
 
     /**
@@ -296,7 +328,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
      */
     public function canBeImpersonated(): bool
     {
-        return ! $this->hasRole('super_admin');
+        return ! $this->isSuperAdmin();
     }
 
     /**
@@ -313,7 +345,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
                 return true;
             }
 
-            return $this->hasRole('service_user');
+            return $this->hasRoleInAnyTeam('service_user');
         }
 
         return false;

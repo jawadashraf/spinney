@@ -22,6 +22,7 @@ use Relaticle\SystemAdmin\Filament\Resources\UserResource\Pages\CreateUser;
 use Relaticle\SystemAdmin\Filament\Resources\UserResource\Pages\EditUser;
 use Relaticle\SystemAdmin\Filament\Resources\UserResource\Pages\ListUsers;
 use Relaticle\SystemAdmin\Filament\Resources\UserResource\Pages\ViewUser;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 final class UserResource extends Resource
 {
@@ -99,6 +100,7 @@ final class UserResource extends Resource
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                Impersonate::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -5,11 +5,14 @@ declare(strict_types=1);
 use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
+use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
+use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Filament\Facades\Filament;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
 
 use function Pest\Livewire\livewire;
 
@@ -37,7 +40,7 @@ it('can render the index page', function (): void {
 
 it('can render the view page', function (): void {
     $record = User::factory()->create();
-    $record->teams()->attach($this->team);
+    $record->teams()->syncWithoutDetaching([$this->team->id]);
 
     livewire(ViewUser::class, ['record' => $record->getKey()])
         ->assertOk();
@@ -55,7 +58,7 @@ it('can render `:dataset` column', function (string $column): void {
 
 it('can search `:dataset` column', function (string $column): void {
     $records = User::factory(3)->create();
-    $records->each(fn (User $user) => $user->teams()->attach($this->team));
+    $records->each(fn (User $user) => $user->teams()->syncWithoutDetaching([$this->team->id]));
     $search = (string) data_get($records->first(), $column);
 
     $visibleRecords = $records->filter(fn (User $record) => (string) data_get($record, $column) === $search);
@@ -68,7 +71,7 @@ it('can search `:dataset` column', function (string $column): void {
 
 it('can sort `:dataset` column', function (string $column): void {
     $records = User::factory(3)->create();
-    $records->each(fn (User $user) => $user->teams()->attach($this->team));
+    $records->each(fn (User $user) => $user->teams()->syncWithoutDetaching([$this->team->id]));
 
     livewire(ListUsers::class)
         ->assertCanSeeTableRecords($records)
@@ -110,9 +113,54 @@ it('super admin can impersonate another user', function (): void {
 
 it('super admin cannot be impersonated', function (): void {
     $otherAdmin = User::factory()->create();
-    $otherAdmin->assignRole('super_admin');
+    $role = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+    $otherAdmin->assignRole($role);
 
     expect($otherAdmin->canBeImpersonated())->toBeFalse();
+});
+
+it('system admin cannot be impersonated', function (): void {
+    $sysAdmin = User::factory()->create(['is_system_admin' => true]);
+
+    expect($sysAdmin->canBeImpersonated())->toBeFalse();
+});
+
+it('does not prefix shield custom permission keys with a separator', function (): void {
+    $customPermissions = FilamentShield::transformCustomPermissions();
+
+    expect($customPermissions)->toHaveKey('Impersonate:User')
+        ->and($customPermissions)->not->toHaveKey(':Impersonate:User');
+});
+
+it('team admin with Impersonate:User permission can impersonate', function (): void {
+    setPermissionsTeamId($this->team->id);
+
+    $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web', 'team_id' => $this->team->id]);
+    $adminRole->givePermissionTo(Permission::firstOrCreate(['name' => 'Impersonate:User', 'guard_name' => 'web']));
+
+    $teamAdmin = User::factory()->create(['current_team_id' => $this->team->id]);
+    $teamAdmin->assignRole($adminRole);
+
+    expect($teamAdmin->canImpersonate())->toBeTrue();
+});
+
+it('unverified service user can access the app panel before the tenant team is resolved', function (): void {
+    setPermissionsTeamId($this->team->id);
+    $serviceUserRole = Role::firstOrCreate(['name' => 'service_user', 'guard_name' => 'web', 'team_id' => $this->team->id]);
+
+    $serviceUser = User::factory()->unverified()->create();
+    $serviceUser->teams()->syncWithoutDetaching([$this->team->id]);
+    $serviceUser->assignRole($serviceUserRole);
+
+    setPermissionsTeamId(null);
+
+    expect($serviceUser->fresh()->canAccessPanel(Filament::getPanel('app')))->toBeTrue();
+});
+
+it('unverified user without service_user role cannot access the app panel', function (): void {
+    $unverifiedUser = User::factory()->unverified()->create();
+
+    expect($unverifiedUser->canAccessPanel(Filament::getPanel('app')))->toBeFalse();
 });
 
 it('has password and email_verified_at in UserResource form schema', function (): void {

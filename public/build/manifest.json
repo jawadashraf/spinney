@@ -1,6 +1,6 @@
 {
   "app-modules/Documentation/resources/css/documentation.css": {
-    "file": "assets/documentation-DYf4LnoW.css",
+    "file": "assets/documentation-CEv3Ux1K.css",
     "src": "app-modules/Documentation/resources/css/documentation.css",
     "isEntry": true,
     "name": "documentation",
@@ -15,7 +15,7 @@
     "isEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-CViIOGR_.css",
+    "file": "assets/app-D3lyf_ty.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -24,15 +24,15 @@
     ]
   },
   "resources/css/filament/admin/theme.css": {
-    "file": "assets/theme-6372_P9R.css",
+    "file": "assets/theme-3tTcY2ck.css",
     "src": "resources/css/filament/admin/theme.css"
   },
   "resources/css/filament/app/theme.css": {
-    "file": "assets/theme-BUDCC4os.css",
+    "file": "assets/theme-pNfRICF5.css",
     "src": "resources/css/filament/app/theme.css"
   },
   "resources/css/filament/knowledge-base/theme.css": {
-    "file": "assets/theme-9fB7igan.css",
+    "file": "assets/theme-DX8J0koa.css",
     "src": "resources/css/filament/knowledge-base/theme.css",
     "isEntry": true,
     "name": "theme",
