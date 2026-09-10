@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use AlizHarb\ActivityLog\RelationManagers\ActivitiesRelationManager;
 use App\Enums\CallStatus;
 use App\Filament\Resources\Calls\Pages\CreateCall;
 use App\Filament\Resources\Calls\Pages\ListCalls;
+use App\Filament\Resources\Calls\Pages\ViewCall;
 use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
 use App\Filament\Resources\ServiceUsers\RelationManagers\CallsRelationManager;
 use App\Models\Call;
@@ -246,6 +248,19 @@ describe('create', function () {
 
         Notification::assertSentTo($this->liaison, CallAssignedNotification::class);
     });
+});
+
+it('renders the call page with its activity log', function () {
+    $call = Call::factory()->assignedTo($this->liaison)->create(['team_id' => $this->team->id]);
+
+    livewire(ViewCall::class, ['record' => $call->id])
+        ->assertOk();
+
+    livewire(ActivitiesRelationManager::class, [
+        'ownerRecord' => $call,
+        'pageClass' => ViewCall::class,
+    ])
+        ->assertOk();
 });
 
 it('shows the call history on the service user record', function () {
