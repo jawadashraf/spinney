@@ -9,8 +9,12 @@ use App\Enums\EnquiryCallType;
 use App\Enums\EnquiryDirection;
 use App\Enums\EnquirySourceType;
 use App\Enums\EnquiryStatus;
+use App\Filament\Resources\Calls\CallResource;
 use App\Filament\Resources\Enquiries\EnquiryResource;
+use App\Models\Call;
+use App\Models\CallPlan;
 use App\Models\Enquiry;
+use App\Notifications\CallAssignedNotification;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -26,8 +30,10 @@ final class CreateFollowUpAction
             ->label('Create Follow-up')
             ->icon(Heroicon::OutlinedArrowPath)
             ->color('warning')
-            ->modalHeading('Create Follow-up Enquiry')
-            ->modalDescription('This will create a new outbound follow-up enquiry linked to this record.')
+            ->modalHeading(fn (Enquiry $record): string => self::isServiceUser($record) ? 'Schedule Follow-up Call' : 'Create Follow-up Enquiry')
+            ->modalDescription(fn (Enquiry $record): string => self::isServiceUser($record)
+                ? 'This will schedule a liaison call for this service user.'
+                : 'This will create a new outbound follow-up enquiry linked to this record.')
             ->schema([
                 Select::make('call_type')
                     ->options([
@@ -39,7 +45,8 @@ final class CreateFollowUpAction
                     ->default(EnquiryCallType::FOLLOW_UP->value)
                     ->native(false)
                     ->required()
-                    ->label('Call Type'),
+                    ->label('Call Type')
+                    ->hidden(fn (Enquiry $record): bool => self::isServiceUser($record)),
 
                 DateTimePicker::make('due_date')
                     ->label('Due Date')
@@ -53,6 +60,12 @@ final class CreateFollowUpAction
                     ->maxLength(2000)
                     ->label('Reason for Follow-up'),
 
+                Select::make('assigned_user_id')
+                    ->label('Assign liaison')
+                    ->options(fn (): array => CallResource::assignableUserOptions())
+                    ->searchable()
+                    ->visible(fn (Enquiry $record): bool => self::isServiceUser($record)),
+
                 Select::make('department_id')
                     ->relationship('department', 'name')
                     ->searchable()
@@ -61,6 +74,12 @@ final class CreateFollowUpAction
                     ->placeholder('Unassigned'),
             ])
             ->action(function (array $data, Enquiry $record): void {
+                if (self::isServiceUser($record)) {
+                    self::scheduleCall($data, $record);
+
+                    return;
+                }
+
                 $callType = EnquiryCallType::from($data['call_type']);
 
                 $followUp = Enquiry::create([
@@ -93,5 +112,40 @@ final class CreateFollowUpAction
 
                 redirect(EnquiryResource::getUrl('view', ['record' => $followUp]));
             });
+    }
+
+    private static function isServiceUser(Enquiry $record): bool
+    {
+        $person = $record->people;
+
+        return $person !== null && ($person->is_service_user || $person->getAttribute('type') === 'service_user');
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private static function scheduleCall(array $data, Enquiry $record): void
+    {
+        $call = Call::create([
+            'team_id' => $record->team_id,
+            'people_id' => $record->people_id,
+            'call_plan_id' => CallPlan::query()->where('people_id', $record->people_id)->where('is_active', true)->value('id'),
+            'assigned_user_id' => $data['assigned_user_id'] ?? null,
+            'department_id' => $data['department_id'] ?? $record->department_id,
+            'enquiry_id' => $record->id,
+            'reason' => $data['reason_for_contact'],
+            'due_at' => $data['due_date'],
+        ]);
+
+        if ($call->assignee !== null && $call->assigned_user_id !== auth()->id()) {
+            $call->assignee->notify(new CallAssignedNotification($call));
+        }
+
+        Notification::make()
+            ->title('Follow-up call scheduled')
+            ->success()
+            ->send();
+
+        redirect(CallResource::getUrl('view', ['record' => $call]));
     }
 }

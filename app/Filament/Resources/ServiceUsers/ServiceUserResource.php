@@ -51,6 +51,8 @@ final class ServiceUserResource extends Resource
             NotesRelationManager::class,
             ThirdPartyCarePlansRelationManager::class,
             ServiceUserAppointmentsRelationManager::class,
+            RelationManagers\CallPlansRelationManager::class,
+            RelationManagers\CallsRelationManager::class,
             RelationManagers\ServiceUserActivitiesRelationManager::class,
         ];
     }

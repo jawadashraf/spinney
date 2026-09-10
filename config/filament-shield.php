@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use App\Filament\Resources\Calls\CallResource;
 use App\Filament\Resources\Enquiries\EnquiryResource;
 use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Filament\Resources\TaskResource;
@@ -189,6 +190,21 @@ return [
             ],
             TaskResource::class => [
                 'attachPeople',
+            ],
+            CallResource::class => [
+                'viewAny',
+                'view',
+                'create',
+                'update',
+                'delete',
+                'deleteAny',
+                'restore',
+                'restoreAny',
+                'forceDelete',
+                'forceDeleteAny',
+                'recordOutcome',
+                'reschedule',
+                'reassign',
             ],
         ],
         'exclude' => [

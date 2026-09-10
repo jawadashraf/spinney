@@ -258,6 +258,14 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     }
 
     /**
+     * @return HasMany<Call, $this>
+     */
+    public function assignedCalls(): HasMany
+    {
+        return $this->hasMany(Call::class, 'assigned_user_id');
+    }
+
+    /**
      * @return HasMany<Opportunity, $this>
      */
     public function opportunities(): HasMany

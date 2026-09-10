@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Support\CallPermissions;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -92,6 +93,8 @@ final class SimplifiedRolePermissionSeeder extends Seeder
 
             $this->command?->info("Role '{$roleName}' created with permissions.");
         }
+
+        CallPermissions::ensure($teamId);
 
         $this->command?->info('All roles and permissions have been seeded successfully.');
     }

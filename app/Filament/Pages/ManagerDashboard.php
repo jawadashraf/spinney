@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\CallStatsOverview;
 use App\Filament\Widgets\DepartmentWorkloadChart;
 use App\Filament\Widgets\ManagerStatsOverview;
+use App\Filament\Widgets\OverdueCallsByLiaisonChart;
 use App\Filament\Widgets\OverdueCallsWidget;
 use App\Filament\Widgets\SafeguardingAlertsWidget;
 use App\Filament\Widgets\ServiceUsersNeedingSupport;
@@ -36,10 +38,12 @@ final class ManagerDashboard extends Dashboard
     {
         return [
             ManagerStatsOverview::class,
+            CallStatsOverview::class,
             ServiceUsersNeedingSupport::class,
             SafeguardingAlertsWidget::class,
             DepartmentWorkloadChart::class,
             OverdueCallsWidget::class,
+            OverdueCallsByLiaisonChart::class,
         ];
     }
 }

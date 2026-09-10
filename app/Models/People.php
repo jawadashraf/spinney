@@ -195,11 +195,29 @@ class People extends Model implements HasCustomFieldsContract
     #[Scope]
     protected function visibleToVolunteerLiaison(Builder $query, User $user): Builder
     {
-        return $query->whereHas('tasks', function (Builder $taskQuery) use ($user): void {
-            $taskQuery->whereHas('assignees', function (Builder $assigneeQuery) use ($user): void {
-                $assigneeQuery->where('users.id', $user->id);
-            });
+        return $query->where(function (Builder $query) use ($user): void {
+            $query->whereHas('tasks', function (Builder $taskQuery) use ($user): void {
+                $taskQuery->whereHas('assignees', function (Builder $assigneeQuery) use ($user): void {
+                    $assigneeQuery->where('users.id', $user->id);
+                });
+            })->orWhereHas('calls', fn (Builder $callQuery): Builder => $callQuery->where('assigned_user_id', $user->id));
         });
+    }
+
+    /**
+     * @return HasMany<CallPlan, $this>
+     */
+    public function callPlans(): HasMany
+    {
+        return $this->hasMany(CallPlan::class, 'people_id');
+    }
+
+    /**
+     * @return HasMany<Call, $this>
+     */
+    public function calls(): HasMany
+    {
+        return $this->hasMany(Call::class, 'people_id');
     }
 
     /**

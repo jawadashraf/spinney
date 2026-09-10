@@ -6,6 +6,9 @@ namespace App\Providers;
 
 use App\Filament\Resources\Appointments\AppointmentResource;
 use App\Http\Responses\LoginResponse;
+use App\Models\Call;
+use App\Models\CallAttempt;
+use App\Models\CallPlan;
 use App\Models\Company;
 use App\Models\Import;
 use App\Models\Note;
@@ -184,6 +187,9 @@ final class AppServiceProvider extends ServiceProvider
             'import' => Import::class,
             'third_party_care_plan' => ThirdPartyCarePlan::class,
             'service_user_profile' => ServiceUserProfile::class,
+            'call_plan' => CallPlan::class,
+            'call' => Call::class,
+            'call_attempt' => CallAttempt::class,
         ]);
 
         // Bind our custom Import model to the Filament Import model

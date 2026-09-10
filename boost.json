@@ -21,17 +21,21 @@
     ],
     "sail": false,
     "skills": [
+        "infer-conventions",
+        "deploying-to-cloud",
         "fortify-development",
         "laravel-best-practices",
+        "testing-best-practices",
         "configuring-horizon",
         "socialite-development",
         "livewire-development",
-        "pest-testing",
         "tailwindcss-development",
         "filament-log-viewer-development",
+        "filament-development",
         "flowforge-development",
         "medialibrary-development",
         "filament-security-audit",
+        "planning-filament",
         "deploying-laravel-cloud"
     ]
 }

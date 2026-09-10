@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Models\Call;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Support\Icons\Heroicon;
 
@@ -32,6 +33,7 @@ final class LiaisonDashboard extends BaseDashboard
         return $user->hasAnyRole(['super_admin', 'admin', 'manager', 'liaison', 'volunteer_liaison'])
             || $user->can('page_LiaisonDashboard')
             || $user->can('View:LiaisonDashboard')
-            || $user->can('ViewAny:Enquiry');
+            || $user->can('ViewAny:Enquiry')
+            || $user->can('viewAny', Call::class);
     }
 }

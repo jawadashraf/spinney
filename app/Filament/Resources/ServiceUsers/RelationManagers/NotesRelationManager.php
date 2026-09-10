@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ServiceUsers\RelationManagers;
 
-use App\Enums\SupportStatus;
-use App\Events\ServiceUserNeedsAttention;
 use App\Filament\Resources\NoteResource\Forms\NoteForm;
 use App\Models\Note;
 use App\Models\ServiceUser;
+use App\Support\ServiceUserSupportStatus;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -42,67 +41,11 @@ final class NotesRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->icon('heroicon-o-plus')
-                    ->after(function ($action, Note $record, RelationManager $livewire): void {
-                        $owner = $livewire->getOwnerRecord();
-                        if ($owner instanceof ServiceUser) {
-                            $status = $record->support_status;
-                            if ($status) {
-                                $profile = $owner->profile;
-                                $profileStatus = $profile?->support_status;
-                                if ($profile) {
-                                    if ($status === SupportStatus::UrgentAttention) {
-                                        $profile->update([
-                                            'support_status' => SupportStatus::UrgentAttention,
-                                            'support_flagged_at' => now(),
-                                            'support_resolved_at' => null,
-                                        ]);
-                                    } elseif ($status === SupportStatus::NeedsAttention && $profileStatus !== SupportStatus::UrgentAttention) {
-                                        $profile->update([
-                                            'support_status' => SupportStatus::NeedsAttention,
-                                            'support_flagged_at' => now(),
-                                            'support_resolved_at' => null,
-                                        ]);
-                                    }
-                                }
-
-                                if (in_array($status, [SupportStatus::NeedsAttention, SupportStatus::UrgentAttention], true)) {
-                                    event(new ServiceUserNeedsAttention($owner, $record, $status));
-                                }
-                            }
-                        }
-                    }),
+                    ->after(fn (Note $record, RelationManager $livewire) => self::flagSupportStatus($record, $livewire)),
             ])
             ->recordActions([
                 EditAction::make()
-                    ->after(function ($action, Note $record, RelationManager $livewire): void {
-                        $owner = $livewire->getOwnerRecord();
-                        if ($owner instanceof ServiceUser) {
-                            $status = $record->support_status;
-                            if ($status) {
-                                $profile = $owner->profile;
-                                $profileStatus = $profile?->support_status;
-                                if ($profile) {
-                                    if ($status === SupportStatus::UrgentAttention) {
-                                        $profile->update([
-                                            'support_status' => SupportStatus::UrgentAttention,
-                                            'support_flagged_at' => now(),
-                                            'support_resolved_at' => null,
-                                        ]);
-                                    } elseif ($status === SupportStatus::NeedsAttention && $profileStatus !== SupportStatus::UrgentAttention) {
-                                        $profile->update([
-                                            'support_status' => SupportStatus::NeedsAttention,
-                                            'support_flagged_at' => now(),
-                                            'support_resolved_at' => null,
-                                        ]);
-                                    }
-                                }
-
-                                if (in_array($status, [SupportStatus::NeedsAttention, SupportStatus::UrgentAttention], true)) {
-                                    event(new ServiceUserNeedsAttention($owner, $record, $status));
-                                }
-                            }
-                        }
-                    }),
+                    ->after(fn (Note $record, RelationManager $livewire) => self::flagSupportStatus($record, $livewire)),
                 DeleteAction::make(),
             ])
             ->defaultGroup(
@@ -112,5 +55,14 @@ final class NotesRelationManager extends RelationManager
                     ->collapsible()
             )
             ->paginated([10]);
+    }
+
+    private static function flagSupportStatus(Note $note, RelationManager $livewire): void
+    {
+        $owner = $livewire->getOwnerRecord();
+
+        if ($owner instanceof ServiceUser && $note->support_status !== null) {
+            ServiceUserSupportStatus::flag($owner, $note, $note->support_status);
+        }
     }
 }

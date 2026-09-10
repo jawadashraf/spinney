@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Enums\CustomFields\TaskField;
+use App\Models\CustomField;
+use App\Models\CustomFieldOption;
 use App\Models\Task;
 use App\Models\User;
 use App\Notifications\TaskDueReminderNotification;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 final class SendTaskDueReminders extends Command
@@ -32,7 +36,7 @@ final class SendTaskDueReminders extends Command
     public function handle(): void
     {
         // Tasks due in the next 24 hours
-        $dueSoonTasks = Task::query()
+        $dueSoonTasks = $this->incompleteTasks()
             ->whereNotNull('due_date')
             ->whereBetween('due_date', [Carbon::now(), Carbon::now()->addDay()])
             ->with(['assignees', 'creator'])
@@ -46,19 +50,13 @@ final class SendTaskDueReminders extends Command
         }
 
         // Tasks that are overdue
-        $overdueTasks = Task::query()
+        $overdueTasks = $this->incompleteTasks()
             ->whereNotNull('due_date')
             ->where('due_date', '<', Carbon::now())
-            // Ideally we only want to notify if the task is NOT completed.
-            // Assuming status is a custom field or there is a way to filter.
-            // In a real scenario we'd join custom fields, but for now we fetch and filter
             ->with(['assignees', 'creator'])
             ->get();
 
         foreach ($overdueTasks as $task) {
-            // Need a way to ensure it's not completed.
-            // In CustomFields, status might be stored in 'integer_value' or 'string_value'.
-            // To prevent spamming, we could restrict this, but let's notify for now if not done.
             $notifiables = $this->getNotifiables($task);
             foreach ($notifiables as $notifiable) {
                 $notifiable->notify(new TaskDueReminderNotification($task, true));
@@ -66,6 +64,34 @@ final class SendTaskDueReminders extends Command
         }
 
         $this->info('Task reminders sent successfully.');
+    }
+
+    /**
+     * Tasks whose status custom field is not set to "Done".
+     *
+     * @return Builder<Task>
+     */
+    private function incompleteTasks(): Builder
+    {
+        $statusFieldIds = CustomField::query()
+            ->where('entity_type', Task::class)
+            ->where('code', TaskField::STATUS->value)
+            ->pluck('id');
+
+        $doneOptionIds = CustomFieldOption::query()
+            ->whereIn('custom_field_id', $statusFieldIds)
+            ->where('name', 'Done')
+            ->pluck('id');
+
+        return Task::query()->when(
+            $doneOptionIds->isNotEmpty(),
+            fn (Builder $query): Builder => $query->whereDoesntHave(
+                'customFieldValues',
+                fn (Builder $values): Builder => $values
+                    ->whereIn('custom_field_id', $statusFieldIds)
+                    ->whereIn('integer_value', $doneOptionIds),
+            ),
+        );
     }
 
     /**

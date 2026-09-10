@@ -8,6 +8,10 @@ Schedule::command('appointments:send-reminders')
     ->dailyAt('09:00')
     ->withoutOverlapping()
     ->onOneServer();
+Schedule::command('calls:send-reminders')
+    ->dailyAt('07:45')
+    ->withoutOverlapping()
+    ->onOneServer();
 Schedule::command('tasks:send-due-reminders')
     ->dailyAt('08:00')
     ->withoutOverlapping()

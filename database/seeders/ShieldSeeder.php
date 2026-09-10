@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
+use App\Support\CallPermissions;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -115,6 +116,8 @@ final class ShieldSeeder extends Seeder
                 ->each(function (Role $role) use ($allPermissions): void {
                     $role->syncPermissions($allPermissions);
                 });
+
+            CallPermissions::ensure($team->id);
 
             User::query()
                 ->where('is_system_admin', true)
