@@ -10,6 +10,7 @@ use App\Enums\CallStatus;
 use App\Enums\SupportStatus;
 use App\Models\Call;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -62,9 +63,9 @@ final class RecordCallOutcomeAction
                     ->label('Next follow-up call')
                     ->seconds(false)
                     ->after('now')
-                    ->helperText(fn (Call $record): string => $record->plan !== null
-                        ? 'Pre-filled from the '.strtolower($record->plan->frequency->getLabel()).' call plan. Clear it if no follow-up is needed.'
-                        : 'Leave empty if no follow-up is needed.')
+                    ->maxDate(fn (Call $record): ?CarbonInterface => $record->plan?->ends_on?->copy()->endOfDay())
+                    ->required(fn (Call $record): bool => self::planContinues($record))
+                    ->helperText(fn (Call $record): string => self::followUpHelperText($record))
                     ->visible(fn (Get $get): bool => self::isClosing($get)),
                 DateTimePicker::make('retry_at')
                     ->label('Try again at')
@@ -118,10 +119,35 @@ final class RecordCallOutcomeAction
         return self::isAnswered($get) || (bool) $get('close_call');
     }
 
+    /**
+     * Whether the call's plan will still be running when its next regular call falls due.
+     */
+    private static function planContinues(Call $record): bool
+    {
+        $plan = $record->plan;
+
+        return $plan !== null && $plan->coversDate($plan->nextDueAfter(now()->setTimeFrom($record->due_at)));
+    }
+
+    private static function followUpHelperText(Call $record): string
+    {
+        $plan = $record->plan;
+
+        if ($plan !== null && self::planContinues($record)) {
+            return 'Pre-filled from the '.strtolower($plan->frequency->getLabel()).' call plan. To stop regular calls, ask a manager to pause the plan.';
+        }
+
+        if ($plan?->ends_on !== null && $plan->is_active) {
+            return 'The call plan ends on '.$plan->ends_on->format('d M Y').'. Leave empty if no follow-up is needed.';
+        }
+
+        return 'Leave empty if no follow-up is needed.';
+    }
+
     private static function fillDefaultDates(Get $get, Set $set, Call $record): void
     {
-        if (self::isClosing($get) && blank($get('next_follow_up_at')) && $record->plan !== null) {
-            $set('next_follow_up_at', $record->plan->nextDueAfter(now()->setTimeFrom($record->due_at))->toDateTimeString());
+        if (self::isClosing($get) && blank($get('next_follow_up_at')) && self::planContinues($record)) {
+            $set('next_follow_up_at', $record->plan?->nextDueAfter(now()->setTimeFrom($record->due_at))->toDateTimeString());
         }
 
         if (! self::isClosing($get) && blank($get('retry_at'))) {

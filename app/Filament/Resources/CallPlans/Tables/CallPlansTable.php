@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\CallPlans\Tables;
 
 use App\Enums\CallFrequency;
+use App\Enums\CallStatus;
 use App\Filament\Resources\Calls\CallResource;
 use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Models\CallPlan;
@@ -19,6 +20,7 @@ use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -76,6 +78,13 @@ final class CallPlansTable
                 TernaryFilter::make('is_active')
                     ->label('Active')
                     ->default(true),
+                Filter::make('withoutOpenCall')
+                    ->label('No call booked')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->whereDoesntHave(
+                        'calls',
+                        fn (Builder $calls): Builder => $calls->where('calls.status', CallStatus::Scheduled),
+                    )),
             ])
             ->recordActions([
                 EditAction::make(),

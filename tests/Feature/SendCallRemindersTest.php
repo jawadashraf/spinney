@@ -2,13 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Enums\CallStatus;
 use App\Enums\CustomFields\TaskField;
 use App\Models\Call;
+use App\Models\CallPlan;
 use App\Models\CustomField;
 use App\Models\CustomFieldOption;
 use App\Models\Task;
 use App\Models\Team;
 use App\Models\User;
+use App\Notifications\CallPlansWithoutCallsNotification;
 use App\Notifications\CallsDueDigestNotification;
 use App\Notifications\CallsOverdueDigestNotification;
 use App\Notifications\TaskDueReminderNotification;
@@ -62,6 +65,31 @@ it('sends managers a summary of long overdue calls grouped by liaison', function
         CallsOverdueDigestNotification::class,
         fn (CallsOverdueDigestNotification $notification): bool => ($notification->overdueByLiaison[$this->liaison->name] ?? 0) === 1
             && ($notification->overdueByLiaison['Unassigned'] ?? 0) === 1,
+    );
+});
+
+it('alerts managers to active call plans with no call booked', function () {
+    $manager = User::factory()->create(['current_team_id' => $this->team->id]);
+    $manager->assignRole('manager');
+
+    $planWithoutCall = CallPlan::factory()->create(['team_id' => $this->team->id]);
+    $planWithoutCall->calls()->update(['status' => CallStatus::Cancelled]);
+
+    CallPlan::factory()->create(['team_id' => $this->team->id]);
+
+    $endedPlan = CallPlan::factory()->create([
+        'team_id' => $this->team->id,
+        'starts_on' => today()->subMonth(),
+        'ends_on' => today()->subDay(),
+    ]);
+    $endedPlan->calls()->update(['status' => CallStatus::Cancelled]);
+
+    $this->artisan('calls:send-reminders')->assertSuccessful();
+
+    Notification::assertSentTo(
+        $manager,
+        CallPlansWithoutCallsNotification::class,
+        fn (CallPlansWithoutCallsNotification $notification): bool => $notification->serviceUserNames === [$planWithoutCall->serviceUser->name],
     );
 });
 

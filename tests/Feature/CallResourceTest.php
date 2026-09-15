@@ -10,6 +10,7 @@ use App\Filament\Resources\Calls\Pages\ViewCall;
 use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
 use App\Filament\Resources\ServiceUsers\RelationManagers\CallsRelationManager;
 use App\Models\Call;
+use App\Models\CallPlan;
 use App\Models\Department;
 use App\Models\People;
 use App\Models\Role;
@@ -126,6 +127,26 @@ describe('actions', function () {
         expect($call->fresh()->status)->toBe(CallStatus::Completed);
     });
 
+    it('requires a next follow-up date when a liaison completes a plan call', function () {
+        $plan = CallPlan::factory()->create([
+            'team_id' => $this->team->id,
+            'assigned_user_id' => $this->liaison->id,
+        ]);
+        $call = $plan->calls()->sole();
+
+        actingAs($this->liaison);
+
+        livewire(ListCalls::class)
+            ->callAction(TestAction::make('recordOutcome')->table($call), data: [
+                'outcome' => 'answered',
+                'notes' => 'All good, no concerns.',
+                'next_follow_up_at' => null,
+            ])
+            ->assertHasFormErrors(['next_follow_up_at' => 'required']);
+
+        expect($call->fresh()->status)->toBe(CallStatus::Scheduled);
+    });
+
     it('hides reschedule and reassign actions from liaisons', function () {
         $call = Call::factory()->assignedTo($this->liaison)->create(['team_id' => $this->team->id]);
 
@@ -172,6 +193,43 @@ describe('actions', function () {
         Notification::assertSentTo($this->liaison, CallAssignedNotification::class);
     });
 
+    it('books the next regular call when an admin cancels a plan call', function () {
+        $plan = CallPlan::factory()->create([
+            'team_id' => $this->team->id,
+            'starts_on' => today()->addDay(),
+            'preferred_time' => '10:00',
+        ]);
+        $call = $plan->calls()->sole();
+
+        actingAs($this->admin);
+
+        livewire(ListCalls::class)
+            ->set('activeTab', 'all')
+            ->callAction(TestAction::make('cancelCall')->table($call))
+            ->assertNotified();
+
+        expect($call->fresh()->status)->toBe(CallStatus::Cancelled)
+            ->and($plan->calls()->open()->sole()->due_at->toDateTimeString())->toBe(today()->addDays(8)->setTime(10, 0)->toDateTimeString());
+    });
+
+    it('pauses the plan instead of booking another call when requested on cancel', function () {
+        $plan = CallPlan::factory()->create(['team_id' => $this->team->id]);
+        $call = $plan->calls()->sole();
+
+        actingAs($this->admin);
+
+        livewire(ListCalls::class)
+            ->set('activeTab', 'all')
+            ->callAction(TestAction::make('cancelCall')->table($call), data: [
+                'pause_plan' => true,
+            ])
+            ->assertNotified();
+
+        expect($call->fresh()->status)->toBe(CallStatus::Cancelled)
+            ->and($plan->fresh()->is_active)->toBeFalse()
+            ->and($plan->calls()->open()->exists())->toBeFalse();
+    });
+
     it('bulk reassigns selected calls', function () {
         $calls = Call::factory()->count(2)->create(['team_id' => $this->team->id]);
 
@@ -188,13 +246,40 @@ describe('actions', function () {
         expect(Call::query()->whereKey($calls->modelKeys())->where('assigned_user_id', $this->liaison->id)->count())->toBe(2);
     });
 
-    it('moves open calls in a date range to a covering liaison', function () {
+    it('moves open calls in the date range and overdue calls to a covering liaison', function () {
         $cover = User::factory()->create(['current_team_id' => $this->team->id]);
         $cover->assignRole('liaison');
 
-        $inRange = Call::factory()->assignedTo($this->liaison)->create(['team_id' => $this->team->id, 'due_at' => now()->addDays(2)]);
+        $inRange = Call::factory()->assignedTo($this->liaison)->create(['team_id' => $this->team->id, 'due_at' => now()->addDays(3)]);
+        $overdue = Call::factory()->overdue()->assignedTo($this->liaison)->create(['team_id' => $this->team->id]);
+        $beforeRange = Call::factory()->assignedTo($this->liaison)->create(['team_id' => $this->team->id, 'due_at' => now()->addDay()]);
         $outOfRange = Call::factory()->assignedTo($this->liaison)->create(['team_id' => $this->team->id, 'due_at' => now()->addDays(20)]);
-        $completed = Call::factory()->completed()->assignedTo($this->liaison)->create(['team_id' => $this->team->id, 'due_at' => now()->addDays(2)]);
+        $completed = Call::factory()->completed()->assignedTo($this->liaison)->create(['team_id' => $this->team->id, 'due_at' => now()->addDays(3)]);
+
+        actingAs($this->admin);
+
+        livewire(ListCalls::class)
+            ->callAction('coverAbsence', data: [
+                'from_user_id' => $this->liaison->id,
+                'to_user_id' => $cover->id,
+                'from' => today()->addDays(2)->toDateString(),
+                'until' => today()->addWeek()->toDateString(),
+            ])
+            ->assertHasNoFormErrors()
+            ->assertNotified();
+
+        expect($inRange->fresh()->assigned_user_id)->toBe($cover->id)
+            ->and($overdue->fresh()->assigned_user_id)->toBe($cover->id)
+            ->and($beforeRange->fresh()->assigned_user_id)->toBe($this->liaison->id)
+            ->and($outOfRange->fresh()->assigned_user_id)->toBe($this->liaison->id)
+            ->and($completed->fresh()->assigned_user_id)->toBe($this->liaison->id);
+    });
+
+    it('keeps overdue calls with the absent liaison when overdue calls are excluded', function () {
+        $cover = User::factory()->create(['current_team_id' => $this->team->id]);
+        $cover->assignRole('liaison');
+
+        $overdue = Call::factory()->overdue()->assignedTo($this->liaison)->create(['team_id' => $this->team->id]);
 
         actingAs($this->admin);
 
@@ -204,13 +289,11 @@ describe('actions', function () {
                 'to_user_id' => $cover->id,
                 'from' => today()->toDateString(),
                 'until' => today()->addWeek()->toDateString(),
+                'include_overdue' => false,
             ])
-            ->assertHasNoFormErrors()
-            ->assertNotified();
+            ->assertHasNoFormErrors();
 
-        expect($inRange->fresh()->assigned_user_id)->toBe($cover->id)
-            ->and($outOfRange->fresh()->assigned_user_id)->toBe($this->liaison->id)
-            ->and($completed->fresh()->assigned_user_id)->toBe($this->liaison->id);
+        expect($overdue->fresh()->assigned_user_id)->toBe($this->liaison->id);
     });
 });
 

@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Actions\Calls\ReassignCalls;
 use App\Enums\CallFrequency;
 use App\Enums\CallStatus;
 use App\Filament\Resources\CallPlans\Pages\CreateCallPlan;
+use App\Filament\Resources\CallPlans\Pages\ListCallPlans;
 use App\Models\Call;
 use App\Models\CallPlan;
 use App\Models\People;
 use App\Models\Team;
 use App\Models\User;
+use App\Notifications\CallAssignedNotification;
 use Carbon\CarbonImmutable;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Notification;
@@ -97,6 +100,41 @@ it('reassigns only open calls when the plan liaison changes', function () {
         ->and($completedCall->fresh()->assigned_user_id)->toBeNull();
 });
 
+it('notifies the new liaison about the open calls moved to them when the plan liaison changes', function () {
+    $liaison = User::factory()->create(['current_team_id' => $this->team->id]);
+
+    $plan = CallPlan::factory()->create([
+        'team_id' => $this->team->id,
+        'people_id' => $this->serviceUser->id,
+    ]);
+
+    $plan->update(['assigned_user_id' => $liaison->id]);
+
+    Notification::assertSentTo(
+        $liaison,
+        CallAssignedNotification::class,
+        fn (CallAssignedNotification $notification): bool => $notification->call->is($plan->calls()->open()->sole())
+            && $notification->count === 1,
+    );
+});
+
+it('notifies the covering liaison once when cover absence also moves the plan', function () {
+    $absentLiaison = User::factory()->create(['current_team_id' => $this->team->id]);
+    $coverLiaison = User::factory()->create(['current_team_id' => $this->team->id]);
+
+    $plan = CallPlan::factory()->create([
+        'team_id' => $this->team->id,
+        'people_id' => $this->serviceUser->id,
+        'assigned_user_id' => $absentLiaison->id,
+    ]);
+
+    app(ReassignCalls::class)->handle($plan->calls()->open()->get(), $coverLiaison, includePlans: true);
+
+    expect($plan->fresh()->assigned_user_id)->toBe($coverLiaison->id);
+
+    Notification::assertSentToTimes($coverLiaison, CallAssignedNotification::class, 1);
+});
+
 it('cancels open calls when the plan is deactivated', function () {
     $plan = CallPlan::factory()->create([
         'team_id' => $this->team->id,
@@ -107,6 +145,21 @@ it('cancels open calls when the plan is deactivated', function () {
 
     expect($plan->calls()->open()->count())->toBe(0)
         ->and($plan->calls()->where('status', CallStatus::Cancelled)->count())->toBe(1);
+});
+
+it('filters call plans that have no call booked', function () {
+    $planWithCall = CallPlan::factory()->create([
+        'team_id' => $this->team->id,
+        'people_id' => $this->serviceUser->id,
+    ]);
+
+    $planWithoutCall = CallPlan::factory()->create(['team_id' => $this->team->id]);
+    $planWithoutCall->calls()->update(['status' => CallStatus::Cancelled]);
+
+    livewire(ListCallPlans::class)
+        ->filterTable('withoutOpenCall')
+        ->assertCanSeeTableRecords([$planWithoutCall])
+        ->assertCanNotSeeTableRecords([$planWithCall]);
 });
 
 it('creates a call plan from the form', function () {
