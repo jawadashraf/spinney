@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\Call;
+use App\Models\CallPlan;
+use App\Models\User;
+use App\Notifications\CallPlansWithoutCallsNotification;
 use App\Notifications\CallsDueDigestNotification;
 use App\Notifications\CallsOverdueDigestNotification;
 use App\Support\TeamManagers;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 #[Signature('calls:send-reminders')]
-#[Description('Send liaisons a digest of calls due today/overdue and managers a summary of long-overdue calls')]
+#[Description('Send liaisons a digest of calls due today/overdue and managers a summary of long-overdue calls and call plans with no call booked')]
 final class SendCallReminders extends Command
 {
     public const int MANAGER_ESCALATION_DAYS = 2;
@@ -23,8 +27,9 @@ final class SendCallReminders extends Command
     {
         $liaisonDigests = $this->notifyLiaisons();
         $managerDigests = $this->notifyManagers();
+        $planAlerts = $this->notifyManagersOfPlansWithoutCalls();
 
-        $this->info("Sent {$liaisonDigests} liaison digest(s) and {$managerDigests} manager digest(s).");
+        $this->info("Sent {$liaisonDigests} liaison digest(s), {$managerDigests} manager digest(s) and {$planAlerts} call plan alert(s).");
 
         return self::SUCCESS;
     }
@@ -74,6 +79,36 @@ final class SendCallReminders extends Command
 
                 TeamManagers::for((int) $teamId)->each(function ($manager) use ($teamCalls, $overdueByLiaison, &$sent): void {
                     $manager->notify(new CallsOverdueDigestNotification($teamCalls->first()->team, $overdueByLiaison));
+                    $sent++;
+                });
+            });
+
+        return $sent;
+    }
+
+    /**
+     * Alert managers to active, unfinished call plans that have no open call, so nobody silently stops being called.
+     */
+    private function notifyManagersOfPlansWithoutCalls(): int
+    {
+        $sent = 0;
+
+        CallPlan::query()
+            ->where('is_active', true)
+            ->where(fn (Builder $query): Builder => $query->whereNull('ends_on')->orWhere('ends_on', '>=', today()))
+            ->whereDoesntHave('calls', fn (Builder $query): Builder => $query->open())
+            ->with(['serviceUser', 'team'])
+            ->get()
+            ->groupBy('team_id')
+            ->each(function (Collection $teamPlans, int|string $teamId) use (&$sent): void {
+                $serviceUserNames = $teamPlans
+                    ->map(fn (CallPlan $plan): string => $plan->serviceUser->name ?? 'Unknown service user')
+                    ->sort()
+                    ->values()
+                    ->all();
+
+                TeamManagers::for((int) $teamId)->each(function (User $manager) use ($teamPlans, $serviceUserNames, &$sent): void {
+                    $manager->notify(new CallPlansWithoutCallsNotification($teamPlans->first()->team, $serviceUserNames));
                     $sent++;
                 });
             });

@@ -15,7 +15,6 @@ use App\Models\User;
 use App\Notifications\CallAttemptsExhaustedNotification;
 use App\Support\ServiceUserSupportStatus;
 use App\Support\TeamManagers;
-use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -65,6 +64,8 @@ final readonly class RecordCallOutcome
 
                 if ($call->next_follow_up_at !== null) {
                     $this->scheduleCall->handle($call, $call->next_follow_up_at, parent: $call);
+                } else {
+                    $this->scheduleCall->nextFromPlan($call);
                 }
             } elseif (! $call->hasAttemptsRemaining()) {
                 $call->fill(['status' => CallStatus::Missed])->save();
@@ -74,17 +75,7 @@ final readonly class RecordCallOutcome
                 TeamManagers::for($call->team_id)
                     ->each(fn (User $manager) => $manager->notify(new CallAttemptsExhaustedNotification($call)));
 
-                $plan = $call->plan;
-
-                if ($plan !== null && $plan->is_active) {
-                    $nextDueAt = $plan->nextDueAfter($call->original_due_at);
-
-                    if ($nextDueAt->isPast()) {
-                        $nextDueAt = $plan->nextDueAfter(CarbonImmutable::now()->setTimeFrom($call->original_due_at));
-                    }
-
-                    $this->scheduleCall->handle($plan, $nextDueAt, parent: $call);
-                }
+                $this->scheduleCall->nextFromPlan($call);
             } else {
                 $call->due_at = filled($data['retry_at'] ?? null)
                     ? Carbon::parse((string) $data['retry_at'])

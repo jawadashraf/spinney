@@ -24,9 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->command('app:generate-sitemap')->daily();
 
-        $schedule->command('queue:work --stop-when-empty')
+        $schedule->command('queue:work --stop-when-empty --max-time=50')
             ->everyMinute()
-            ->withoutOverlapping();
+            ->withoutOverlapping(5);
     })
     ->booting(function (): void {
         //        Model::automaticallyEagerLoadRelationships(); TODO: Before enabling this, check the test suite for any issues with eager loading.

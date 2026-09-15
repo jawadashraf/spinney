@@ -7,6 +7,7 @@ use App\Enums\CallOutcome;
 use App\Enums\CallStatus;
 use App\Enums\SupportStatus;
 use App\Events\ServiceUserNeedsAttention;
+use App\Models\Call;
 use App\Models\CallPlan;
 use App\Models\People;
 use App\Models\ServiceUserProfile;
@@ -109,7 +110,7 @@ it('marks the call missed after the last attempt, alerts managers and schedules 
         ->and($nextCall->due_at->isFuture())->toBeTrue();
 });
 
-it('closes an unanswered call without retries when requested', function () {
+it('books the next regular call when a plan call is closed without a follow-up date', function () {
     $call = app(RecordCallOutcome::class)->handle($this->call, $this->liaison, [
         'outcome' => CallOutcome::WrongNumber->value,
         'notes' => 'Number no longer in use.',
@@ -117,7 +118,36 @@ it('closes an unanswered call without retries when requested', function () {
     ]);
 
     expect($call->status)->toBe(CallStatus::Completed)
-        ->and($call->followUpCall)->toBeNull();
+        ->and($call->followUpCall->status)->toBe(CallStatus::Scheduled)
+        ->and($call->followUpCall->due_at->toDateTimeString())->toBe(today()->addWeek()->setTime(10, 0)->toDateTimeString());
+});
+
+it('does not book a follow-up after the plan has ended', function () {
+    $this->plan->update(['ends_on' => today()]);
+
+    $call = app(RecordCallOutcome::class)->handle($this->call, $this->liaison, [
+        'outcome' => CallOutcome::Answered->value,
+        'notes' => 'Last call of the plan.',
+        'next_follow_up_at' => now()->addWeek()->toDateTimeString(),
+    ]);
+
+    expect($call->status)->toBe(CallStatus::Completed)
+        ->and($this->plan->calls()->open()->exists())->toBeFalse();
+});
+
+it('does not book a second open call for a plan that already has one', function () {
+    $scheduledByManager = Call::factory()->create([
+        'team_id' => $this->team->id,
+        'people_id' => $this->plan->people_id,
+        'call_plan_id' => $this->plan->id,
+    ]);
+
+    app(RecordCallOutcome::class)->handle($this->call, $this->liaison, [
+        'outcome' => CallOutcome::Answered->value,
+        'notes' => 'All fine.',
+    ]);
+
+    expect($this->plan->calls()->open()->sole()->is($scheduledByManager))->toBeTrue();
 });
 
 it('raises a support concern on the service user', function () {

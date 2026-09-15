@@ -14,6 +14,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 final class CoverAbsenceAction
@@ -47,14 +48,26 @@ final class CoverAbsenceAction
                     ->label('Calls due until')
                     ->required()
                     ->afterOrEqual('from'),
+                Toggle::make('include_overdue')
+                    ->label('Also move their overdue calls')
+                    ->helperText('Includes open calls that were due before the start date and have not been made yet.')
+                    ->default(true),
                 Toggle::make('include_plans')
                     ->label('Also move their call plans permanently'),
             ])
             ->action(function (array $data): void {
+                $from = Carbon::parse($data['from'])->startOfDay();
+                $until = Carbon::parse($data['until'])->endOfDay();
+
                 $calls = CallResource::getEloquentQuery()
                     ->open()
                     ->where('calls.assigned_user_id', $data['from_user_id'])
-                    ->whereBetween('calls.due_at', [Carbon::parse($data['from'])->startOfDay(), Carbon::parse($data['until'])->endOfDay()])
+                    ->where(fn (Builder $query): Builder => $query
+                        ->whereBetween('calls.due_at', [$from, $until])
+                        ->when(
+                            (bool) ($data['include_overdue'] ?? false),
+                            fn (Builder $query): Builder => $query->orWhere('calls.due_at', '<', now()->min($from)),
+                        ))
                     ->get();
 
                 $to = User::query()->findOrFail((int) $data['to_user_id']);
