@@ -19,6 +19,8 @@ use App\Services\AvatarService;
 use Database\Factories\CompanyFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -106,6 +108,26 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
             'email_invalid_at' => 'datetime',
             'unsubscribed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Companies an outreach email could reach: a usable general email, or a contact on the mailing list with one.
+     *
+     * @param  Builder<Company>  $query
+     */
+    #[Scope]
+    protected function reachableByEmail(Builder $query): void
+    {
+        $query->where(fn (Builder $query) => $query
+            ->where(fn (Builder $query) => $query
+                ->whereNotNull('email')
+                ->whereNull('email_invalid_at')
+                ->whereNull('unsubscribed_at'))
+            ->orWhereHas('contacts', fn (Builder $query) => $query
+                ->where('consent_communications', true)
+                ->whereNotNull('email')
+                ->whereNull('email_invalid_at')
+                ->whereNull('unsubscribed_at')));
     }
 
     public function getLogoAttribute(): string

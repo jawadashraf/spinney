@@ -64,6 +64,9 @@ Updated: 2026-10-16
 - [x] **[Quota]** `RecordOutgoingMail` logs every sent email; `MailQuota` keeps 30 of 100 daily sends for notifications and blocks oversized campaigns.
 - [x] **[Unsubscribe]** Signed unsubscribe links and `List-Unsubscribe` one-click headers; unsubscribed and invalid addresses are skipped.
 - [x] **[Fin Mail]** Installed; templates, themes, mail settings and sent-email log in the System Admin panel.
+- [x] **[Verification]** Companies link to the organisation they are part of and carry verification status, note and source.
+- [x] **[Leicester directory]** Client research workbook (138 mosques, madrasahs, prayer rooms) converted and imported.
+- [x] **[Outreach dashboard]** Directory reach and verification, engagements and outreach emails per month, coverage by type, companies not contacted in six months.
 
 ## Decisions
 | Date | Decision | Rationale | Owner |

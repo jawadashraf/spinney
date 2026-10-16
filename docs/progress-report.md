@@ -47,7 +47,7 @@ The main outstanding work is in Phase 3: donations, outreach, exports and the pu
 | System Admin panel with audit log | ✅ Complete |
 | Donation tracking and Gift Aid | ⏳ Not started |
 | Outreach emails from the CRM (Fin Mail, Hostinger mailbox, daily quota, unsubscribe) | ✅ Built (16 Oct); production mail set-up pending |
-| Outreach programme engagement metrics | 🟡 Engagement log in place; reporting not started |
+| Outreach programme engagement metrics (Outreach dashboard) | ✅ Complete (16 Oct) |
 | Data exports (CSV/PDF) | ⏳ Not started |
 | Public landing pages (Home, About, Contact, How we work) | ⏳ Not started |
 
@@ -79,13 +79,12 @@ The aftercare call system, task management and Yeastar integration go beyond the
 | Outreach emails: production mail set-up and live test | P3 | 0.5 day |
 | Restricted notes and access logging | P2 | 2–3 days |
 | Donations, Gift Aid and donor directory | P3 | 3–4 days |
-| Outreach engagement metrics | P3 | 1–2 days |
 | Reports and exports (CSV/PDF) | P3 | 3–4 days |
 | Public landing pages | P3 | 1–2 days |
 | Automated test suite repairs | — | 1–3 days |
 | Yeastar go-live (deploy, PBX configuration) | Extra | 1–2 days |
 | Training manuals, UAT and sign-off | Handover | 3–4 days |
-| **Total** | | **~14–21 working days** |
+| **Total** | | **~13–19 working days** |
 
 ---
 

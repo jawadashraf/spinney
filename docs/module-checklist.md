@@ -74,6 +74,8 @@ Updated: 2026-10-16
 - [x] Permissions enforced (managers and admins only)
 - [x] Tests added and passing
 - [x] Outreach emails from the CRM: Fin Mail templates, rich text with images, attachments, personalisation, recipients by group/type/company, daily quota, unsubscribe link, per-company email history
+- [x] Part of (parent organisation), verification status/note/source, "No email yet" filter
+- [x] Outreach dashboard: reach, verification, engagements and emails per month, coverage by type, not contacted in 6 months
 - [ ] Production mail set-up (Hostinger SMTP credentials, `storage:link` for images) and a live test send
 - [ ] Donors and supporters directory fields and UI (`Donor` type exists, no UI)
 
