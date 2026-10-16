@@ -1,0 +1,141 @@
+<Information Provider="crm" Name="Spinney" Key="spinney" Logo="" Remark="Spinney Hill liaison calls: liaison users, service user lookup and call journal. Never creates contacts." Version="1.0.0" AuthType="basic" MaxConcurrentRequest="10" UserAssociation="1" CallJournal="1" ChatJournal="0" CreateNewContact="0">
+  <Parameters />
+  <Scenarios>
+    <Scenario Id="AuthMethod" Type="AUTH">
+      <Presets />
+      <Parameters>
+        <Parameter Name="AuthMethod" Value="basic" />
+        <Parameter Name="CredentialType" Value="api_key" />
+        <Parameter Name="Base64EncodedCredential" Value="{{.api_key}}" />
+        <Parameter Father="CustomFieldList" Name="spinney_url" Editor="string" Title="Spinney URL (e.g. https://crm.example.org)" Key="spinney_url" />
+        <Parameter Father="CustomFieldList" Name="api_key" Editor="password" Title="API Key" Key="api_key" />
+        <Parameter Father="PopulateTemplateString" Name="Content-Type" Type="Header" Value="application/json" />
+        <Parameter Father="PopulateTemplateString" Name="Accept" Type="Header" Value="application/json" />
+      </Parameters>
+      <Requests />
+      <Responses />
+    </Scenario>
+    <Scenario Id="UserAssociation" Type="REST">
+      <Presets />
+      <Parameters />
+      <Requests>
+        <Request Name="UserAssociation" Method="GET" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/users">
+          <Parameters>
+            <Parameter Father="Pagination" Name="PaginationEnabled" Value="0" />
+          </Parameters>
+          <Outputs>
+            <Output Name="UserUniqueId" Path="data.#.id" />
+            <Output Name="FirstName" Path="data.#.first_name" />
+            <Output Name="LastName" Path="data.#.last_name" />
+            <Output Name="Email" Path="data.#.email" />
+          </Outputs>
+        </Request>
+      </Requests>
+    </Scenario>
+    <Scenario Id="SyncContactAuto" Type="REST">
+      <Presets />
+      <Parameters>
+        <Parameter Name="ContactUrlType" Value="retrieve_from_contact" />
+        <Parameter Name="URLFormat" />
+        <Parameter Name="ContactFieldForUri" Value="data.#.url" />
+        <Parameter Name="ContactsIdEnable" Value="1" />
+        <Parameter Name="FirstNameEnable" Value="1" />
+        <Parameter Name="LastNameEnable" Value="1" />
+        <Parameter Name="MobileNumberEnable" Value="1" />
+        <Parameter Name="CompanyEnable" Value="0" />
+        <Parameter Name="EmailEnable" Value="0" />
+        <Parameter Name="BusinessNumberEnable" Value="0" />
+        <Parameter Name="BusinessNumber2Enable" Value="0" />
+        <Parameter Name="BusinessFaxNumberEnable" Value="0" />
+        <Parameter Name="MobileNumber2Enable" Value="0" />
+        <Parameter Name="HomeNumberEnable" Value="0" />
+        <Parameter Name="HomeNumber2Enable" Value="0" />
+        <Parameter Name="HomeFaxNumberEnable" Value="0" />
+        <Parameter Name="OtherNumberEnable" Value="0" />
+        <Parameter Name="ZipCodeEnable" Value="0" />
+        <Parameter Name="StreetEnable" Value="0" />
+        <Parameter Name="CityEnable" Value="0" />
+        <Parameter Name="StateEnable" Value="0" />
+        <Parameter Name="CountryEnable" Value="0" />
+        <Parameter Name="RemarkEnable" Value="0" />
+        <Parameter Name="CustomValueEnable" Value="0" />
+      </Parameters>
+      <Requests>
+        <Request Name="service_users" Method="GET" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/contacts?phone={{UrlEncode .Phone}}">
+          <Parameters />
+          <Outputs>
+            <Output Name="ContactsId" Path="data.#.id" />
+            <Output Name="FirstName" Path="data.#.first_name" />
+            <Output Name="LastName" Path="data.#.last_name" />
+            <Output Name="MobileNumber" Path="data.#.phone" />
+          </Outputs>
+        </Request>
+      </Requests>
+    </Scenario>
+    <Scenario Id="SearchContact" Type="REST">
+      <Requests>
+        <Request Name="SearchContact_service_users" Method="GET" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/contacts/search?q={{UrlEncode .SearchValue}}">
+          <Parameters />
+          <Outputs>
+            <Output Name="ContactsId" Path="data.#.id" />
+            <Output Name="FirstName" Path="data.#.first_name" />
+            <Output Name="LastName" Path="data.#.last_name" />
+            <Output Name="MobileNumber" Path="data.#.phone" />
+          </Outputs>
+        </Request>
+      </Requests>
+    </Scenario>
+    <Scenario Id="CallJournal" Type="REST">
+      <Presets />
+      <Parameters>
+        <Parameter Name="EnableDescription" Value="1" />
+        <Parameter Name="Description" Value="Call: {{.Time}} {{.Call_Log_Status}} from {{.Call_From}} to {{.Call_To}} {{.Talk_Duration}}" />
+        <Parameter Name="EnablePlayCallRecording" Value="1" />
+        <Parameter Name="PlayCallRecording" Value="1" />
+        <Parameter Name="EnableForwardCallLogForAnsweredAgent" Value="1" />
+        <Parameter Name="ForwardCallLogForAnsweredAgent" Value="1" />
+        <Parameter Name="NeedSyncContact" Value="1" />
+      </Parameters>
+      <Requests>
+        <Request Name="CallJournalInboundSuccess" Method="POST" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/call-journal">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;linked_id&quot;:&quot;{{.LinkedId}}&quot;,&quot;direction&quot;:&quot;inbound&quot;,&quot;disposition&quot;:&quot;{{.CallDisposition}}&quot;,&quot;status&quot;:&quot;{{.Call_Status}}&quot;,&quot;talk_duration_sec&quot;:&quot;{{.Talk_Duration_Sec}}&quot;,&quot;started_at&quot;:&quot;{{.StartTimeUnix}}&quot;,&quot;ended_at&quot;:&quot;{{.EndTimeUnix}}&quot;,&quot;crm_user_id&quot;:&quot;{{.CrmId}}&quot;,&quot;contact_id&quot;:&quot;{{.ContactId}}&quot;,&quot;contact_number&quot;:&quot;{{.ContactNumber}}&quot;,&quot;recording_url&quot;:&quot;{{.RecordPath}}&quot;}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="CrmActId" Path="id" />
+          </Outputs>
+        </Request>
+        <Request Name="CallJournalOutboundSuccess" Method="POST" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/call-journal">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;linked_id&quot;:&quot;{{.LinkedId}}&quot;,&quot;direction&quot;:&quot;outbound&quot;,&quot;disposition&quot;:&quot;{{.CallDisposition}}&quot;,&quot;status&quot;:&quot;{{.Call_Status}}&quot;,&quot;talk_duration_sec&quot;:&quot;{{.Talk_Duration_Sec}}&quot;,&quot;started_at&quot;:&quot;{{.StartTimeUnix}}&quot;,&quot;ended_at&quot;:&quot;{{.EndTimeUnix}}&quot;,&quot;crm_user_id&quot;:&quot;{{.CrmId}}&quot;,&quot;contact_id&quot;:&quot;{{.ContactId}}&quot;,&quot;contact_number&quot;:&quot;{{.ContactNumber}}&quot;,&quot;recording_url&quot;:&quot;{{.RecordPath}}&quot;}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="CrmActId" Path="id" />
+          </Outputs>
+        </Request>
+        <Request Name="CallJournalInboundFailed" Method="POST" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/call-journal">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;linked_id&quot;:&quot;{{.LinkedId}}&quot;,&quot;direction&quot;:&quot;inbound&quot;,&quot;disposition&quot;:&quot;{{.CallDisposition}}&quot;,&quot;status&quot;:&quot;{{.Call_Status}}&quot;,&quot;talk_duration_sec&quot;:&quot;{{.Talk_Duration_Sec}}&quot;,&quot;started_at&quot;:&quot;{{.StartTimeUnix}}&quot;,&quot;ended_at&quot;:&quot;{{.EndTimeUnix}}&quot;,&quot;crm_user_id&quot;:&quot;{{.CrmId}}&quot;,&quot;contact_id&quot;:&quot;{{.ContactId}}&quot;,&quot;contact_number&quot;:&quot;{{.ContactNumber}}&quot;,&quot;recording_url&quot;:&quot;{{.RecordPath}}&quot;}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="CrmActId" Path="id" />
+          </Outputs>
+        </Request>
+        <Request Name="CallJournalOutboundFailed" Method="POST" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/call-journal">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;linked_id&quot;:&quot;{{.LinkedId}}&quot;,&quot;direction&quot;:&quot;outbound&quot;,&quot;disposition&quot;:&quot;{{.CallDisposition}}&quot;,&quot;status&quot;:&quot;{{.Call_Status}}&quot;,&quot;talk_duration_sec&quot;:&quot;{{.Talk_Duration_Sec}}&quot;,&quot;started_at&quot;:&quot;{{.StartTimeUnix}}&quot;,&quot;ended_at&quot;:&quot;{{.EndTimeUnix}}&quot;,&quot;crm_user_id&quot;:&quot;{{.CrmId}}&quot;,&quot;contact_id&quot;:&quot;{{.ContactId}}&quot;,&quot;contact_number&quot;:&quot;{{.ContactNumber}}&quot;,&quot;recording_url&quot;:&quot;{{.RecordPath}}&quot;}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="CrmActId" Path="id" />
+          </Outputs>
+        </Request>
+        <Request Name="CallJournalUpdate" Method="PUT" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/call-journal/{{.CrmActId}}">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;recording_url&quot;:&quot;{{.RecordPath}}&quot;}" />
+          </Parameters>
+          <Outputs />
+        </Request>
+      </Requests>
+    </Scenario>
+  </Scenarios>
+</Information>

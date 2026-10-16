@@ -23,7 +23,10 @@ final readonly class RecordCallOutcome
     public function __construct(private ScheduleCall $scheduleCall) {}
 
     /**
-     * Keys: outcome (required), notes, action_required, next_follow_up_at, retry_at, close_call, raise_concern, support_status.
+     * Keys: outcome (required), notes, action_required, next_follow_up_at, retry_at, close_call, raise_concern, support_status, attempted_at.
+     *
+     * When the phone system has already logged an answered attempt that is awaiting notes, that attempt is
+     * completed instead of a new one being added.
      *
      * @param  array<string, mixed>  $data
      */
@@ -34,17 +37,30 @@ final readonly class RecordCallOutcome
             $raiseConcern = (bool) ($data['raise_concern'] ?? false);
             $supportStatus = $raiseConcern ? SupportStatus::from((string) ($data['support_status'] ?? SupportStatus::NeedsAttention->value)) : null;
 
-            $call->attempts()->create([
-                'team_id' => $call->team_id,
-                'user_id' => $by->id,
-                'attempted_at' => now(),
-                'outcome' => $outcome,
-                'notes' => $data['notes'] ?? null,
-            ]);
+            $attemptedAt = filled($data['attempted_at'] ?? null) ? Carbon::parse($data['attempted_at']) : now();
+            $pendingAttempt = $call->pendingPhoneSystemAttempt();
+
+            if ($pendingAttempt !== null) {
+                $pendingAttempt->update([
+                    'outcome' => $outcome,
+                    'notes' => $data['notes'] ?? null,
+                ]);
+            } else {
+                $call->attempts()->create([
+                    'team_id' => $call->team_id,
+                    'user_id' => $by->id,
+                    'attempted_at' => $attemptedAt,
+                    'outcome' => $outcome,
+                    'notes' => $data['notes'] ?? null,
+                ]);
+
+                $call->fill([
+                    'attempt_count' => $call->attempt_count + 1,
+                    'last_attempt_at' => $attemptedAt,
+                ]);
+            }
 
             $call->fill([
-                'attempt_count' => $call->attempt_count + 1,
-                'last_attempt_at' => now(),
                 'outcome' => $outcome,
                 'notes' => $data['notes'] ?? $call->notes,
                 'action_required' => $data['action_required'] ?? $call->action_required,

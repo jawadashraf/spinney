@@ -170,3 +170,37 @@ it('raises a support concern on the service user', function () {
 
     Event::assertDispatched(ServiceUserNeedsAttention::class);
 });
+
+it('completes the answered attempt logged by the phone system instead of adding another', function () {
+    $call = Call::factory()->assignedTo($this->liaison)->awaitingNotes()->create([
+        'team_id' => $this->team->id,
+        'people_id' => $this->plan->people_id,
+        'call_plan_id' => $this->plan->id,
+    ]);
+    $this->call->delete();
+
+    $call = app(RecordCallOutcome::class)->handle($call, $this->liaison, [
+        'outcome' => CallOutcome::Answered->value,
+        'notes' => 'Doing well, talked about the lunch club.',
+        'next_follow_up_at' => now()->addWeek()->toDateTimeString(),
+    ]);
+
+    expect($call->status)->toBe(CallStatus::Completed)
+        ->and($call->attempt_count)->toBe(1)
+        ->and($call->attempts()->sole())
+        ->notes->toBe('Doing well, talked about the lunch club.')
+        ->pbxCallLog->not->toBeNull();
+});
+
+it('records the attempt at the time given rather than now', function () {
+    $attemptedAt = now()->subHour()->startOfMinute();
+
+    $call = app(RecordCallOutcome::class)->handle($this->call, $this->liaison, [
+        'outcome' => CallOutcome::NoAnswer->value,
+        'notes' => 'Rang out.',
+        'attempted_at' => $attemptedAt,
+    ]);
+
+    expect($call->last_attempt_at->toDateTimeString())->toBe($attemptedAt->toDateTimeString())
+        ->and($call->attempts()->sole()->attempted_at->toDateTimeString())->toBe($attemptedAt->toDateTimeString());
+});

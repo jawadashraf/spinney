@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AlizHarb\ActivityLog\RelationManagers\ActivitiesRelationManager;
+use App\Enums\CallOutcome;
 use App\Enums\CallStatus;
 use App\Filament\Resources\Calls\Pages\CreateCall;
 use App\Filament\Resources\Calls\Pages\ListCalls;
@@ -145,6 +146,23 @@ describe('actions', function () {
             ->assertHasFormErrors(['next_follow_up_at' => 'required']);
 
         expect($call->fresh()->status)->toBe(CallStatus::Scheduled);
+    });
+
+    it('pre-fills an answered outcome when the phone system logged the call', function () {
+        $call = Call::factory()->assignedTo($this->liaison)->awaitingNotes()->create(['team_id' => $this->team->id]);
+
+        actingAs($this->liaison);
+
+        livewire(ListCalls::class)
+            ->mountAction(TestAction::make('recordOutcome')->table($call))
+            ->assertSchemaStateSet(['outcome' => CallOutcome::Answered])
+            ->setActionData(['notes' => 'Good chat, no concerns.'])
+            ->callMountedAction()
+            ->assertHasNoFormErrors();
+
+        expect($call->fresh())
+            ->status->toBe(CallStatus::Completed)
+            ->attempt_count->toBe(1);
     });
 
     it('hides reschedule and reassign actions from liaisons', function () {
@@ -344,6 +362,17 @@ it('renders the call page with its activity log', function () {
         'pageClass' => ViewCall::class,
     ])
         ->assertOk();
+});
+
+it('shows the phone system talk time and recording link on the call page', function () {
+    $call = Call::factory()->assignedTo($this->liaison)->awaitingNotes()->create(['team_id' => $this->team->id]);
+    $call->attempts()->sole()->pbxCallLog->update(['recording_url' => 'https://pbx.example.test/recordings/1791457200.101.wav']);
+
+    livewire(ViewCall::class, ['record' => $call->id])
+        ->assertOk()
+        ->assertSee('Talked 04:00')
+        ->assertSee('https://pbx.example.test/recordings/1791457200.101.wav')
+        ->assertSee('Awaiting notes from the liaison');
 });
 
 it('shows the call history on the service user record', function () {

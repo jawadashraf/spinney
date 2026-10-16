@@ -28,14 +28,13 @@ final class RecordCallOutcomeAction
     public static function make(): Action
     {
         return Action::make('recordOutcome')
-            ->label('Record outcome')
+            ->label(fn (Call $record): string => $record->isAwaitingNotes() ? 'Add call notes' : 'Record outcome')
             ->icon(Heroicon::OutlinedChatBubbleLeftEllipsis)
             ->color('success')
             ->visible(fn (Call $record): bool => $record->isOpen())
             ->authorize('recordOutcome')
             ->modalHeading(fn (Call $record): string => 'Record call – '.($record->serviceUser->name ?? 'service user'))
-            ->modalDescription(fn (Call $record): string => 'Attempt '.($record->attempt_count + 1).' of '.$record->maxAttempts()
-                .(filled($record->serviceUser?->phone) ? ' · '.$record->serviceUser->phone : ''))
+            ->modalDescription(fn (Call $record): string => self::modalDescription($record))
             ->modalSubmitActionLabel('Save outcome')
             ->modalWidth(Width::TwoExtraLarge)
             ->schema([
@@ -43,6 +42,7 @@ final class RecordCallOutcomeAction
                     ->options(CallOutcome::class)
                     ->inline()
                     ->required()
+                    ->default(fn (Call $record): ?CallOutcome => $record->isAwaitingNotes() ? CallOutcome::Answered : null)
                     ->live()
                     ->afterStateUpdated(fn (Get $get, Set $set, Call $record) => self::fillDefaultDates($get, $set, $record)),
                 Textarea::make('notes')
@@ -65,6 +65,7 @@ final class RecordCallOutcomeAction
                     ->after('now')
                     ->maxDate(fn (Call $record): ?CarbonInterface => $record->plan?->ends_on?->copy()->endOfDay())
                     ->required(fn (Call $record): bool => self::planContinues($record))
+                    ->default(fn (Call $record): ?string => $record->isAwaitingNotes() ? self::nextPlanCallAt($record) : null)
                     ->helperText(fn (Call $record): string => self::followUpHelperText($record))
                     ->visible(fn (Get $get): bool => self::isClosing($get)),
                 DateTimePicker::make('retry_at')
@@ -74,7 +75,7 @@ final class RecordCallOutcomeAction
                     ->required()
                     ->visible(fn (Get $get, Call $record): bool => filled($get('outcome'))
                         && ! self::isClosing($get)
-                        && $record->attempt_count + 1 < $record->maxAttempts()),
+                        && $record->attempt_count + ($record->isAwaitingNotes() ? 0 : 1) < $record->maxAttempts()),
                 Toggle::make('raise_concern')
                     ->label('Raise support / safeguarding concern')
                     ->live(),
@@ -147,12 +148,32 @@ final class RecordCallOutcomeAction
     private static function fillDefaultDates(Get $get, Set $set, Call $record): void
     {
         if (self::isClosing($get) && blank($get('next_follow_up_at')) && self::planContinues($record)) {
-            $set('next_follow_up_at', $record->plan?->nextDueAfter(now()->setTimeFrom($record->due_at))->toDateTimeString());
+            $set('next_follow_up_at', self::nextPlanCallAt($record));
         }
 
         if (! self::isClosing($get) && blank($get('retry_at'))) {
             $set('retry_at', RecordCallOutcome::defaultRetryAt($record)->toDateTimeString());
         }
+    }
+
+    private static function nextPlanCallAt(Call $record): ?string
+    {
+        if (! self::planContinues($record)) {
+            return null;
+        }
+
+        return $record->plan?->nextDueAfter(now()->setTimeFrom($record->due_at))->toDateTimeString();
+    }
+
+    private static function modalDescription(Call $record): string
+    {
+        $phone = filled($record->serviceUser?->phone) ? ' · '.$record->serviceUser->phone : '';
+
+        if ($record->isAwaitingNotes() && $record->last_attempt_at !== null) {
+            return 'Answered on the phone system at '.$record->last_attempt_at->format('d M Y, H:i').$phone;
+        }
+
+        return 'Attempt '.($record->attempt_count + 1).' of '.$record->maxAttempts().$phone;
     }
 
     private static function summary(Call $call): string

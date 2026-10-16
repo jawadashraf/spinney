@@ -1,0 +1,324 @@
+<Information Provider="crm" Name="Salesforce-Custom" Key="salesforce" Logo="salesforce.png" Remark="" Version="1.5.1" AuthType="oauth2" MaxConcurrentRequest="10" UserAssociation="1" CallJournal="1" ChatJournal="1" CreateNewContact="1">
+    <Parameters>
+    </Parameters>
+    <Scenarios>
+        <Scenario Id="AuthMethod" Type="AUTH">
+            <Presets></Presets>
+            <Parameters>
+                <Parameter Name="AuthMethod" Value="oauth2"></Parameter>
+                <Parameter Name="TokenType" Value="Bearer"></Parameter>
+                <Parameter Name="AuthEndPoint" Value="https://login.salesforce.com/services/oauth2/authorize?client_id={{.client_id}}&amp;client_secret={{.client_secret}}"></Parameter>
+                <Parameter Name="TokenEndPoint" Value="https://login.salesforce.com/services/oauth2/token?client_id={{.client_id}}&amp;client_secret={{.client_secret}}"></Parameter>
+                <Parameter Name="AdditionalQueryString"></Parameter>
+                <Parameter Name="Scope" Value=""></Parameter>
+                <Parameter Name="CredentialType"></Parameter>
+                <Parameter Name="Base64EncodedCredential"></Parameter>
+                <Parameter Name="APIVersion" Value="/services/data/v52.0"></Parameter>
+                <Parameter Father="TokenErrorMap" Type="TokenInvalid" Name="TokenInvalid" Value="INVALID_TOKEN"></Parameter>
+                <Parameter Father="CustomFieldList" Name="client_id" Editor="password" Title="Client ID" Key="client_id"></Parameter>
+                <Parameter Father="CustomFieldList" Name="client_secret" Editor="password" Title="Client Secret" Key="client_secret"></Parameter>
+                <Parameter Father="PopulateTemplateString" Name="Content-Type" Type="Header" Value="application/json" />
+                <Parameter Father="PopulateTemplateString" Name="Accept" Type="Header" Value="application/json" />
+                <Parameter Name="EnableKeepalive" Value="1"></Parameter>
+                <Parameter Name="KeepaliveInterval" Value="5"></Parameter>
+            </Parameters>
+            <Requests></Requests>
+            <Responses></Responses>
+        </Scenario>
+        <Scenario Id="SyncContactAuto" Type="REST">
+            <Presets></Presets>
+            <Parameters>
+                <Parameter Name="ContactUrlType" Value="specify_url_format"></Parameter>
+                <Parameter Name="URLFormat" Value="{{.instance_url}}/{{.ContactId}}"></Parameter>
+                <Parameter Name="ContactFieldForUri"></Parameter>
+                <Parameter Name="ContactsIdEnable" Value="1"></Parameter>
+                <Parameter Name="FirstNameEnable" Value="1"></Parameter>
+                <Parameter Name="LastNameEnable" Value="1"></Parameter>
+                <Parameter Name="CompanyEnable" Value="1"></Parameter>
+                <Parameter Name="EmailEnable" Value="1"></Parameter>
+                <Parameter Name="BusinessNumberEnable" Value="1"></Parameter>
+                <Parameter Name="BusinessNumber2Enable" Value="1"></Parameter>
+                <Parameter Name="BusinessFaxNumberEnable" Value="1"></Parameter>
+                <Parameter Name="MobileNumberEnable" Value="1"></Parameter>
+                <Parameter Name="MobileNumber2Enable" Value="1"></Parameter>
+                <Parameter Name="HomeNumberEnable" Value="1"></Parameter>
+                <Parameter Name="HomeNumber2Enable" Value="1"></Parameter>
+                <Parameter Name="HomeFaxNumberEnable" Value="1"></Parameter>
+                <Parameter Name="OtherNumberEnable" Value="1"></Parameter>
+                <Parameter Name="ZipCodeEnable" Value="1"></Parameter>
+                <Parameter Name="StreetEnable" Value="1"></Parameter>
+                <Parameter Name="CityEnable" Value="1"></Parameter>
+                <Parameter Name="StateEnable" Value="1"></Parameter>
+                <Parameter Name="CountryEnable" Value="1"></Parameter>
+                <Parameter Name="RemarkEnable" Value="1"></Parameter>
+                <Parameter Name="CustomValueEnable" Value="1"></Parameter>
+            </Parameters>
+            <Requests>
+                <Request Name="contacts" Method="GET" URLFormat="{{.instance_url}}{{.APIVersion}}/query?q=select%20Id,OwnerId,FirstName,LastName,AccountId,Email,Phone,HomePhone,OtherPhone,MobilePhone,AssistantPhone,Fax,MailingStreet,MailingCity,MailingState,MailingPostalCode,MailingCountry%20from%20Contact%20where%20Phone=%27{{UrlEncode .Phone}}%27%20or%20HomePhone=%27{{UrlEncode .Phone}}%27%20or%20OtherPhone=%27{{UrlEncode .Phone}}%27%20or%20MobilePhone=%27{{UrlEncode .Phone}}%27%20or%20AssistantPhone=%27{{UrlEncode .Phone}}%27%20or%20Fax=%27{{UrlEncode .Phone}}%27" ResponseType="application/json">
+                    <Parameters></Parameters>
+                    <Outputs Next = "{{if .ForeignKey}}GetAccountName{{end}}">
+                        <Output Name="ContactsId" Path="records.#.Id"></Output>
+                        <Output Name="FirstName" Path="records.#.FirstName"></Output>
+                        <Output Name="LastName" Path="records.#.LastName"></Output>
+                        <Output Name="Company" Path=""></Output>
+                        <Output Name="Email" Path="records.#.Email"></Output>
+                        <Output Name="BusinessNumber" Path="records.#.Phone"></Output>
+                        <Output Name="BusinessNumber2" Path="records.#.AssistantPhone"></Output>
+                        <Output Name="BusinessFaxNumber" Path="records.#.Fax"></Output>
+                        <Output Name="MobileNumber" Path="records.#.MobilePhone"></Output>
+                        <Output Name="MobileNumber2" Path=""></Output>
+                        <Output Name="HomeNumber" Path="records.#.HomePhone"></Output>
+                        <Output Name="HomeNumber2" Path=""></Output>
+                        <Output Name="HomeFaxNumber" Path=""></Output>
+                        <Output Name="OtherNumber" Path="records.#.OtherPhone"></Output>
+                        <Output Name="ZipCode" Path="records.#.MailingPostalCode"></Output>
+                        <Output Name="Street" Path="records.#.MailingStreet"></Output>
+                        <Output Name="City" Path="records.#.MailingCity"></Output>
+                        <Output Name="State" Path="records.#.MailingState"></Output>
+                        <Output Name="Country" Path="records.#.MailingCountry"></Output>
+                        <Output Name="Remark" Path=""></Output>
+                        <Output Name="CustomValue" Path=""></Output>
+                        <Output Name="ForeignKey" Path="records.#.AccountId"></Output>
+                    </Outputs>
+                </Request>
+                <Request Name="leads" Method="GET" URLFormat="{{.instance_url}}{{.APIVersion}}/query?q=select%20Id,OwnerId,FirstName,LastName,Company,Email,Phone,MobilePhone,Fax,Street,City,State,PostalCode,Country,Description%20from%20Lead%20where%20Phone=%27{{UrlEncode .Phone}}%27or%20Fax=%27{{UrlEncode .Phone}}%27or%20MobilePhone=%27{{UrlEncode .Phone}}%27" ResponseType="application/json">
+                    <Parameters></Parameters>
+                    <Outputs>
+                        <Output Name="ContactsId" Path="records.#.Id"></Output>
+                        <Output Name="FirstName" Path="records.#.FirstName"></Output>
+                        <Output Name="LastName" Path="records.#.LastName"></Output>
+                        <Output Name="Company" Path="records.#.Company"></Output>
+                        <Output Name="Email" Path="records.#.Email"></Output>
+                        <Output Name="BusinessNumber" Path="records.#.Phone"></Output>
+                        <Output Name="BusinessNumber2" Path=""></Output>
+                        <Output Name="BusinessFaxNumber" Path="records.#.Fax"></Output>
+                        <Output Name="MobileNumber" Path="records.#.MobilePhone"></Output>
+                        <Output Name="MobileNumber2" Path=""></Output>
+                        <Output Name="HomeNumber" Path=""></Output>
+                        <Output Name="HomeNumber2" Path=""></Output>
+                        <Output Name="HomeFaxNumber" Path=""></Output>
+                        <Output Name="OtherNumber" Path=""></Output>
+                        <Output Name="ZipCode" Path="records.#.PostalCode"></Output>
+                        <Output Name="Street" Path="records.#.Street"></Output>
+                        <Output Name="City" Path="records.#.City"></Output>
+                        <Output Name="State" Path="records.#.State"></Output>
+                        <Output Name="Country" Path="records.#.Country"></Output>
+                        <Output Name="Remark" Path="records.#.Description"></Output>
+                        <Output Name="CustomValue" Path=""></Output>
+                    </Outputs>
+                </Request>
+                <Request Name="accounts" Method="GET" URLFormat="{{.instance_url}}{{.APIVersion}}/query?q=select%20Id,OwnerId,Name,Phone,Fax,BillingStreet,BillingCity,BillingState,BillingPostalCode,BillingCountry,Description%20from%20Account%20where%20Phone=%27{{UrlEncode .Phone}}%27%20or%20Fax=%27{{UrlEncode .Phone}}%27" ResponseType="application/json">
+                    <Parameters></Parameters>
+                    <Outputs>
+                        <Output Name="ContactsId" Path="records.#.Id"></Output>
+                        <Output Name="FirstName" Path="records.#.Name"></Output>
+                        <Output Name="LastName" Path=""></Output>
+                        <Output Name="Company" Path=""></Output>
+                        <Output Name="Email" Path=""></Output>
+                        <Output Name="BusinessNumber" Path="records.#.Phone"></Output>
+                        <Output Name="BusinessNumber2" Path=""></Output>
+                        <Output Name="BusinessFaxNumber" Path="records.#.Fax"></Output>
+                        <Output Name="MobileNumber" Path=""></Output>
+                        <Output Name="MobileNumber2" Path=""></Output>
+                        <Output Name="HomeNumber" Path=""></Output>
+                        <Output Name="HomeNumber2" Path=""></Output>
+                        <Output Name="HomeFaxNumber" Path=""></Output>
+                        <Output Name="OtherNumber" Path=""></Output>
+                        <Output Name="ZipCode" Path="records.#.BillingPostalCode"></Output>
+                        <Output Name="Street" Path="records.#.BillingStreet"></Output>
+                        <Output Name="City" Path="records.#.BillingCity"></Output>
+                        <Output Name="State" Path="records.#.BillingState"></Output>
+                        <Output Name="Country" Path="records.#.BillingCountry"></Output>
+                        <Output Name="Remark" Path="records.#.Description"></Output>
+                        <Output Name="CustomValue" Path=""></Output>
+                    </Outputs>
+                </Request>
+            </Requests>
+        </Scenario>
+        <Scenario Id="SearchContact" Type="REST">
+            <Requests>
+                <Request Name="SearchContact_contacts" Method="GET" URLFormat="{{.instance_url}}{{.APIVersion}}/query?q=select%20Id,OwnerId,FirstName,LastName,AccountId,Email,Phone,HomePhone,OtherPhone,MobilePhone,AssistantPhone,Fax,MailingStreet,MailingCity,MailingState,MailingPostalCode,MailingCountry%20from%20Contact%20where%20Phone%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20HomePhone%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20OtherPhone%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20MobilePhone%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20AssistantPhone%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20Fax%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20FirstName%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20LastName%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27" ResponseType="application/json">
+                    <Parameters></Parameters>
+                    <Outputs Next = "{{if .ForeignKey}}GetAccountName{{end}}">
+                        <Output Name="ContactsId" Path="records.#.Id"></Output>
+                        <Output Name="FirstName" Path="records.#.FirstName"></Output>
+                        <Output Name="LastName" Path="records.#.LastName"></Output>
+                        <Output Name="Company" Path=""></Output>
+                        <Output Name="Email" Path="records.#.Email"></Output>
+                        <Output Name="BusinessNumber" Path="records.#.Phone"></Output>
+                        <Output Name="BusinessNumber2" Path="records.#.AssistantPhone"></Output>
+                        <Output Name="BusinessFaxNumber" Path="records.#.Fax"></Output>
+                        <Output Name="MobileNumber" Path="records.#.MobilePhone"></Output>
+                        <Output Name="MobileNumber2" Path=""></Output>
+                        <Output Name="HomeNumber" Path="records.#.HomePhone"></Output>
+                        <Output Name="HomeNumber2" Path=""></Output>
+                        <Output Name="HomeFaxNumber" Path=""></Output>
+                        <Output Name="OtherNumber" Path="records.#.OtherPhone"></Output>
+                        <Output Name="ZipCode" Path="records.#.MailingPostalCode"></Output>
+                        <Output Name="Street" Path="records.#.MailingStreet"></Output>
+                        <Output Name="City" Path="records.#.MailingCity"></Output>
+                        <Output Name="State" Path="records.#.MailingState"></Output>
+                        <Output Name="Country" Path="records.#.MailingCountry"></Output>
+                        <Output Name="Remark" Path=""></Output>
+                        <Output Name="CustomValue" Path=""></Output>
+                        <Output Name="ForeignKey" Path="records.#.AccountId"></Output>
+                    </Outputs>
+                </Request>
+                <Request Name="SearchContact_leads" Method="GET" URLFormat="{{.instance_url}}{{.APIVersion}}/query?q=select%20Id,OwnerId,FirstName,LastName,Company,Email,Phone,MobilePhone,Fax,Street,City,State,PostalCode,Country,Description%20from%20Lead%20where%20Phone%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20Fax%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20MobilePhone%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20FirstName%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20LastName%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20Company%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27" ResponseType="application/json">
+                    <Parameters></Parameters>
+                    <Outputs>
+                        <Output Name="ContactsId" Path="records.#.Id"></Output>
+                        <Output Name="FirstName" Path="records.#.FirstName"></Output>
+                        <Output Name="LastName" Path="records.#.LastName"></Output>
+                        <Output Name="Company" Path="records.#.Company"></Output>
+                        <Output Name="Email" Path="records.#.Email"></Output>
+                        <Output Name="BusinessNumber" Path="records.#.Phone"></Output>
+                        <Output Name="BusinessNumber2" Path=""></Output>
+                         <Output Name="BusinessFaxNumber" Path="records.#.Fax"></Output>
+                        <Output Name="MobileNumber" Path="records.#.MobilePhone"></Output>
+                        <Output Name="MobileNumber2" Path=""></Output>
+                        <Output Name="HomeNumber" Path=""></Output>
+                        <Output Name="HomeNumber2" Path=""></Output>
+                        <Output Name="HomeFaxNumber" Path=""></Output>
+                        <Output Name="OtherNumber" Path=""></Output>
+                        <Output Name="ZipCode" Path="records.#.PostalCode"></Output>
+                        <Output Name="Street" Path="records.#.Street"></Output>
+                        <Output Name="City" Path="records.#.City"></Output>
+                        <Output Name="State" Path="records.#.State"></Output>
+                        <Output Name="Country" Path="records.#.Country"></Output>
+                        <Output Name="Remark" Path="records.#.Description"></Output>
+                        <Output Name="CustomValue" Path=""></Output>
+                    </Outputs>
+                </Request>
+                <Request Name="SearchContact_accounts" Method="GET" URLFormat="{{.instance_url}}{{.APIVersion}}/query?q=select%20Id,OwnerId,Name,Phone,Fax,BillingStreet,BillingCity,BillingState,BillingPostalCode,BillingCountry,Description%20from%20Account%20where%20Phone%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20Fax%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27%20or%20Name%20LIKE%20%27%25{{UrlEncode .SearchValue}}%25%27" ResponseType="application/json">
+                    <Parameters></Parameters>
+                    <Outputs>
+                        <Output Name="ContactsId" Path="records.#.Id"></Output>
+                        <Output Name="FirstName" Path="records.#.Name"></Output>
+                        <Output Name="LastName" Path=""></Output>
+                        <Output Name="Company" Path=""></Output>
+                        <Output Name="Email" Path=""></Output>
+                        <Output Name="BusinessNumber" Path="records.#.Phone"></Output>
+                        <Output Name="BusinessNumber2" Path=""></Output>
+                        <Output Name="BusinessFaxNumber" Path="records.#.Fax"></Output>
+                        <Output Name="MobileNumber" Path=""></Output>
+                        <Output Name="MobileNumber2" Path=""></Output>
+                        <Output Name="HomeNumber" Path=""></Output>
+                        <Output Name="HomeNumber2" Path=""></Output>
+                        <Output Name="HomeFaxNumber" Path=""></Output>
+                        <Output Name="OtherNumber" Path=""></Output>
+                        <Output Name="ZipCode" Path="records.#.BillingPostalCode"></Output>
+                        <Output Name="Street" Path="records.#.BillingStreet"></Output>
+                        <Output Name="City" Path="records.#.BillingCity"></Output>
+                        <Output Name="State" Path="records.#.BillingState"></Output>
+                        <Output Name="Country" Path="records.#.BillingCountry"></Output>
+                        <Output Name="Remark" Path="records.#.Description"></Output>
+                        <Output Name="CustomValue" Path=""></Output>
+                    </Outputs>
+                </Request>
+            </Requests>
+        </Scenario>
+        <Scenario Id="UserAssociation" Type="REST">
+            <Presets></Presets>
+            <Parameters></Parameters>
+            <Requests>
+                <Request Name="UserAssociation" Method="GET" URLFormat="{{.instance_url}}{{.APIVersion}}/queryAll?q=select%20Id,Username,LastName,FirstName,Email,UserType,isActive%20from%20User" ResponseType="application/json">
+                    <Parameters>
+                        <Parameter Father="Pagination" Name="PaginationEnabled" Value="1"></Parameter>
+                        <Parameter Father="Pagination" Name="PaginationType" Value="link_based"></Parameter>
+                        <Parameter Father="Pagination" Name="VarNextPageUrlFormat" Value="{{.instance_url}}/{{.VarNextPageUrl}}"></Parameter>
+                        <Parameter Father="Pagination" Name="VarNextPagePath" Value="nextRecordsUrl"></Parameter>
+                    </Parameters>
+                    <Outputs>
+                        <Output Name="UserUniqueId" Path="records.#.Id"></Output>
+                        <Output Name="FirstName" Path="records.#.FirstName"></Output>
+                        <Output Name="LastName" Path="records.#.LastName"></Output>
+                        <Output Name="Email" Path="records.#.Email"></Output>
+                    </Outputs>
+                </Request>
+            </Requests>
+        </Scenario>
+        <Scenario Id="CreateNewContact" Type="REST">
+            <Presets></Presets>
+            <Parameters></Parameters>
+            <Requests>
+                <Request Name="contacts" Method="POST" URLFormat="{{.instance_url}}{{.APIVersion}}/sobjects/Contact" ResponseType="application/json">
+                    <Parameters>
+                        <Parameter Name="Data" Type="Body" Value="{&#34;FirstName&#34;: &#34;{{.FirstName}}&#34;,&#34;LastName&#34;: &#34;{{.LastName}}&#34;,&#34;Phone&#34;: &#34;{{.BusinessNumber}}&#34;{{if .CrmId}},&#34;OwnerId&#34;: &#34;{{.CrmId}}&#34;{{end}}}"></Parameter>
+                    </Parameters>
+                    <Outputs>
+                        <Output Name="ContactId" Path="id"></Output>
+                    </Outputs>
+                </Request>
+                <Request Name="leads" Method="POST" URLFormat="{{.instance_url}}{{.APIVersion}}/sobjects/Lead" ResponseType="application/json">
+                    <Parameters>
+                        <Parameter Name="Data" Type="Body" Value="{&#34;FirstName&#34;: &#34;{{.FirstName}}&#34;,&#34;LastName&#34;: &#34;{{.LastName}}&#34;,&#34;Company&#34;: &#34;Unknown&#34;,&#34;Phone&#34;: &#34;{{.BusinessNumber}}&#34;{{if .CrmId}},&#34;OwnerId&#34;: &#34;{{.CrmId}}&#34;{{end}}}"></Parameter>
+                    </Parameters>
+                    <Outputs>
+                        <Output Name="ContactId" Path="id"></Output>
+                    </Outputs>
+                </Request>
+            </Requests>
+        </Scenario>
+        <Scenario Id="CallJournal" Type="REST">
+            <Presets></Presets>
+            <Parameters>
+                <Parameter Name="EnableSubject" Value="1"></Parameter>
+                <Parameter Name="Subject" Value="Extension Call"></Parameter>
+                <Parameter Name="EnableDescription" Value="1"></Parameter>
+                <Parameter Name="Description" Value="Call: {{.Time}} {{.Call_Log_Status}} from {{.Call_From}} to {{.Call_To}} {{.Talk_Duration}}"></Parameter>
+                <Parameter Name="EnablePlayCallRecording" Value="0"></Parameter>
+                <Parameter Name="PlayCallRecording" Value="0"></Parameter>
+                <Parameter Name="EnableForwardCallLogForAnsweredAgent" Value="1"></Parameter>
+                <Parameter Name="ForwardCallLogForAnsweredAgent" Value="0"></Parameter>
+                <Parameter Name="NeedSyncContact" Value="0"></Parameter>
+            </Parameters>
+            <Requests>
+                <Request Name="CallJournal" Method="POST" URLFormat="{{.instance_url}}{{.APIVersion}}/sobjects/Task" ResponseType="application/json">
+                    <Parameters>
+                        <Parameter Name="Data" Type="Body" Value="{&#34;Subject&#34;: &#34;{{.Subject}}&#34;,&#34;Status&#34;: &#34;Completed&#34;,&#34;Description&#34;: &#34;{{.Description}}&#34;,&#34;WhoId&#34;: &#34;{{if or (eq .ContactSyncType &#34;leads&#34;) (eq .ContactSyncType &#34;contacts&#34;)}}{{.ContactId}}{{end}}&#34;,&#34;WhatId&#34;: &#34;{{if eq .ContactSyncType &#34;accounts&#34;}}{{.ContactId}}{{end}}&#34;,&#34;ActivityDate&#34;:&#34;{{ TimeFormat .StartTimeUnix &#34;yyyy-MM-dd&#34; &#34;1&#34;}}&#34;,&#34;TaskSubtype&#34;: &#34;Call&#34;,&#34;Priority&#34;: &#34;Normal&#34;{{if .CrmId}},&#34;OwnerId&#34;: &#34;{{.CrmId}}&#34;{{end}}}"></Parameter>
+                    </Parameters>
+                    <Outputs>
+                        <Output Name="CrmActId" Path="id"></Output>
+                    </Outputs>
+                </Request>
+                <Request Name="CallJournalUpdate" Method="PATCH" URLFormat="{{.instance_url}}{{.APIVersion}}/sobjects/Task/{{.CrmActId}}" ResponseType="application/json">
+                    <Parameters>
+                        <Parameter Name="Data" Type="Body" Value="{&#34;Description&#34;: &#34;{{.Description}}&#34;}"></Parameter>
+                    </Parameters>
+                    <Outputs></Outputs>
+                </Request>
+            </Requests>
+        </Scenario>
+        <Scenario Id="Common" Type="REST">
+            <Presets></Presets>
+            <Parameters></Parameters>
+            <Requests>
+                <Request Name="GetAccountName" Method="GET" URLFormat="{{.instance_url}}{{.APIVersion}}/query?q=select%20Name%20from%20Account%20where%20Id=%27{{.ForeignKey}}%27"  ResponseType="application/json">
+                    <Parameters></Parameters>
+                    <Outputs>
+                        <Output Name="Company" Path="records.0.Name"></Output>
+                    </Outputs>
+                </Request>
+            </Requests>
+        </Scenario>
+        <Scenario Id="ChatJournal" Type="REST">
+            <Presets></Presets>
+            <Parameters>
+                <Parameter Name="EnableSubject" Value="1"></Parameter>
+                <Parameter Name="Subject" Value="PhoneSystem External Chat Session"></Parameter>
+                <Parameter Father="PopulateTemplateString" Name="Owner" Value="&#34;OwnerId&#34;:&#34;{{.CrmId}}&#34;,"></Parameter>
+                <Parameter Father="PopulateTemplateString" Name="WhoModule1" Key="contacts" Value="&#34;WhoId&#34;:&#34;{{.ContactId}}&#34;,"></Parameter>
+                <Parameter Father="PopulateTemplateString" Name="WhoModule2" Key="leads" Value="&#34;WhoId&#34;:&#34;{{.ContactId}}&#34;,"></Parameter>
+            </Parameters>
+            <Requests>
+                <Request Name="ChatJournalDefault" Method="POST" ResponseType="application/json" URLFormat="{{.instance_url}}{{.APIVersion}}/sobjects/Task/">
+                    <Parameters>
+                        <Parameter Name="Data" Type="Body" Value="{{&#34;{&#34;}}{{.Owner}}{{.WhoModule}}&#34;Subject&#34;:&#34;{{.Subject}}&#34;,&#34;Status&#34;:&#34;Completed&#34;,&#34;Priority&#34;:&#34;Normal&#34;,&#34;Description&#34;:&#34;Message Channel Type: {{.Channel_Display}}{{.Messages}}&#34;,&#34;ActivityDate&#34;:&#34;{{ TimeFormat .StartTimeUnix &quot;yyyy-MM-dd&quot; &quot;1&quot; }}&#34;,&#34;TaskSubtype&#34;:&#34;Task&#34;}"></Parameter>
+                    </Parameters>
+                    <Outputs></Outputs>
+                </Request>
+            </Requests>
+        </Scenario>
+    </Scenarios>
+</Information>

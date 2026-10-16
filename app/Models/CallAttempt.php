@@ -9,6 +9,7 @@ use App\Models\Concerns\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -18,6 +19,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $attempted_at
  * @property CallOutcome $outcome
  * @property string|null $notes
+ * @property-read PbxCallLog|null $pbxCallLog
  */
 #[Fillable([
     'team_id',
@@ -56,5 +58,15 @@ final class CallAttempt extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The phone system call this attempt was logged from, if any.
+     *
+     * @return HasOne<PbxCallLog, $this>
+     */
+    public function pbxCallLog(): HasOne
+    {
+        return $this->hasOne(PbxCallLog::class);
     }
 }

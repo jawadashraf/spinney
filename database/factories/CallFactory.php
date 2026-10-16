@@ -6,7 +6,9 @@ namespace Database\Factories;
 
 use App\Enums\CallOutcome;
 use App\Enums\CallStatus;
+use App\Enums\PbxCallResult;
 use App\Models\Call;
+use App\Models\PbxCallLog;
 use App\Models\People;
 use App\Models\Team;
 use App\Models\User;
@@ -65,6 +67,35 @@ final class CallFactory extends Factory
             'last_attempt_at' => now()->subDay(),
             'notes' => fake()->paragraph(),
         ]);
+    }
+
+    /**
+     * Answered on the phone system, with the liaison's notes still to be added.
+     */
+    public function awaitingNotes(): self
+    {
+        return $this->state(fn (): array => [
+            'outcome' => CallOutcome::Answered,
+            'attempt_count' => 1,
+            'last_attempt_at' => now()->subMinutes(10),
+        ])->afterCreating(function (Call $call): void {
+            $attempt = $call->attempts()->create([
+                'team_id' => $call->team_id,
+                'user_id' => $call->assigned_user_id,
+                'attempted_at' => $call->last_attempt_at,
+                'outcome' => CallOutcome::Answered,
+            ]);
+
+            PbxCallLog::factory()->create([
+                'team_id' => $call->team_id,
+                'user_id' => $call->assigned_user_id,
+                'people_id' => $call->people_id,
+                'call_id' => $call->id,
+                'call_attempt_id' => $attempt->id,
+                'started_at' => $call->last_attempt_at,
+                'result' => PbxCallResult::AwaitingNotes,
+            ]);
+        });
     }
 
     public function assignedTo(User $user): self

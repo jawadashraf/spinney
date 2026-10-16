@@ -282,6 +282,18 @@ final class Call extends Model
     }
 
     /**
+     * Open calls that are overdue or due before the end of the day in the UK.
+     *
+     * @param  Builder<Call>  $query
+     * @return Builder<Call>
+     */
+    #[Scope]
+    protected function dueByEndOfUkDay(Builder $query): Builder
+    {
+        return $query->open()->where('calls.due_at', '<=', Carbon::now('Europe/London')->endOfDay()->setTimezone(config('app.timezone')));
+    }
+
+    /**
      * @param  Builder<Call>  $query
      * @return Builder<Call>
      */
@@ -335,6 +347,29 @@ final class Call extends Model
     public function isOverdue(): bool
     {
         return $this->isOpen() && $this->due_at->isPast();
+    }
+
+    /**
+     * The phone system logged an answered call that the liaison has not yet written notes for.
+     */
+    public function isAwaitingNotes(): bool
+    {
+        return $this->isOpen() && $this->outcome === CallOutcome::Answered;
+    }
+
+    /**
+     * The answered attempt logged by the phone system that the liaison's notes complete.
+     */
+    public function pendingPhoneSystemAttempt(): ?CallAttempt
+    {
+        if (! $this->isAwaitingNotes()) {
+            return null;
+        }
+
+        return $this->attempts()
+            ->where('outcome', CallOutcome::Answered)
+            ->whereHas('pbxCallLog')
+            ->first();
     }
 
     public function maxAttempts(): int

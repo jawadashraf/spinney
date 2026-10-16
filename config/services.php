@@ -63,4 +63,10 @@ return [
         'timeout' => (int) env('IDEAL_POSTCODES_TIMEOUT', 5),
         'cache_ttl' => (int) env('IDEAL_POSTCODES_CACHE_TTL', 86400),
     ],
+
+    'yeastar' => [
+        'api_key' => env('YEASTAR_API_KEY'),
+        'team_id' => env('YEASTAR_TEAM_ID'),
+        'misdial_seconds' => (int) env('YEASTAR_MISDIAL_SECONDS', 10),
+    ],
 ];

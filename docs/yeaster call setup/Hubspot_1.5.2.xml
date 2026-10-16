@@ -1,0 +1,271 @@
+<Information Provider="crm" Name="Hubspot" Key="hubspot" Logo="hubspot.png" Remark="" Version="1.5.2" AuthType="oauth2" MaxConcurrentRequest="10" UserAssociation="1" CallJournal="1" ChatJournal="1" CreateNewContact="1">
+  <Parameters />
+  <Scenarios>
+    <Scenario Id="AuthMethod" Type="AUTH">
+      <Presets />
+      <Parameters>
+        <Parameter Name="AuthMethod" Value="oauth2" />
+        <Parameter Name="TokenType" Value="Bearer" />
+        <Parameter Name="AuthEndPoint" Value="https://app.hubspot.com/oauth/authorize?client_id={{.client_id}}" />
+        <Parameter Name="TokenEndPoint" Value="https://api.hubapi.com/oauth/v1/token?client_id={{.client_id}}&amp;client_secret={{.client_secret}}" />
+        <Parameter Name="AdditionalQueryString" />
+        <Parameter Name="Scope" Value="oauth crm.objects.contacts.read settings.users.write crm.objects.contacts.write crm.objects.companies.write settings.users.read crm.schemas.contacts.read crm.objects.companies.read crm.objects.deals.read crm.objects.deals.write crm.schemas.companies.read crm.schemas.companies.write crm.schemas.contacts.write crm.schemas.deals.read crm.schemas.deals.write crm.objects.owners.read settings.users.teams.write settings.users.teams.read" />
+        <Parameter Name="ContentType" Value="application/x-www-form-urlencoded" />
+        <Parameter Name="ParamType" Value="body" />
+        <Parameter Name="CredentialType" />
+        <Parameter Name="Base64EncodedCredential" />
+        <Parameter Father="TokenErrorMap" Type="TokenInvalid" Name="TokenInvalid" Value="INVALID_AUTHENTICATION" />
+        <Parameter Father="TokenErrorMap" Type="TokenExpire" Name="TokenExpire" Value="EXPIRED_AUTHENTICATION" />
+        <Parameter Father="CustomFieldList" Name="client_id" Editor="password" Title="Client ID" Key="client_id" />
+        <Parameter Father="CustomFieldList" Name="client_secret" Editor="password" Title="Client Secret" Key="client_secret" />
+        <Parameter Father="PopulateTemplateString" Name="Content-Type" Type="Header" Value="application/json" />
+        <Parameter Father="PopulateTemplateString" Name="Accept" Type="Header" Value="application/json" />
+      </Parameters>
+      <Requests />
+      <Responses />
+    </Scenario>
+    <Scenario Id="GetGlobalInfo" Type="REST">
+      <Presets />
+      <Parameters />
+      <Requests>
+        <Request Name="GetAccountInfo" Method="GET" ResponseType="application/json" URLFormat="https://api.hubapi.com/account-info/v3/details">
+          <Parameters />
+          <Outputs>
+            <Output Name="PortalId" Path="portalId" />
+          </Outputs>
+        </Request>
+      </Requests>
+    </Scenario>
+    <Scenario Id="SyncContactAuto" Type="REST">
+      <Presets />
+      <Parameters>
+        <Parameter Name="ContactUrlType" Value="specify_url_format" />
+        <Parameter Name="URLFormat" Value="https://app.hubspot.com/contacts/{{.PortalId}}/{{if eq .ContactSyncType &quot;contacts&quot;}}contact{{else}}company{{end}}/{{.ContactId}}" />
+        <Parameter Name="ContactFieldForUri" />
+        <Parameter Name="ContactsIdEnable" Value="1" />
+        <Parameter Name="FirstNameEnable" Value="1" />
+        <Parameter Name="LastNameEnable" Value="1" />
+        <Parameter Name="CompanyEnable" Value="1" />
+        <Parameter Name="EmailEnable" Value="1" />
+        <Parameter Name="BusinessNumberEnable" Value="1" />
+        <Parameter Name="BusinessNumber2Enable" Value="1" />
+        <Parameter Name="BusinessFaxNumberEnable" Value="1" />
+        <Parameter Name="MobileNumberEnable" Value="1" />
+        <Parameter Name="MobileNumber2Enable" Value="1" />
+        <Parameter Name="HomeNumberEnable" Value="1" />
+        <Parameter Name="HomeNumber2Enable" Value="1" />
+        <Parameter Name="HomeFaxNumberEnable" Value="1" />
+        <Parameter Name="OtherNumberEnable" Value="1" />
+        <Parameter Name="ZipCodeEnable" Value="1" />
+        <Parameter Name="StreetEnable" Value="1" />
+        <Parameter Name="CityEnable" Value="1" />
+        <Parameter Name="StateEnable" Value="1" />
+        <Parameter Name="CountryEnable" Value="1" />
+        <Parameter Name="RemarkEnable" Value="1" />
+        <Parameter Name="CustomValueEnable" Value="1" />
+      </Parameters>
+      <Requests>
+        <Request Name="contacts" Method="POST" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/contacts/search">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;properties&quot;:[&quot;hs_object_id&quot;,&quot;hubspot_owner_id&quot;,&quot;firstname&quot;,&quot;lastname&quot;,&quot;company&quot;,&quot;email&quot;,&quot;phone&quot;,&quot;mobilephone&quot;,&quot;fax&quot;,&quot;address&quot;,&quot;city&quot;,&quot;state&quot;,&quot;country&quot;,&quot;zip&quot;],&quot;filterGroups&quot;:[{&quot;filters&quot;:[{&quot;propertyName&quot;:&quot;phone&quot;,&quot;operator&quot;:&quot;EQ&quot;,&quot;value&quot;:&quot;{{.Phone}}&quot;}]},{&quot;filters&quot;:[{&quot;propertyName&quot;:&quot;mobilephone&quot;,&quot;operator&quot;:&quot;EQ&quot;,&quot;value&quot;:&quot;{{.Phone}}&quot;}]},{&quot;filters&quot;:[{&quot;propertyName&quot;:&quot;fax&quot;,&quot;operator&quot;:&quot;EQ&quot;,&quot;value&quot;:&quot;{{.Phone}}&quot;}]}]}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="ContactsId" Path="results.#.id" />
+            <Output Name="FirstName" Path="results.#.properties.firstname" />
+            <Output Name="LastName" Path="results.#.properties.lastname" />
+            <Output Name="Company" Path="results.#.properties.company" />
+            <Output Name="Email" Path="results.#.properties.email" />
+            <Output Name="BusinessNumber" Path="results.#.properties.phone" />
+            <Output Name="BusinessFaxNumber" Path="results.#.properties.fax" />
+            <Output Name="MobileNumber" Path="results.#.properties.mobilephone" />
+            <Output Name="ZipCode" Path="results.#.properties.zip" />
+            <Output Name="Street" Path="results.#.properties.address" />
+            <Output Name="City" Path="results.#.properties.city" />
+            <Output Name="State" Path="results.#.properties.state" />
+            <Output Name="Country" Path="results.#.properties.country" />
+          </Outputs>
+        </Request>
+        <Request Name="companies" Method="POST" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/companies/search">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;properties&quot;:[&quot;hs_object_id&quot;,&quot;hubspot_owner_id&quot;,&quot;name&quot;,&quot;phone&quot;,&quot;description&quot;,&quot;address&quot;,&quot;city&quot;,&quot;state&quot;,&quot;country&quot;,&quot;zip&quot;],&quot;filterGroups&quot;:[{&quot;filters&quot;:[{&quot;propertyName&quot;:&quot;phone&quot;,&quot;operator&quot;:&quot;EQ&quot;,&quot;value&quot;:&quot;{{.Phone}}&quot;}]}]}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="ContactsId" Path="results.#.id" />
+            <Output Name="LastName" Path="results.#.properties.name" />
+            <Output Name="BusinessNumber" Path="results.#.properties.phone" />
+            <Output Name="ZipCode" Path="results.#.properties.zip" />
+            <Output Name="Street" Path="results.#.properties.address" />
+            <Output Name="City" Path="results.#.properties.city" />
+            <Output Name="State" Path="results.#.properties.state" />
+            <Output Name="Country" Path="results.#.properties.country" />
+            <Output Name="Remark" Path="results.#.properties.description" />
+          </Outputs>
+        </Request>
+      </Requests>
+    </Scenario>
+    <Scenario Id="SearchContact" Type="REST">
+      <Requests>
+        <Request Name="SearchContact_contacts" Method="POST" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/contacts/search">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;properties&quot;:[&quot;hs_object_id&quot;,&quot;hubspot_owner_id&quot;,&quot;firstname&quot;,&quot;lastname&quot;,&quot;company&quot;,&quot;email&quot;,&quot;phone&quot;,&quot;mobilephone&quot;,&quot;fax&quot;,&quot;address&quot;,&quot;city&quot;,&quot;state&quot;,&quot;country&quot;,&quot;zip&quot;],&quot;filterGroups&quot;:[{&quot;filters&quot;:[{&quot;propertyName&quot;:&quot;phone&quot;,&quot;operator&quot;:&quot;CONTAINS_TOKEN&quot;,&quot;value&quot;:&quot;*{{.SearchValue}}*&quot;}]},{&quot;filters&quot;:[{&quot;propertyName&quot;:&quot;mobilephone&quot;,&quot;operator&quot;:&quot;CONTAINS_TOKEN&quot;,&quot;value&quot;:&quot;*{{.SearchValue}}*&quot;}]},{&quot;filters&quot;:[{&quot;propertyName&quot;:&quot;fax&quot;,&quot;operator&quot;:&quot;CONTAINS_TOKEN&quot;,&quot;value&quot;:&quot;*{{.SearchValue}}*&quot;}]},{&quot;filters&quot;:[{&quot;propertyName&quot;:&quot;firstname&quot;,&quot;operator&quot;:&quot;CONTAINS_TOKEN&quot;,&quot;value&quot;:&quot;*{{.SearchValue}}*&quot;}]},{&quot;filters&quot;:[{&quot;propertyName&quot;:&quot;lastname&quot;,&quot;operator&quot;:&quot;CONTAINS_TOKEN&quot;,&quot;value&quot;:&quot;*{{.SearchValue}}*&quot;}]}]}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="ContactsId" Path="results.#.id" />
+            <Output Name="FirstName" Path="results.#.properties.firstname" />
+            <Output Name="LastName" Path="results.#.properties.lastname" />
+            <Output Name="Company" Path="results.#.properties.company" />
+            <Output Name="Email" Path="results.#.properties.email" />
+            <Output Name="BusinessNumber" Path="results.#.properties.phone" />
+            <Output Name="BusinessFaxNumber" Path="results.#.properties.fax" />
+            <Output Name="MobileNumber" Path="results.#.properties.mobilephone" />
+            <Output Name="ZipCode" Path="results.#.properties.zip" />
+            <Output Name="Street" Path="results.#.properties.address" />
+            <Output Name="City" Path="results.#.properties.city" />
+            <Output Name="State" Path="results.#.properties.state" />
+            <Output Name="Country" Path="results.#.properties.country" />
+          </Outputs>
+        </Request>
+        <Request Name="SearchContact_companies" Method="POST" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/companies/search">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;properties&quot;:[&quot;hs_object_id&quot;,&quot;hubspot_owner_id&quot;,&quot;name&quot;,&quot;phone&quot;,&quot;description&quot;,&quot;address&quot;,&quot;city&quot;,&quot;state&quot;,&quot;country&quot;,&quot;zip&quot;],&quot;filterGroups&quot;:[{&quot;filters&quot;:[{&quot;propertyName&quot;:&quot;phone&quot;,&quot;operator&quot;:&quot;CONTAINS_TOKEN&quot;,&quot;value&quot;:&quot;*{{.SearchValue}}*&quot;}]},{&quot;filters&quot;:[{&quot;propertyName&quot;:&quot;name&quot;,&quot;operator&quot;:&quot;CONTAINS_TOKEN&quot;,&quot;value&quot;:&quot;*{{.SearchValue}}*&quot;}]}]}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="ContactsId" Path="results.#.id" />
+            <Output Name="LastName" Path="results.#.properties.name" />
+            <Output Name="BusinessNumber" Path="results.#.properties.phone" />
+            <Output Name="ZipCode" Path="results.#.properties.zip" />
+            <Output Name="Street" Path="results.#.properties.address" />
+            <Output Name="City" Path="results.#.properties.city" />
+            <Output Name="State" Path="results.#.properties.state" />
+            <Output Name="Country" Path="results.#.properties.country" />
+            <Output Name="Remark" Path="results.#.properties.description" />
+          </Outputs>
+        </Request>
+      </Requests>
+    </Scenario>
+    <Scenario Id="UserAssociation" Type="REST">
+      <Presets />
+      <Parameters />
+      <Requests>
+        <Request Name="UserAssociation" Method="GET" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/owners?limit=100">
+          <Parameters>
+            <Parameter Father="Pagination" Name="PaginationEnabled" Value="1" />
+            <Parameter Father="Pagination" Name="PaginationType" Value="link_based" />
+            <Parameter Father="Pagination" Name="VarNextPageUrlFormat" Value="{{.VarNextPageUrl}}" />
+            <Parameter Father="Pagination" Name="VarNextPagePath" Value="paging.next.link" />
+          </Parameters>
+          <Outputs>
+            <Output Name="UserUniqueId" Path="results.#.id" />
+            <Output Name="FirstName" Path="results.#.firstName" />
+            <Output Name="LastName" Path="results.#.lastName" />
+            <Output Name="Email" Path="results.#.email" />
+          </Outputs>
+        </Request>
+      </Requests>
+    </Scenario>
+    <Scenario Id="CreateNewContact" Type="REST">
+      <Presets />
+      <Parameters>
+        <Parameter Father="PopulateTemplateString" Name="Owner" Value="&quot;Owner&quot;:{&quot;id&quot;:&quot;{{.CrmId}}&quot;}," />
+      </Parameters>
+      <Requests>
+        <Request Name="contacts" Method="POST" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/contacts">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;properties&quot;:{&quot;firstname&quot;:&quot;{{.FirstName}}&quot;,&quot;lastname&quot;:&quot;{{.LastName}}&quot;,&quot;phone&quot;:&quot;{{.BusinessNumber}}&quot;}}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="ContactId" Path="id" />
+          </Outputs>
+        </Request>
+        <Request Name="companies" Method="POST" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/companies">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;properties&quot;:{&quot;name&quot;:&quot;{{.DisplayName}}&quot;,&quot;phone&quot;:&quot;{{.BusinessNumber}}&quot;}}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="ContactId" Path="id" />
+          </Outputs>
+        </Request>
+      </Requests>
+    </Scenario>
+    <Scenario Id="CallJournal" Type="REST">
+      <Presets />
+      <Parameters>
+        <Parameter Name="EnableDescription" Value="1" />
+        <Parameter Name="Description" Value="Call: {{.Time}} {{.Call_Log_Status}} from {{.Call_From}} to {{.Call_To}} {{.Talk_Duration}}" />
+        <Parameter Name="EnablePlayCallRecording" Value="1" />
+        <Parameter Name="PlayCallRecording" Value="0" />
+        <Parameter Name="EnableForwardCallLogForAnsweredAgent" Value="1" />
+        <Parameter Name="ForwardCallLogForAnsweredAgent" Value="0" />
+        <Parameter Name="NeedSyncContact" Value="1" />
+        <Parameter Father="PopulateTemplateString" Name="Owner" Value="&quot;Owner&quot;:{&quot;id&quot;:&quot;{{.CrmId}}&quot;}," />
+        <Parameter Father="PopulateTemplateString" Name="WhoModule1" Key="contacts" Value="contacts" />
+        <Parameter Father="PopulateTemplateString" Name="WhoModule2" Key="companies" Value="companies" />
+        <Parameter Father="ConvertParameter" Name="WhoModuleId" From="WhoModule" Key="contacts" Value="194" />
+        <Parameter Father="ConvertParameter" Name="WhoModuleId" From="WhoModule" Key="companies" Value="182" />
+        <Parameter Father="ConvertParameter" Name="HsCallDisposition" From="CallDisposition" Key="BUSY" Value="9d9162e7-6cf3-4944-bf63-4dff82258764" />
+        <Parameter Father="ConvertParameter" Name="HsCallDisposition" From="CallDisposition" Key="ANSWERED" Value="f240bbac-87c9-4f6e-bf70-924b57d47db7" />
+        <Parameter Father="ConvertParameter" Name="HsCallDisposition" From="CallDisposition" Key="NO ANSWER" Value="73a0d17f-1163-4015-bdd5-ec830791da20" />
+        <Parameter Father="ConvertParameter" Name="HsCallDisposition" From="CallDisposition" Key="VOICEMAIL" Value="b2cf5968-551e-4856-9783-52b3da59a7d0" />
+        <Parameter Father="ConvertParameter" Name="HsCallStatus" From="Call_Status" Key="Missed" Value="NO_ANSWER" />
+        <Parameter Father="ConvertParameter" Name="HsCallStatus" From="Call_Status" Key="Completed" Value="COMPLETED" />
+      </Parameters>
+      <Requests>
+        <Request Name="CallJournalInboundSuccess" Method="POST" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/calls">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;associations&quot;:[{&quot;to&quot;:{&quot;id&quot;:&quot;{{.ContactId}}&quot;,&quot;type&quot;:&quot;{{.WhoModule}}&quot;},&quot;types&quot;:[{&quot;associationCategory&quot;:&quot;HUBSPOT_DEFINED&quot;,&quot;associationTypeId&quot;:{{.WhoModuleId}}}]}],&quot;properties&quot;:{&quot;hs_timestamp&quot;:&quot;{{ TsSecToMilliSec .StartTimeUnix}}&quot;,&quot;hs_call_body&quot;:&quot;{{.Description}}&quot;,&quot;hubspot_owner_id&quot;:&quot;{{.CrmId}}&quot;,&quot;hs_call_direction&quot;:&quot;INBOUND&quot;,&quot;hs_call_duration&quot;:{{ TsSecToMilliSec .Talk_Duration_Sec}},&quot;hs_call_disposition&quot;:&quot;{{.HsCallDisposition}}&quot;,&quot;hs_call_to_number&quot;:&quot;{{.Call_To}}&quot;,&quot;hs_call_from_number&quot;:&quot;{{.Call_From}}&quot;,&quot;hs_call_status&quot;:&quot;{{.HsCallStatus}}&quot;{{if .RecordPath}},&quot;hs_call_recording_url&quot;:&quot;{{.RecordPath}}&quot;{{end}}}}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="CrmActId" Path="id" />
+          </Outputs>
+        </Request>
+        <Request Name="CallJournalOutboundSuccess" Method="POST" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/calls">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;associations&quot;:[{&quot;to&quot;:{&quot;id&quot;:&quot;{{.ContactId}}&quot;,&quot;type&quot;:&quot;{{.WhoModule}}&quot;},&quot;types&quot;:[{&quot;associationCategory&quot;:&quot;HUBSPOT_DEFINED&quot;,&quot;associationTypeId&quot;:{{.WhoModuleId}}}]}],&quot;properties&quot;:{&quot;hs_timestamp&quot;:&quot;{{ TsSecToMilliSec .StartTimeUnix}}&quot;,&quot;hs_call_body&quot;:&quot;{{.Description}}&quot;,&quot;hubspot_owner_id&quot;:&quot;{{.CrmId}}&quot;,&quot;hs_call_direction&quot;:&quot;OUTBOUND&quot;,&quot;hs_call_duration&quot;:{{ TsSecToMilliSec .Talk_Duration_Sec}},&quot;hs_call_disposition&quot;:&quot;{{.HsCallDisposition}}&quot;,&quot;hs_call_to_number&quot;:&quot;{{.Call_To}}&quot;,&quot;hs_call_from_number&quot;:&quot;{{.Call_From}}&quot;,&quot;hs_call_status&quot;:&quot;{{.HsCallStatus}}&quot;{{if .RecordPath}},&quot;hs_call_recording_url&quot;:&quot;{{.RecordPath}}&quot;{{end}}}}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="CrmActId" Path="id" />
+          </Outputs>
+        </Request>
+        <Request Name="CallJournalInboundFailed" Method="POST" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/calls">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;associations&quot;:[{&quot;to&quot;:{&quot;id&quot;:&quot;{{.ContactId}}&quot;,&quot;type&quot;:&quot;{{.WhoModule}}&quot;},&quot;types&quot;:[{&quot;associationCategory&quot;:&quot;HUBSPOT_DEFINED&quot;,&quot;associationTypeId&quot;:{{.WhoModuleId}}}]}],&quot;properties&quot;:{&quot;hs_timestamp&quot;:&quot;{{ TsSecToMilliSec .StartTimeUnix}}&quot;,&quot;hs_call_body&quot;:&quot;{{.Description}}&quot;,&quot;hubspot_owner_id&quot;:&quot;{{.CrmId}}&quot;,&quot;hs_call_direction&quot;:&quot;INBOUND&quot;,&quot;hs_call_duration&quot;:{{ TsSecToMilliSec .Talk_Duration_Sec}},&quot;hs_call_disposition&quot;:&quot;{{.HsCallDisposition}}&quot;,&quot;hs_call_to_number&quot;:&quot;{{.Call_To}}&quot;,&quot;hs_call_from_number&quot;:&quot;{{.Call_From}}&quot;,&quot;hs_call_status&quot;:&quot;{{.HsCallStatus}}&quot;{{if .RecordPath}},&quot;hs_call_recording_url&quot;:&quot;{{.RecordPath}}&quot;{{end}}}}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="CrmActId" Path="id" />
+          </Outputs>
+        </Request>
+        <Request Name="CallJournalOutboundFailed" Method="POST" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/calls">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;associations&quot;:[{&quot;to&quot;:{&quot;id&quot;:&quot;{{.ContactId}}&quot;,&quot;type&quot;:&quot;{{.WhoModule}}&quot;},&quot;types&quot;:[{&quot;associationCategory&quot;:&quot;HUBSPOT_DEFINED&quot;,&quot;associationTypeId&quot;:{{.WhoModuleId}}}]}],&quot;properties&quot;:{&quot;hs_timestamp&quot;:&quot;{{ TsSecToMilliSec .StartTimeUnix}}&quot;,&quot;hs_call_body&quot;:&quot;{{.Description}}&quot;,&quot;hubspot_owner_id&quot;:&quot;{{.CrmId}}&quot;,&quot;hs_call_direction&quot;:&quot;OUTBOUND&quot;,&quot;hs_call_duration&quot;:{{ TsSecToMilliSec .Talk_Duration_Sec}},&quot;hs_call_disposition&quot;:&quot;{{.HsCallDisposition}}&quot;,&quot;hs_call_to_number&quot;:&quot;{{.Call_To}}&quot;,&quot;hs_call_from_number&quot;:&quot;{{.Call_From}}&quot;,&quot;hs_call_status&quot;:&quot;{{.HsCallStatus}}&quot;{{if .RecordPath}},&quot;hs_call_recording_url&quot;:&quot;{{.RecordPath}}&quot;{{end}}}}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="CrmActId" Path="id" />
+          </Outputs>
+        </Request>
+        <Request Name="CallJournalUpdate" Method="PATCH" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/calls/{{.CrmActId}}">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;properties&quot;:{&quot;hs_call_body&quot;:&quot;{{.Description}}&quot;}}" />
+          </Parameters>
+          <Outputs />
+        </Request>
+      </Requests>
+    </Scenario>
+    <Scenario Id="ChatJournal" Type="REST">
+      <Presets />
+      <Parameters>
+        <Parameter Name="EnableSubject" Value="1" />
+        <Parameter Name="Subject" Value="PhoneSystem External Chat Session" />
+        <Parameter Father="PopulateTemplateString" Name="WhoModule1" Key="contacts" Value="contacts" />
+        <Parameter Father="ConvertParameter" Name="WhoModuleId" From="WhoModule" Key="contacts" Value="200" />
+      </Parameters>
+      <Requests>
+        <Request Name="ChatJournalDefault" Method="POST" ResponseType="application/json" URLFormat="https://api.hubapi.com/crm/v3/objects/meetings">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;associations&quot;:[{&quot;to&quot;:{&quot;id&quot;:&quot;{{.ContactId}}&quot;,&quot;type&quot;:&quot;{{.WhoModule}}&quot;},&quot;types&quot;:[{&quot;associationCategory&quot;:&quot;HUBSPOT_DEFINED&quot;,&quot;associationTypeId&quot;:{{.WhoModuleId}}}]}],&quot;properties&quot;:{&quot;hs_meeting_title&quot;:&quot;{{.Subject}}&quot;,&quot;hs_timestamp&quot;:&quot;{{ TsSecToMilliSec .StartTimeUnix}}&quot;,&quot;hs_meeting_start_time&quot;:&quot;{{ TsSecToMilliSec .StartTimeUnix}}&quot;,&quot;hs_meeting_end_time&quot;:&quot;{{ TsSecToMilliSec .EndTimeUnix}}&quot;,&quot;hs_meeting_outcome&quot;:&quot;COMPLETED&quot;,&quot;hs_meeting_body&quot;:&quot;Message Channel Type: {{.Channel_Display}}{{.Messages}}&quot;}}" />
+          </Parameters>
+          <Outputs />
+        </Request>
+      </Requests>
+    </Scenario>
+  </Scenarios>
+</Information>

@@ -63,7 +63,8 @@ final class CallsTable
                     ->badge()
                     ->placeholder('Ad-hoc'),
                 TextColumn::make('status')
-                    ->badge(),
+                    ->badge()
+                    ->description(fn (Call $record): ?string => $record->isAwaitingNotes() ? 'Answered – add notes' : null),
                 TextColumn::make('attempt_count')
                     ->label('Attempts')
                     ->numeric(0)

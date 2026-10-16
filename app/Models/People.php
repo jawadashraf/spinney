@@ -13,6 +13,7 @@ use App\Models\Concerns\HasTeam;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Observers\PeopleObserver;
 use App\Services\AvatarService;
+use App\Support\PhoneNumber;
 use Database\Factories\PeopleFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -132,6 +133,10 @@ class People extends Model implements HasCustomFieldsContract
 
             if ($people->first_name && $people->last_name) {
                 $people->attributes['name'] = "{$people->first_name} {$people->last_name}";
+            }
+
+            if ($people->isDirty('phone')) {
+                $people->phone_normalized = PhoneNumber::normalize($people->phone);
             }
         });
     }

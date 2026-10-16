@@ -28,6 +28,14 @@ final class PeopleFactory extends Factory
         ];
     }
 
+    public function serviceUser(): self
+    {
+        return $this->state([
+            'type' => 'service_user',
+            'is_service_user' => true,
+        ]);
+    }
+
     public function configure(): Factory
     {
         // Use minutes instead of seconds to ensure distinct timestamps

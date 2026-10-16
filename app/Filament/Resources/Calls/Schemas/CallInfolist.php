@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Calls\Schemas;
 
 use App\Filament\Resources\Calls\CallResource;
 use App\Models\Call;
+use App\Models\CallAttempt;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -100,8 +101,18 @@ final class CallInfolist
                                     ->placeholder('—'),
                                 TextEntry::make('outcome')
                                     ->badge(),
+                                TextEntry::make('pbxCallLog.talk_duration_sec')
+                                    ->label('Phone system')
+                                    ->formatStateUsing(fn (CallAttempt $record): string => 'Talked '.$record->pbxCallLog?->formattedTalkDuration())
+                                    ->visible(fn (CallAttempt $record): bool => $record->pbxCallLog !== null),
+                                TextEntry::make('pbxCallLog.recording_url')
+                                    ->label('Recording')
+                                    ->formatStateUsing(fn (): string => 'Play recording')
+                                    ->url(fn (CallAttempt $record): ?string => $record->pbxCallLog?->recording_url, shouldOpenInNewTab: true)
+                                    ->color('primary')
+                                    ->visible(fn (CallAttempt $record): bool => filled($record->pbxCallLog?->recording_url)),
                                 TextEntry::make('notes')
-                                    ->placeholder('—')
+                                    ->placeholder(fn (CallAttempt $record): string => $record->call?->isAwaitingNotes() && $record->pbxCallLog !== null ? 'Awaiting notes from the liaison' : '—')
                                     ->columnSpanFull(),
                             ]),
                     ]),

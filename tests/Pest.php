@@ -105,3 +105,18 @@ function something()
 {
     // ..
 }
+
+/**
+ * Configure the Yeastar integration for a team and return the PBX's basic-auth header.
+ *
+ * @return array{Authorization: string}
+ */
+function yeastarHeaders(int $teamId, string $apiKey = 'test-yeastar-key'): array
+{
+    config([
+        'services.yeastar.api_key' => $apiKey,
+        'services.yeastar.team_id' => $teamId,
+    ]);
+
+    return ['Authorization' => 'Basic '.base64_encode($apiKey)];
+}
