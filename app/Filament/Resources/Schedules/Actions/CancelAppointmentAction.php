@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Schedules\Actions;
 
+use App\Actions\Appointments\UpdateAppointmentStatus;
 use App\Enums\AppointmentStatus;
 use App\Models\Schedule;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 
@@ -20,26 +22,20 @@ final class CancelAppointmentAction extends Action
             ->color('danger')
             ->requiresConfirmation()
             ->modalHeading('Cancel Appointment')
-            ->modalDescription('Cancel this appointment. A reason is recommended.')
-            ->form([
+            ->modalDescription('The counsellor and the attendee will be emailed. The reason is only shared with staff.')
+            ->schema([
                 Textarea::make('cancellation_reason')
                     ->label('Cancellation Reason')
                     ->maxLength(500)
                     ->rows(3),
             ])
-            ->visible(fn (Schedule $record): bool => in_array(
-                $record->metadata['appointment_status'] ?? AppointmentStatus::SCHEDULED->value,
-                [AppointmentStatus::SCHEDULED->value, AppointmentStatus::CONFIRMED->value]
-            ) && ($record->schedule_type->value ?? '') === 'appointment')
-            ->action(function (Schedule $record, array $data): void {
-                $record->metadata = array_merge($record->metadata ?? [], [
-                    'appointment_status' => AppointmentStatus::CANCELLED->value,
-                    'cancellation_reason' => $data['cancellation_reason'] ?? null,
-                    'cancelled_at' => now()->toIso8601String(),
-                    'cancelled_by' => auth()->id(),
-                ]);
-                $record->is_active = false;
-                $record->save();
-            });
+            ->visible(fn (Schedule $record): bool => ($record->schedule_type->value ?? '') === 'appointment'
+                && $record->getAppointmentStatus()->canTransitionTo(AppointmentStatus::CANCELLED))
+            ->action(function (Schedule $record, array $data, UpdateAppointmentStatus $update): void {
+                /** @var User $user */
+                $user = auth()->user();
+                $update->cancel($record, $user, $data['cancellation_reason'] ?? null);
+            })
+            ->successNotificationTitle('Appointment cancelled');
     }
 }

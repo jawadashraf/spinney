@@ -14,6 +14,7 @@ use App\Models\Import;
 use App\Models\Note;
 use App\Models\Opportunity;
 use App\Models\People;
+use App\Models\Schedule;
 use App\Models\ServiceUserProfile;
 use App\Models\Task;
 use App\Models\Team;
@@ -190,6 +191,7 @@ final class AppServiceProvider extends ServiceProvider
             'call_plan' => CallPlan::class,
             'call' => Call::class,
             'call_attempt' => CallAttempt::class,
+            'schedule' => Schedule::class,
         ]);
 
         // Bind our custom Import model to the Filament Import model

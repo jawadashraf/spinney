@@ -48,7 +48,8 @@ enum AppointmentStatus: string implements HasColor, HasIcon, HasLabel
     public function canTransitionTo(self $target): bool
     {
         return match ($this) {
-            self::SCHEDULED => in_array($target, [self::CONFIRMED, self::CANCELLED]),
+            // A session can be recorded even if nobody confirmed the booking first.
+            self::SCHEDULED => in_array($target, [self::CONFIRMED, self::COMPLETED, self::CANCELLED]),
             self::CONFIRMED => in_array($target, [self::COMPLETED, self::CANCELLED]),
             self::COMPLETED, self::CANCELLED => false,
         };

@@ -5,15 +5,18 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\AppointmentStatus;
+use App\Enums\AttendanceStatus;
 use App\Enums\AttendeeType;
 use App\Enums\CounselorType;
 use App\Enums\PaymentType;
 use App\Enums\SessionType;
 use App\Models\Concerns\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 use Zap\Models\Schedule as ZapSchedule;
 
 #[Fillable([
@@ -68,6 +71,103 @@ final class Schedule extends ZapSchedule
     public function serviceUser(): BelongsTo
     {
         return $this->belongsTo(People::class, 'metadata->service_user_id');
+    }
+
+    /**
+     * Appointment statuses that still await the session.
+     *
+     * @var list<AppointmentStatus>
+     */
+    public const array OPEN_STATUSES = [AppointmentStatus::SCHEDULED, AppointmentStatus::CONFIRMED];
+
+    /**
+     * Limit a schedule query to appointments with any of the given statuses. Appointments booked before the
+     * status was recorded have none, and count as scheduled.
+     *
+     * @template TQuery of Builder
+     *
+     * @param  TQuery  $query
+     * @param  list<AppointmentStatus>  $statuses
+     * @return TQuery
+     */
+    public static function whereAppointmentStatus(Builder $query, array $statuses): Builder
+    {
+        $values = array_map(fn (AppointmentStatus $status): string => $status->value, $statuses);
+
+        return $query->where(function (Builder $query) use ($values, $statuses): void {
+            $query->whereIn('metadata->appointment_status', $values);
+
+            if (in_array(AppointmentStatus::SCHEDULED, $statuses, true)) {
+                $query->orWhereNull('metadata->appointment_status');
+            }
+        });
+    }
+
+    /**
+     * The staff member the appointment is with, when it is a user.
+     */
+    public function counsellor(): ?User
+    {
+        return $this->schedulable instanceof User ? $this->schedulable : null;
+    }
+
+    public function isWithCounsellor(User $user): bool
+    {
+        return $this->schedulable_type === $user->getMorphClass() && (int) $this->schedulable_id === (int) $user->getKey();
+    }
+
+    /**
+     * Session notes are for the counsellor who held the session, managers and admins only.
+     */
+    public function sessionNotesVisibleTo(?User $user): bool
+    {
+        return $user instanceof User && ($user->managesAppointments() || $this->isWithCounsellor($user));
+    }
+
+    /**
+     * The booked service user. The serviceUser relation's key is a JSON path, which Eloquent cannot lazy-load
+     * for a single model, so it is looked up directly.
+     */
+    public function serviceUserRecord(): ?People
+    {
+        $id = $this->metadata['service_user_id'] ?? null;
+
+        return $id === null ? null : People::query()->find((int) $id);
+    }
+
+    public function attendeeName(): string
+    {
+        return $this->isServiceUserAppointment()
+            ? ($this->serviceUserRecord()->name ?? 'Service user')
+            : ($this->getExternalAttendeeName() ?? 'Attendee');
+    }
+
+    public function getAttendance(): ?AttendanceStatus
+    {
+        return AttendanceStatus::tryFrom((string) ($this->metadata['attendance'] ?? ''));
+    }
+
+    /**
+     * Start and end time, e.g. "10:00 - 11:00", from the booked slot, else the first period, else the dates.
+     */
+    public function timeRange(): string
+    {
+        $start = $this->metadata['start_time'] ?? $this->periods->first()->start_time ?? null;
+        $end = $this->metadata['end_time'] ?? $this->periods->first()->end_time ?? null;
+
+        if ($start === null || $end === null) {
+            $start = $this->start_date->format('H:i');
+            $end = $this->end_date?->format('H:i');
+        }
+
+        return substr((string) $start, 0, 5).' - '.substr((string) $end, 0, 5);
+    }
+
+    public function startsAt(): Carbon
+    {
+        $time = substr((string) ($this->metadata['start_time'] ?? $this->periods->first()->start_time ?? '00:00'), 0, 5);
+
+        return Carbon::parse($this->start_date->format('Y-m-d').' '.$time);
     }
 
     public function isServiceUserAppointment(): bool

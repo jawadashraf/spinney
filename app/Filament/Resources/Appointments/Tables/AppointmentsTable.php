@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Appointments\Tables;
 
+use App\Enums\AppointmentStatus;
 use App\Enums\AttendeeType;
 use App\Enums\CounselorType;
 use App\Enums\PaymentType;
@@ -38,10 +39,7 @@ final class AppointmentsTable
                     ->sortable(),
                 TextColumn::make('attendee')
                     ->label('Attendee')
-                    ->state(fn (Schedule $record): string => $record->isServiceUserAppointment()
-                        ? ($record->serviceUser->name ?? '—')
-                        : ($record->getExternalAttendeeName() ?? '—')
-                    )
+                    ->state(fn (Schedule $record): string => $record->attendeeName())
                     ->searchable(query: fn (Builder $query, string $search) => $query->whereHas('serviceUser', fn ($q) => $q->where('name', 'like', "%{$search}%"))->orWhere('metadata->external_attendee_name', 'like', "%{$search}%")),
                 TextColumn::make('metadata.attendee_type')
                     ->label('Attendee Type')
@@ -55,10 +53,21 @@ final class AppointmentsTable
                     ->sortable(),
                 TextColumn::make('selected_slot')
                     ->label('Time Slot')
-                    ->state(fn (Schedule $record): string => isset($record->metadata['start_time']) && isset($record->metadata['end_time'])
-                        ? "{$record->metadata['start_time']} - {$record->metadata['end_time']}"
-                        : '—'
-                    ),
+                    ->state(fn (Schedule $record): string => $record->timeRange()),
+                TextColumn::make('appointment_type')
+                    ->label('Type')
+                    ->state(fn (Schedule $record): ?string => $record->getCounselorType()?->getLabel())
+                    ->placeholder('—'),
+                TextColumn::make('appointment_status')
+                    ->label('Status')
+                    ->badge()
+                    ->state(fn (Schedule $record): string => $record->getAppointmentStatus()->getLabel())
+                    ->color(fn (Schedule $record): string => $record->getAppointmentStatus()->getColor()),
+                TextColumn::make('attendance')
+                    ->badge()
+                    ->state(fn (Schedule $record): ?string => $record->getAttendance()?->getLabel())
+                    ->color(fn (Schedule $record): string => $record->getAttendance()?->getColor() ?? 'gray')
+                    ->placeholder('—'),
                 TextColumn::make('metadata.session_type')
                     ->label('Session')
                     ->formatStateUsing(fn (string $state): string => SessionType::tryFrom($state)?->getLabel() ?? '—')
@@ -74,7 +83,8 @@ final class AppointmentsTable
                 IconColumn::make('is_active')
                     ->boolean()
                     ->sortable()
-                    ->label('Active'),
+                    ->label('Active')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -82,11 +92,17 @@ final class AppointmentsTable
             ])
             ->defaultSort('start_date', 'desc')
             ->filters([
+                SelectFilter::make('appointment_status')
+                    ->label('Status')
+                    ->options(AppointmentStatus::class)
+                    ->query(fn (Builder $query, array $data): Builder => filled($data['value'])
+                        ? Schedule::whereAppointmentStatus($query, [AppointmentStatus::from($data['value'])])
+                        : $query),
                 SelectFilter::make('metadata_counselor_type')
                     ->options(CounselorType::class)
                     ->label('Counselor Specialty')
                     ->query(fn (Builder $query, array $data): Builder => $data['value']
-                        ? $query->whereJsonContains('metadata->counselor_type', $data['value'])
+                        ? $query->where('metadata->counselor_type', $data['value'])
                         : $query),
                 SelectFilter::make('metadata_attendee_type')
                     ->options(AttendeeType::class)
@@ -106,7 +122,9 @@ final class AppointmentsTable
                     ->query(fn (Builder $query): Builder => $query->where('start_date', '>=', now()->toDateString()))
                     ->label('Upcoming'),
                 Filter::make('past')
-                    ->query(fn (Builder $query): Builder => $query->where('end_date', '<', now()->toDateString())->orWhereNull('end_date'))
+                    ->query(fn (Builder $query): Builder => $query->where(fn (Builder $query): Builder => $query
+                        ->where('end_date', '<', now()->toDateString())
+                        ->orWhereNull('end_date')))
                     ->label('Past'),
             ])
             ->recordActions([

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Support\AppointmentPermissions;
 use App\Support\CallPermissions;
 use App\Support\CompanyPermissions;
 use Illuminate\Database\Seeder;
@@ -95,6 +96,7 @@ final class SimplifiedRolePermissionSeeder extends Seeder
 
         CallPermissions::ensure($teamId);
         CompanyPermissions::ensure($teamId);
+        AppointmentPermissions::ensure($teamId);
 
         $this->command?->info('All roles and permissions have been seeded successfully.');
     }

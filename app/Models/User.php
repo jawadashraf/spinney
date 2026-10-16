@@ -293,6 +293,14 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     }
 
     /**
+     * Managers and admins see and manage every appointment; other staff only those they are booked to hold.
+     */
+    public function managesAppointments(): bool
+    {
+        return $this->isSuperAdmin() || $this->hasAnyRole(['admin', 'manager']);
+    }
+
+    /**
      * Determine if this user is a system administrator or has super_admin role across any team.
      */
     public function isSuperAdmin(): bool

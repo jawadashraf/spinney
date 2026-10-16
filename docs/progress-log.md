@@ -6,7 +6,7 @@ Updated: 2026-10-16
 ## Current Sprint
 - **Sprint**: Phase 2 completion
 - **Status**: In Progress
-- **Next Task**: Production mail set-up for outreach emails, then restricted notes.
+- **Next Task**: Restricted notes.
 
 ## Accomplishments
 ### Sprint 1: Foundations (Enquiry)
@@ -66,6 +66,7 @@ Updated: 2026-10-16
 - [x] **[Fin Mail]** Installed; templates, themes, mail settings and sent-email log in the System Admin panel.
 - [x] **[Verification]** Companies link to the organisation they are part of and carry verification status, note and source.
 - [x] **[Leicester directory]** Client research workbook (138 mosques, madrasahs, prayer rooms) converted and imported.
+- [x] **[Appointments]** Booking/cancellation/reminder emails to counsellor and attendee; counsellors' "My appointments"; Assessment and Aftercare types; audited status changes; session records (attended/no-show, note, next step) visible to counsellor, managers and admins; counsellor track on the Manager Dashboard.
 - [x] **[Outreach dashboard]** Directory reach and verification, engagements and outreach emails per month, coverage by type, companies not contacted in six months.
 
 ## Decisions
@@ -81,6 +82,7 @@ Updated: 2026-10-16
 | 2026-09-15 | An active call plan always keeps one open call | Aftercare follow-ups cannot silently stop | Dev |
 | 2026-10-08 | Yeastar via Custom CRM template; PBX never creates records; recordings stored as links | Data protection and record integrity | Dev |
 | 2026-10-16 | Outreach directory built on Companies (Organisation = tenant Team); managers and admins only | Avoids clashing with tenancy terminology; directory holds external contact details | Product |
+| 2026-10-16 | Appointment session notes visible to the counsellor, managers and admins only | Counselling notes are sensitive (requirements §7) | Product |
 | 2026-10-16 | Outreach emails via Fin Mail and the Hostinger mailbox, 100/day with 30 kept for notifications; no open/click tracking; bounces marked by hand | Low volume; Postmark can replace SMTP later | Product |
 
 ## Risks and Blockers

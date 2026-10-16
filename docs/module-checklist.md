@@ -47,10 +47,17 @@ Updated: 2026-10-16
 - [ ] Tests added and passing
 
 ## Appointments and Shared Diaries (P2)
-- [x] Data model and migration complete (`Schedule`)
-- [x] Booking UI for telephone team
-- [x] Email confirmations implemented (booked, cancelled, reminder)
+Reviewed 16 Oct 2026 against `acceptance/04-appointments.md`; gaps fixed the same day.
+- [x] Data model and migration complete (`Schedule`) (AP-001)
+- [x] Booking UI: counsellor, attendee, type, date and free 60-minute slot from availability (AP-001, AP-003); service user page books through the same path
 - [x] Availability management (My Schedule with approvals, working hours)
+- [x] Appointment types incl. Assessment and Aftercare (AP-002)
+- [x] Email confirmations on booking and cancellation, and day-before reminders, to the counsellor and the attendee's own email (AP-004); service users only with communications consent and a real address
+- [x] Status transitions with audit log; status shown in list (AP-005); scheduled → completed also allowed
+- [x] Counsellors see and manage their own appointments ("My appointments"); assessors view own (AP-006)
+- [x] Session record on completion: attended/no-show, session note, next step; notes visible to the counsellor, managers and admins only
+- [x] Counsellor track on the Manager Dashboard: sessions held, no-shows, cancellations, upcoming, needs recording
+- [ ] Shared calendar view (AP-007, Desirable; needs a calendar plugin)
 - [x] Permissions enforced
 - [x] Tests added and passing
 

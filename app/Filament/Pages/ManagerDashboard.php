@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\CallStatsOverview;
+use App\Filament\Widgets\CounsellorSessionsWidget;
 use App\Filament\Widgets\DepartmentWorkloadChart;
 use App\Filament\Widgets\ManagerStatsOverview;
 use App\Filament\Widgets\OverdueCallsByLiaisonChart;
@@ -44,6 +45,7 @@ final class ManagerDashboard extends Dashboard
             DepartmentWorkloadChart::class,
             OverdueCallsWidget::class,
             OverdueCallsByLiaisonChart::class,
+            CounsellorSessionsWidget::class,
         ];
     }
 }

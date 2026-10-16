@@ -9,6 +9,7 @@ use App\Enums\CounselorType;
 use App\Enums\PaymentType;
 use App\Enums\SessionType;
 use App\Models\Schedule;
+use App\Models\User;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -32,10 +33,7 @@ final class AppointmentInfolist
                             ->date(),
                         TextEntry::make('selected_slot')
                             ->label('Time Slot')
-                            ->state(fn (Schedule $record): string => isset($record->metadata['start_time']) && isset($record->metadata['end_time'])
-                                ? "{$record->metadata['start_time']} - {$record->metadata['end_time']}"
-                                : '—'
-                            ),
+                            ->state(fn (Schedule $record): string => $record->timeRange()),
                         TextEntry::make('description')
                             ->placeholder('—')
                             ->columnSpanFull(),
@@ -45,14 +43,55 @@ final class AppointmentInfolist
                     ])
                     ->columns(2),
 
+                Section::make('Status')
+                    ->schema([
+                        TextEntry::make('appointment_status')
+                            ->label('Status')
+                            ->badge()
+                            ->state(fn (Schedule $record): string => $record->getAppointmentStatus()->getLabel())
+                            ->color(fn (Schedule $record): string => $record->getAppointmentStatus()->getColor()),
+                        TextEntry::make('attendance')
+                            ->badge()
+                            ->state(fn (Schedule $record): ?string => $record->getAttendance()?->getLabel())
+                            ->color(fn (Schedule $record): string => $record->getAttendance()?->getColor() ?? 'gray')
+                            ->placeholder('Not recorded yet'),
+                        TextEntry::make('metadata.completed_at')
+                            ->label('Recorded')
+                            ->dateTime()
+                            ->placeholder('—'),
+                        TextEntry::make('metadata.cancellation_reason')
+                            ->label('Cancellation reason')
+                            ->placeholder('—')
+                            ->visible(fn (Schedule $record): bool => filled($record->metadata['cancelled_at'] ?? null))
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(3),
+
+                Section::make('Session record')
+                    ->description('Visible to the counsellor, managers and admins only.')
+                    ->icon('heroicon-o-lock-closed')
+                    ->schema([
+                        TextEntry::make('metadata.session_note')
+                            ->label('Session note')
+                            ->placeholder('—')
+                            ->columnSpanFull(),
+                        TextEntry::make('metadata.next_step')
+                            ->label('Next step')
+                            ->placeholder('—')
+                            ->columnSpanFull(),
+                    ])
+                    ->visible(fn (Schedule $record): bool => $record->getAttendance() !== null
+                        && $record->sessionNotesVisibleTo(auth()->user() instanceof User ? auth()->user() : null)),
+
                 Section::make('Attendee & Billing Info')
                     ->schema([
                         TextEntry::make('metadata.attendee_type')
                             ->label('Attendee Type')
                             ->formatStateUsing(fn (?string $state): string => AttendeeType::tryFrom($state ?? '')?->getLabel() ?? '—')
                             ->badge(),
-                        TextEntry::make('serviceUser.name')
+                        TextEntry::make('service_user_name')
                             ->label('Service User')
+                            ->state(fn (Schedule $record): ?string => $record->serviceUserRecord()?->name)
                             ->visible(fn (Schedule $record): bool => $record->isServiceUserAppointment()),
                         TextEntry::make('metadata.external_attendee_name')
                             ->label('External Attendee Name')

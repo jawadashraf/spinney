@@ -13,6 +13,7 @@ use App\Filament\Resources\Appointments\Schemas\AppointmentForm;
 use App\Filament\Resources\Appointments\Schemas\AppointmentInfolist;
 use App\Filament\Resources\Appointments\Tables\AppointmentsTable;
 use App\Models\Schedule;
+use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -35,9 +36,20 @@ final class AppointmentResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    /**
+     * Managers and admins see every appointment. Counsellors and assessors (AC AP-006) see only the
+     * appointments they are booked to hold.
+     */
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasAnyRole(['admin', 'manager']) ?? false;
+        $user = self::currentUser();
+
+        return $user !== null && ($user->managesAppointments() || $user->can('ViewAny:Appointment'));
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return self::currentUser()?->managesAppointments() ? 'Appointments' : 'My appointments';
     }
 
     public static function form(Schema $schema): Schema
@@ -64,7 +76,14 @@ final class AppointmentResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('schedule_type', ScheduleType::APPOINTMENT->value ?? ScheduleType::APPOINTMENT);
+        $query = parent::getEloquentQuery()->where('schedule_type', ScheduleType::APPOINTMENT->value ?? ScheduleType::APPOINTMENT);
+        $user = self::currentUser();
+
+        if ($user !== null && ! $user->managesAppointments()) {
+            $query->where('schedulable_type', $user->getMorphClass())->where('schedulable_id', $user->getKey());
+        }
+
+        return $query;
     }
 
     public static function getAuthorizationResponse(string|\UnitEnum $action, ?Model $record = null): Response
@@ -73,8 +92,12 @@ final class AppointmentResource extends Resource
             return Response::allow();
         }
 
-        $user = auth()->user();
+        $user = self::currentUser();
         if (! $user) {
+            return Response::deny();
+        }
+
+        if ($record instanceof Schedule && ! $user->managesAppointments() && ! $record->isWithCounsellor($user)) {
             return Response::deny();
         }
 
@@ -86,6 +109,13 @@ final class AppointmentResource extends Resource
         return $user->can($permission)
             ? Response::allow()
             : Response::deny();
+    }
+
+    private static function currentUser(): ?User
+    {
+        $user = auth()->user();
+
+        return $user instanceof User ? $user : null;
     }
 
     public static function getPages(): array

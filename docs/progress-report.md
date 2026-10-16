@@ -31,7 +31,8 @@ The main outstanding work is in Phase 3: donations, outreach, exports and the pu
 | Deliverable | Status |
 |-------------|--------|
 | External (third-party) care plans with documents | ✅ Complete |
-| Counsellor appointments with booking, cancellation and reminder emails | ✅ Complete |
+| Counsellor appointment booking within availability | ✅ Complete |
+| Appointment emails, counsellor access, session records, counsellor track | ✅ Complete (16 Oct) |
 | Availability management (My Schedule, approvals, working hours) | ✅ Complete |
 | Reminder system (appointments, tasks, aftercare calls at UK time) | ✅ Complete |
 | Interaction notes, searchable, with service user timeline | ✅ Complete |
@@ -69,6 +70,22 @@ The main outstanding work is in Phase 3: donations, outreach, exports and the pu
 | Oct | Telephony | Yeastar PBX integration: caller lookup, screen pop, automatic call logging |
 
 The aftercare call system, task management and Yeastar integration go beyond the signed scope.
+
+---
+
+## Appointments Review (16 October)
+
+Booking works: staff pick a counsellor, date and a free slot from the counsellor's availability. Checked against the acceptance criteria, the following gaps were found and fixed the same day:
+
+| Gap | Acceptance criteria |
+|-----|---------------------|
+| Booking and cancellation emails are never sent; the reminder email link fails; service users' own email addresses are not used | AP-004 |
+| Counsellors cannot see or manage their own appointments | AP-006 |
+| Assessment and Aftercare appointment types missing; status not shown in the list; status changes not audited | AP-002, AP-005 |
+| No session record on completion (attended / no-show, session note, next step) | Requirements §13.2 |
+| No per-counsellor track (sessions delivered, no-shows, upcoming load) | Requirements §13.2 |
+
+Session notes will be visible only to the counsellor, managers and admins. A calendar view (AP-007, Desirable) and session charging (§13.5, outside the signed scope) are not included.
 
 ---
 
