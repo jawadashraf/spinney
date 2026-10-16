@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Observers;
 
+use App\Enums\CompanyVerificationStatus;
 use App\Jobs\FetchFaviconForCompany;
 use App\Models\Company;
 use App\Models\User;
@@ -19,6 +20,16 @@ final readonly class CompanyObserver
             /** @var User $user */
             $user = auth()->user();
             $company->creator_id = $user->getKey();
+        }
+    }
+
+    /**
+     * Record when staff confirmed the company's details, and clear it if the record is no longer verified.
+     */
+    public function saving(Company $company): void
+    {
+        if ($company->isDirty('verification_status')) {
+            $company->verified_at = $company->verification_status === CompanyVerificationStatus::Verified ? now() : null;
         }
     }
 

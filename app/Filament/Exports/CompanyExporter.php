@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Exports;
 
 use App\Enums\CompanyStatus;
+use App\Enums\CompanyVerificationStatus;
 use App\Models\Company;
 use App\Support\CustomFields;
 use Carbon\Carbon;
@@ -26,6 +27,16 @@ final class CompanyExporter extends BaseExporter
                 ->label('Type'),
             ExportColumn::make('status')
                 ->formatStateUsing(fn (CompanyStatus $state): string => $state->getLabel()),
+            ExportColumn::make('parentCompany.name')
+                ->label('Part Of'),
+            ExportColumn::make('verification_status')
+                ->label('Verification')
+                ->formatStateUsing(fn (CompanyVerificationStatus $state): string => $state->getLabel()),
+            ExportColumn::make('verified_at')
+                ->label('Verified At'),
+            ExportColumn::make('verification_note')
+                ->label('Verification Note'),
+            ExportColumn::make('source'),
             ExportColumn::make('email')
                 ->label('General Email'),
             ExportColumn::make('phone'),

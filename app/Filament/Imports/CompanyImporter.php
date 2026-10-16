@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Imports;
 
 use App\Enums\CompanyStatus;
+use App\Enums\CompanyVerificationStatus;
 use App\Enums\CreationSource;
 use App\Models\Company;
 use App\Models\CompanyType;
@@ -81,6 +82,33 @@ final class CompanyImporter extends BaseImporter
                 ->rules(['nullable', 'string'])
                 ->example('Newsletter, Ramadan appeal')
                 ->fillRecordUsing(fn (): null => null),
+            ImportColumn::make('verification_status')
+                ->label('Verification')
+                ->guess(['verification', 'verification_status', 'verified'])
+                ->rules(['nullable', 'string'])
+                ->example('unverified')
+                ->fillRecordUsing(function (Company $record, ?string $state): void {
+                    if (filled($state)) {
+                        $record->verification_status = CompanyVerificationStatus::tryFrom(Str::of($state)->lower()->trim()->snake()->toString())
+                            ?? CompanyVerificationStatus::Unverified;
+                    }
+                }),
+            ImportColumn::make('verification_note')
+                ->guess(['verification_note', 'note', 'notes'])
+                ->rules(['nullable', 'string'])
+                ->example('Postcode differs between sources'),
+            ImportColumn::make('source')
+                ->guess(['source', 'sources', 'source_url', 'source_urls'])
+                ->rules(['nullable', 'string'])
+                ->example('https://example.org/directory'),
+            ImportColumn::make('part_of')
+                ->label('Part of')
+                ->guess(['part_of', 'parent', 'parent_company', 'parent_site'])
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('Leicester Central Masjid')
+                ->fillRecordUsing(function (Company $record, ?string $state, CompanyImporter $importer): void {
+                    $importer->linkToParent($record, $state);
+                }),
             ImportColumn::make('contact_first_name')
                 ->guess(['contact_first_name', 'first_name', 'contact_firstname'])
                 ->rules(['nullable', 'string', 'max:255'])
@@ -131,6 +159,32 @@ final class CompanyImporter extends BaseImporter
     public function teamId(): int
     {
         return $this->import->team_id ?? throw new RuntimeException('A company import must belong to a team.');
+    }
+
+    /**
+     * Link to the named parent company in the same team. A parent that is not in the directory yet is noted
+     * instead, so put parents earlier in the file than the sites they run.
+     */
+    public function linkToParent(Company $company, ?string $parentName): void
+    {
+        $parentName = Str::of((string) $parentName)->trim()->toString();
+
+        if ($parentName === '' || $parentName === $company->name) {
+            return;
+        }
+
+        $parent = Company::query()
+            ->where('team_id', $this->teamId())
+            ->where('name', $parentName)
+            ->first();
+
+        if ($parent instanceof Company) {
+            $company->parent_company_id = $parent->getKey();
+
+            return;
+        }
+
+        $company->verification_note = trim(($company->verification_note ?? '')."\nPart of: {$parentName} (not in the directory when imported).");
     }
 
     protected function afterSave(): void

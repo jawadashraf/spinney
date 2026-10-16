@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\CompanyEngagementType;
 use App\Enums\CompanyStatus;
+use App\Enums\CompanyVerificationStatus;
 use App\Filament\Imports\CompanyImporter;
 use App\Filament\Pages\ManagerDashboard;
 use App\Filament\Resources\CompanyResource;
@@ -162,6 +163,34 @@ describe('companies', function () {
             ->assertCanNotSeeTableRecords([$masjidCompany, $otherCompany]);
     });
 
+    it('records when a company is verified and clears it when it is not', function () {
+        $company = Company::factory()->for($this->team)->create();
+
+        livewire(ListCompanies::class)
+            ->callAction(TestAction::make('edit')->table($company), ['verification_status' => CompanyVerificationStatus::Verified->value])
+            ->assertHasNoActionErrors();
+
+        expect($company->refresh()->verified_at)->not->toBeNull();
+
+        livewire(ListCompanies::class)
+            ->callAction(TestAction::make('edit')->table($company), ['verification_status' => CompanyVerificationStatus::NeedsChecking->value])
+            ->assertHasNoActionErrors();
+
+        expect($company->refresh()->verified_at)->toBeNull();
+    });
+
+    it('finds companies with no email for them or any contact', function () {
+        $withGeneralEmail = Company::factory()->for($this->team)->create(['email' => 'office@central.test']);
+        $withContactEmail = Company::factory()->for($this->team)->create();
+        People::factory()->professional()->create(['team_id' => $this->team->id, 'company_id' => $withContactEmail->id]);
+        $withoutEmail = Company::factory()->for($this->team)->create();
+
+        livewire(ListCompanies::class)
+            ->filterTable('no_email')
+            ->assertCanSeeTableRecords([$withoutEmail])
+            ->assertCanNotSeeTableRecords([$withGeneralEmail, $withContactEmail]);
+    });
+
     it('only offers the current team\'s company types', function () {
         $ownType = CompanyType::factory()->for($this->team)->create(['name' => 'Masjid']);
         $otherTeamType = CompanyType::factory()->create(['name' => 'Other team type']);
@@ -283,5 +312,28 @@ describe('spreadsheet import', function () {
 
         expect(CompanyType::query()->where('team_id', $this->team->id)->where('name', 'Masjid')->count())->toBe(1);
         assertDatabaseHas(Company::class, ['name' => 'Central Masjid', 'company_type_id' => $masjid->id]);
+    });
+
+    it('links a site to the organisation it is part of', function () {
+        $masjid = Company::factory()->for($this->team)->create(['name' => 'Masjid Ibraheem']);
+
+        ($this->importer)(['name' => 'Madrasah Baytul Ilm', 'part_of' => 'Masjid Ibraheem']);
+
+        expect(Company::query()->where('name', 'Madrasah Baytul Ilm')->sole()->parent_company_id)->toBe($masjid->id);
+    });
+
+    it('notes a parent that is not in the directory instead of failing', function () {
+        ($this->importer)(['name' => 'Madrasah Baytul Ilm', 'verification_note' => 'Directory record', 'part_of' => 'Unknown Masjid']);
+
+        $company = Company::query()->where('name', 'Madrasah Baytul Ilm')->sole();
+
+        expect($company->parent_company_id)->toBeNull()
+            ->and($company->verification_note)->toBe("Directory record\nPart of: Unknown Masjid (not in the directory when imported).");
+    });
+
+    it('reads verification statuses written as labels', function () {
+        ($this->importer)(['name' => 'Tawakul', 'verification_status' => 'Needs checking']);
+
+        expect(Company::query()->where('name', 'Tawakul')->sole()->verification_status)->toBe(CompanyVerificationStatus::NeedsChecking);
     });
 });

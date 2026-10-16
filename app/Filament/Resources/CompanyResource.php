@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\CompanyStatus;
+use App\Enums\CompanyVerificationStatus;
 use App\Filament\Exports\CompanyExporter;
 use App\Filament\Resources\CompanyResource\Pages\ListCompanies;
 use App\Filament\Resources\CompanyResource\Pages\ViewCompany;
@@ -36,6 +37,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -108,6 +110,17 @@ final class CompanyResource extends Resource
                             ->nullable()
                             ->preload()
                             ->searchable(),
+                        Select::make('parent_company_id')
+                            ->label('Part of')
+                            ->relationship(
+                                'parentCompany',
+                                'name',
+                                fn (Builder $query, ?Company $record): Builder => $query
+                                    ->where('team_id', Filament::getTenant()?->getKey())
+                                    ->when($record, fn (Builder $query) => $query->whereKeyNot($record->getKey())),
+                            )
+                            ->searchable()
+                            ->helperText('The organisation that runs this one, such as the masjid behind a madrasah.'),
                     ]),
                 Section::make('Contact details')
                     ->schema([
@@ -130,6 +143,24 @@ final class CompanyResource extends Resource
                         self::timestampToggle('unsubscribed_at', 'Unsubscribed')
                             ->helperText('The general address has asked not to receive emails.'),
                     ]),
+
+                Section::make('Verification')
+                    ->schema([
+                        Select::make('verification_status')
+                            ->label('Status')
+                            ->options(CompanyVerificationStatus::class)
+                            ->default(CompanyVerificationStatus::Unverified)
+                            ->required()
+                            ->helperText('Mark Verified once staff have confirmed the details with the organisation.'),
+                        Textarea::make('verification_note')
+                            ->label('Note')
+                            ->rows(3),
+                        Textarea::make('source')
+                            ->label('Where the details came from')
+                            ->rows(2)
+                            ->helperText('For example a website, directory or "phoned the office".'),
+                    ])
+                    ->collapsible(),
 
                 CustomFields::form()->forSchema($schema)->build()->columns(1),
             ])
@@ -168,6 +199,14 @@ final class CompanyResource extends Resource
                     ->limitList(2)
                     ->expandableLimitedList()
                     ->toggleable(),
+                TextColumn::make('verification_status')
+                    ->label('Verification')
+                    ->badge()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('parentCompany.name')
+                    ->label('Part of')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('contacts_count')
                     ->label('Contacts')
                     ->counts('contacts')
@@ -210,6 +249,14 @@ final class CompanyResource extends Resource
                     ->preload(),
                 SelectFilter::make('status')
                     ->options(CompanyStatus::class),
+                SelectFilter::make('verification_status')
+                    ->label('Verification')
+                    ->options(CompanyVerificationStatus::class),
+                Filter::make('no_email')
+                    ->label('No email yet')
+                    ->query(fn (Builder $query): Builder => $query
+                        ->whereNull('email')
+                        ->whereDoesntHave('contacts', fn (Builder $query) => $query->whereNotNull('email'))),
                 TrashedFilter::make(),
             ])
             ->recordActions([

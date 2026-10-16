@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CompanyStatus;
+use App\Enums\CompanyVerificationStatus;
 use App\Enums\CreationSource;
 use App\Models\Concerns\HasAiSummary;
 use App\Models\Concerns\HasCreator;
@@ -32,7 +33,12 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 /**
  * @property string $name
  * @property int|null $company_type_id
+ * @property int|null $parent_company_id
  * @property CompanyStatus $status
+ * @property CompanyVerificationStatus $verification_status
+ * @property Carbon|null $verified_at
+ * @property string|null $verification_note
+ * @property string|null $source
  * @property string|null $email
  * @property string|null $phone
  * @property string|null $website
@@ -48,7 +54,11 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 #[Fillable([
     'name',
     'company_type_id',
+    'parent_company_id',
     'status',
+    'verification_status',
+    'verification_note',
+    'source',
     'email',
     'phone',
     'website',
@@ -78,6 +88,7 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
     protected $attributes = [
         'creation_source' => CreationSource::WEB,
         'status' => CompanyStatus::Active,
+        'verification_status' => CompanyVerificationStatus::Unverified,
     ];
 
     /**
@@ -90,6 +101,8 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
         return [
             'creation_source' => CreationSource::class,
             'status' => CompanyStatus::class,
+            'verification_status' => CompanyVerificationStatus::class,
+            'verified_at' => 'datetime',
             'email_invalid_at' => 'datetime',
             'unsubscribed_at' => 'datetime',
         ];
@@ -128,6 +141,26 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
     public function contacts(): HasMany
     {
         return $this->hasMany(Professional::class);
+    }
+
+    /**
+     * The organisation this one is part of, such as the masjid that runs a madrasah.
+     *
+     * @return BelongsTo<Company, $this>
+     */
+    public function parentCompany(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_company_id');
+    }
+
+    /**
+     * Sites and services that are part of this organisation.
+     *
+     * @return HasMany<Company, $this>
+     */
+    public function linkedCompanies(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_company_id');
     }
 
     /**

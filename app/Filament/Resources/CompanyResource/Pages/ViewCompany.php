@@ -110,6 +110,29 @@ final class ViewCompany extends ViewRecord
                                     ->placeholder('-'),
                                 TextEntry::make('postcode')
                                     ->placeholder('-'),
+                                TextEntry::make('parentCompany.name')
+                                    ->label('Part of')
+                                    ->url(fn (Company $record): ?string => $record->parent_company_id !== null
+                                        ? CompanyResource::getUrl('view', ['record' => $record->parent_company_id])
+                                        : null)
+                                    ->placeholder('-'),
+                                TextEntry::make('linkedCompanies.name')
+                                    ->label('Linked sites')
+                                    ->badge()
+                                    ->placeholder('-')
+                                    ->columnSpan(2),
+                                TextEntry::make('verification_status')
+                                    ->label('Verification')
+                                    ->badge()
+                                    ->hint(fn (Company $record): ?string => $record->verified_at?->format('j M Y')),
+                                TextEntry::make('verification_note')
+                                    ->label('Verification note')
+                                    ->placeholder('-')
+                                    ->columnSpan(2),
+                                TextEntry::make('source')
+                                    ->label('Source')
+                                    ->placeholder('-')
+                                    ->columnSpanFull(),
                             ]),
                         CustomFields::infolist()->forSchema($schema)->build(),
                     ]),
