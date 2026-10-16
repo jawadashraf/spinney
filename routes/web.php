@@ -5,9 +5,11 @@ declare(strict_types=1);
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OutreachUnsubscribeController;
 use App\Http\Controllers\PrivacyPolicyController;
 use App\Http\Controllers\TermsOfServiceController;
 use Filament\Auth\Pages\PasswordReset\RequestPasswordReset;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
@@ -44,6 +46,15 @@ Route::get('/terms-of-service', TermsOfServiceController::class)->name('terms.sh
 Route::get('/privacy-policy', PrivacyPolicyController::class)->name('policy.show');
 
 Route::redirect('/dashboard', '/')->name('dashboard');
+
+// Signed links in outreach emails. The POST has no CSRF token because mail clients send it for one-click unsubscribe.
+Route::get('/outreach/unsubscribe/{recipient}', [OutreachUnsubscribeController::class, 'show'])
+    ->middleware('signed')
+    ->name('outreach.unsubscribe');
+Route::post('/outreach/unsubscribe/{recipient}', [OutreachUnsubscribeController::class, 'store'])
+    ->middleware(['signed', 'throttle:10,1'])
+    ->withoutMiddleware(PreventRequestForgery::class)
+    ->name('outreach.unsubscribe.store');
 
 Route::get('/team-invitations/{invitation}', [TeamInvitationController::class, 'accept'])
     ->middleware(['signed', 'verified', 'auth', AuthenticateSession::class])

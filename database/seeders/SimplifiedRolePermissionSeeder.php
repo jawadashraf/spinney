@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Support\CallPermissions;
+use App\Support\CompanyPermissions;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -18,12 +19,11 @@ final class SimplifiedRolePermissionSeeder extends Seeder
         $rolePermissions = [
             'liaison' => [
                 'display_name' => 'Liaison',
-                'permissions' => ['ViewAny:Company', 'ViewAny:Schedule', 'View:Schedule'],
+                'permissions' => ['ViewAny:Schedule', 'View:Schedule'],
             ],
             'volunteer_liaison' => [
                 'display_name' => 'Volunteer Liaison',
                 'permissions' => [
-                    'ViewAny:Company',
                     'ViewAny:Schedule',
                     'View:Schedule',
                     'Create:Schedule',
@@ -36,11 +36,11 @@ final class SimplifiedRolePermissionSeeder extends Seeder
             ],
             'assessor' => [
                 'display_name' => 'Assessor',
-                'permissions' => ['ViewAny:Company', 'ViewAny:Schedule', 'View:Schedule'],
+                'permissions' => ['ViewAny:Schedule', 'View:Schedule'],
             ],
             'counselor' => [
                 'display_name' => 'Counselor',
-                'permissions' => ['ViewAny:Company', 'ViewAny:Schedule', 'View:Schedule', 'Create:Schedule',
+                'permissions' => ['ViewAny:Schedule', 'View:Schedule', 'Create:Schedule',
                     'Update:Schedule', 'Delete:Schedule'],
             ],
             //            'aftercare' => [
@@ -58,7 +58,6 @@ final class SimplifiedRolePermissionSeeder extends Seeder
             'manager' => [
                 'display_name' => 'Manager',
                 'permissions' => [
-                    'ViewAny:Company',
                     'ViewAny:Schedule',
                     'View:Schedule',
                     'Create:Schedule',
@@ -95,6 +94,7 @@ final class SimplifiedRolePermissionSeeder extends Seeder
         }
 
         CallPermissions::ensure($teamId);
+        CompanyPermissions::ensure($teamId);
 
         $this->command?->info('All roles and permissions have been seeded successfully.');
     }

@@ -15,13 +15,18 @@ ini_set('memory_limit', '1024M');
 |
 */
 
+use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
+use App\Support\CompanyPermissions;
 use Database\Seeders\ShieldSeeder;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Laravel\Jetstream\Events\TeamCreated;
 use Tests\TestCase;
+
+use function Pest\Laravel\actingAs;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
@@ -119,4 +124,22 @@ function yeastarHeaders(int $teamId, string $apiKey = 'test-yeastar-key'): array
     ]);
 
     return ['Authorization' => 'Basic '.base64_encode($apiKey)];
+}
+
+/**
+ * Sign in as a new member of the team with the given role, with the team as the current tenant.
+ */
+function signInToDirectoryAs(Team $team, string $role): User
+{
+    Role::firstOrCreate(['name' => $role, 'team_id' => $team->id], ['guard_name' => 'web']);
+    CompanyPermissions::ensure($team->id);
+
+    $user = User::factory()->create(['current_team_id' => $team->id]);
+    $user->teams()->syncWithoutDetaching([$team->id => ['role' => 'member']]);
+    $user->assignRole($role);
+
+    actingAs($user);
+    Filament::setTenant($team);
+
+    return $user;
 }

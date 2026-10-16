@@ -36,6 +36,19 @@ final class PeopleFactory extends Factory
         ]);
     }
 
+    /**
+     * A named contact at a company in the outreach directory.
+     */
+    public function professional(): self
+    {
+        return $this->state([
+            'type' => 'professional',
+            'email' => fake()->safeEmail(),
+            'job_title' => fake()->jobTitle(),
+            'consent_communications' => true,
+        ]);
+    }
+
     public function configure(): Factory
     {
         // Use minutes instead of seconds to ensure distinct timestamps

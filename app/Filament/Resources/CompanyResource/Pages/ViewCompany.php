@@ -8,8 +8,10 @@ use App\Filament\Actions\GenerateRecordSummaryAction;
 use App\Filament\Components\Infolists\AvatarName;
 use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\CompanyResource;
+use App\Filament\Resources\CompanyResource\RelationManagers\ContactsRelationManager;
+use App\Filament\Resources\CompanyResource\RelationManagers\EngagementsRelationManager;
 use App\Filament\Resources\CompanyResource\RelationManagers\NotesRelationManager;
-use App\Filament\Resources\CompanyResource\RelationManagers\PeopleRelationManager;
+use App\Filament\Resources\CompanyResource\RelationManagers\OutreachEmailsRelationManager;
 use App\Filament\Resources\CompanyResource\RelationManagers\TasksRelationManager;
 use App\Models\Company;
 use App\Support\CustomFields;
@@ -19,6 +21,7 @@ use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Flex;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -70,8 +73,44 @@ final class ViewCompany extends ViewRecord
                                 ->avatarSize('sm')
                                 ->textSize('sm')  // Default text size for account owner
                                 ->circular()
-                                ->label('Account Owner'),
+                                ->label('Staff lead'),
                         ]),
+                        Grid::make(3)
+                            ->schema([
+                                TextEntry::make('companyType.name')
+                                    ->label('Type')
+                                    ->badge()
+                                    ->placeholder('-'),
+                                TextEntry::make('status')
+                                    ->badge(),
+                                TextEntry::make('mailingGroups.name')
+                                    ->label('Mailing groups')
+                                    ->badge()
+                                    ->placeholder('-'),
+                                TextEntry::make('email')
+                                    ->label('General email')
+                                    ->icon('heroicon-o-envelope')
+                                    ->copyable()
+                                    ->placeholder('-')
+                                    ->hint(fn (Company $record): ?string => match (true) {
+                                        $record->email_invalid_at !== null => 'Email invalid',
+                                        $record->unsubscribed_at !== null => 'Unsubscribed',
+                                        default => null,
+                                    })
+                                    ->hintColor('danger'),
+                                TextEntry::make('phone')
+                                    ->icon('heroicon-o-phone')
+                                    ->placeholder('-'),
+                                TextEntry::make('website')
+                                    ->icon('heroicon-o-globe-alt')
+                                    ->url(fn (Company $record): ?string => $record->website)
+                                    ->openUrlInNewTab()
+                                    ->placeholder('-'),
+                                TextEntry::make('address')
+                                    ->placeholder('-'),
+                                TextEntry::make('postcode')
+                                    ->placeholder('-'),
+                            ]),
                         CustomFields::infolist()->forSchema($schema)->build(),
                     ]),
                     Section::make([
@@ -91,9 +130,11 @@ final class ViewCompany extends ViewRecord
     public function getRelationManagers(): array
     {
         return [
-            PeopleRelationManager::class,
-            TasksRelationManager::class,
+            ContactsRelationManager::class,
+            EngagementsRelationManager::class,
+            OutreachEmailsRelationManager::class,
             NotesRelationManager::class,
+            TasksRelationManager::class,
         ];
     }
 }

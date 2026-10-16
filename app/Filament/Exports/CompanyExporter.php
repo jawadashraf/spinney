@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
+use App\Enums\CompanyStatus;
 use App\Models\Company;
 use App\Support\CustomFields;
 use Carbon\Carbon;
@@ -21,18 +22,30 @@ final class CompanyExporter extends BaseExporter
                 ->label('ID'),
             ExportColumn::make('name')
                 ->label('Company Name'),
-            ExportColumn::make('team.name')
-                ->label('Team'),
+            ExportColumn::make('companyType.name')
+                ->label('Type'),
+            ExportColumn::make('status')
+                ->formatStateUsing(fn (CompanyStatus $state): string => $state->getLabel()),
+            ExportColumn::make('email')
+                ->label('General Email'),
+            ExportColumn::make('phone'),
+            ExportColumn::make('website'),
+            ExportColumn::make('address'),
+            ExportColumn::make('postcode'),
+            ExportColumn::make('mailing_groups')
+                ->label('Mailing Groups')
+                ->state(fn (Company $company): string => $company->mailingGroups->pluck('name')->implode(', ')),
+            ExportColumn::make('contacts_count')
+                ->label('Number of Contacts')
+                ->counts('contacts'),
+            ExportColumn::make('email_invalid_at')
+                ->label('Email Invalid Since'),
+            ExportColumn::make('unsubscribed_at')
+                ->label('Unsubscribed At'),
             ExportColumn::make('accountOwner.name')
-                ->label('Account Owner'),
+                ->label('Staff Lead'),
             ExportColumn::make('creator.name')
                 ->label('Created By'),
-            ExportColumn::make('people_count')
-                ->label('Number of People')
-                ->state(fn (Company $company): int => $company->people()->count()),
-            ExportColumn::make('opportunities_count')
-                ->label('Number of Opportunities')
-                ->state(fn (Company $company): int => $company->opportunities()->count()),
             ExportColumn::make('created_at')
                 ->label('Created At')
                 ->formatStateUsing(fn (Carbon $state): string => $state->format('Y-m-d H:i:s')),

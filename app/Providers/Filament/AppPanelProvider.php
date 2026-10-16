@@ -9,9 +9,9 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\LiaisonDashboard;
+use App\Filament\Pages\ManagerDashboard;
 use App\Filament\Pages\Tenancy\EditOrganization;
 use App\Filament\Pages\Tenancy\RegisterOrganization;
-use App\Filament\Resources\CompanyResource;
 use App\Http\Middleware\EnsureVolunteerWorkHours;
 use App\Http\Middleware\SyncSpatiePermissionsTeamId;
 use App\Models\Team;
@@ -69,7 +69,7 @@ final class AppPanelProvider extends PanelProvider
             ->id('app')
             // ->path('app')
             // ->domain('app.'.parse_url((string) config('app.url'))['host'])
-            ->homeUrl(fn (): string => Filament::getTenant() ? CompanyResource::getUrl('index') : url('/'))
+            ->homeUrl(fn (): ?string => self::homeUrl())
             ->brandName('Spinneyhill')
             ->tenant(Team::class, slugAttribute: 'slug', ownershipRelationship: 'team')
             ->tenantMiddleware([
@@ -211,5 +211,22 @@ final class AppPanelProvider extends PanelProvider
     public function shouldRegisterMenuItem(): bool
     {
         return Auth::user()?->hasVerifiedEmail() ?? false;
+    }
+
+    /**
+     * Send managers and liaisons to their dashboard. Anyone else gets null, which makes Filament
+     * fall back to the first navigation item they can open.
+     */
+    private static function homeUrl(): ?string
+    {
+        if (! Filament::getTenant()) {
+            return url('/');
+        }
+
+        return match (true) {
+            ManagerDashboard::canAccess() => ManagerDashboard::getUrl(),
+            LiaisonDashboard::canAccess() => LiaisonDashboard::getUrl(),
+            default => null,
+        };
     }
 }

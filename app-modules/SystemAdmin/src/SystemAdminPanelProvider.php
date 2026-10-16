@@ -16,6 +16,7 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use FinityLabs\FinMail\FinMailPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -57,6 +58,8 @@ final class SystemAdminPanelProvider extends PanelProvider
                     ->label('Task Management'),
                 NavigationGroup::make()
                     ->label('Content'),
+                NavigationGroup::make()
+                    ->label('Email'),
             ])
             ->globalSearch()
             ->darkMode()
@@ -85,6 +88,10 @@ final class SystemAdminPanelProvider extends PanelProvider
                     ->pluralLabel('Logs')
                     ->navigationGroup('System'),
                 FilamentLogViewer::make(),
+                // Outreach email templates, themes, mail settings and the sent-email log. Registered here rather
+                // than in the tenant-scoped app panel because Fin Mail's models have no team.
+                FinMailPlugin::make()
+                    ->navigationGroup('Email'),
             ])
             ->databaseNotifications()
             ->middleware([

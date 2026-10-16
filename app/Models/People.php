@@ -33,6 +33,9 @@ use Parental\HasChildren;
 /**
  * @property Carbon|null $deleted_at
  * @property CreationSource $creation_source
+ * @property string|null $job_title
+ * @property Carbon|null $email_invalid_at
+ * @property Carbon|null $unsubscribed_at
  */
 #[ObservedBy(PeopleObserver::class)]
 class People extends Model implements HasCustomFieldsContract
@@ -92,6 +95,8 @@ class People extends Model implements HasCustomFieldsContract
             'consent_data_storage' => 'boolean',
             'consent_referrals' => 'boolean',
             'consent_communications' => 'boolean',
+            'email_invalid_at' => 'datetime',
+            'unsubscribed_at' => 'datetime',
         ];
     }
 

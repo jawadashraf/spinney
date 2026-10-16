@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\CompanyStatus;
 use App\Enums\CreationSource;
 use App\Models\Concerns\HasAiSummary;
 use App\Models\Concerns\HasCreator;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -29,9 +31,15 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @property string $name
- * @property string $address
- * @property string $country
- * @property string $phone
+ * @property int|null $company_type_id
+ * @property CompanyStatus $status
+ * @property string|null $email
+ * @property string|null $phone
+ * @property string|null $website
+ * @property string|null $address
+ * @property string|null $postcode
+ * @property Carbon|null $email_invalid_at
+ * @property Carbon|null $unsubscribed_at
  * @property Carbon|null $deleted_at
  * @property CreationSource $creation_source
  * @property-read string $created_by
@@ -39,9 +47,15 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 #[ObservedBy(CompanyObserver::class)]
 #[Fillable([
     'name',
-    'address',
-    'country',
+    'company_type_id',
+    'status',
+    'email',
     'phone',
+    'website',
+    'address',
+    'postcode',
+    'email_invalid_at',
+    'unsubscribed_at',
     'creation_source',
 ])]
 final class Company extends Model implements HasCustomFieldsContract, HasMedia
@@ -63,6 +77,7 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
      */
     protected $attributes = [
         'creation_source' => CreationSource::WEB,
+        'status' => CompanyStatus::Active,
     ];
 
     /**
@@ -74,6 +89,9 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
     {
         return [
             'creation_source' => CreationSource::class,
+            'status' => CompanyStatus::class,
+            'email_invalid_at' => 'datetime',
+            'unsubscribed_at' => 'datetime',
         ];
     }
 
@@ -100,6 +118,50 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
     public function people(): HasMany
     {
         return $this->hasMany(People::class);
+    }
+
+    /**
+     * Named contacts at the company, such as an imam or head teacher.
+     *
+     * @return HasMany<Professional, $this>
+     */
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Professional::class);
+    }
+
+    /**
+     * @return BelongsTo<CompanyType, $this>
+     */
+    public function companyType(): BelongsTo
+    {
+        return $this->belongsTo(CompanyType::class);
+    }
+
+    /**
+     * @return BelongsToMany<MailingGroup, $this>
+     */
+    public function mailingGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(MailingGroup::class);
+    }
+
+    /**
+     * @return HasMany<CompanyEngagement, $this>
+     */
+    public function engagements(): HasMany
+    {
+        return $this->hasMany(CompanyEngagement::class);
+    }
+
+    /**
+     * Outreach emails sent to this company's general email or its contacts.
+     *
+     * @return HasMany<OutreachEmailRecipient, $this>
+     */
+    public function outreachRecipients(): HasMany
+    {
+        return $this->hasMany(OutreachEmailRecipient::class);
     }
 
     /**
