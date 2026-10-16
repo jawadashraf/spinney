@@ -1,11 +1,12 @@
 # Progress Log
 
 Date: 2026-02-08
+Updated: 2026-10-16
 
 ## Current Sprint
-- **Sprint**: 3 (Authentication & Aesthetics)
+- **Sprint**: Phase 2 completion
 - **Status**: In Progress
-- **Next Task**: Unified Case Files & Restricted Notes implementation.
+- **Next Task**: Production mail set-up for outreach emails, then restricted notes.
 
 ## Accomplishments
 ### Sprint 1: Foundations (Enquiry)
@@ -31,6 +32,39 @@ Date: 2026-02-08
 - [x] **[Branding]** Updated application branding and optimized URL generation macros for cleaner environment-agnostic links.
 - [x] **[Auditability]** Implemented Filament Activity Log for comprehensive tracking of model changes and user actions.
 
+### Apr–May 2026: Tasks, Care Plans, Enquiries
+- [x] **[Tasks]** Task types, department support, due dates; `Taskable`/`TaskUser` pivots assign team IDs.
+- [x] **[Care Plans]** `ThirdPartyCarePlan` with service user contacts, media, and a relation manager on the service user.
+- [x] **[Enquiries]** Phone field, reordered form, `SafeguardingFlagRaised` notification pipeline, follow-up action.
+- [x] **[Docs]** Signed proposal, Phase 1 acceptance criteria (`acceptance/`), classes plan, enquiries user guide.
+
+### May–Jul 2026: Appointments, Availability, Service Users
+- [x] **[Appointments]** `Schedule` with recurrence preview, appointment booking, booked/cancelled/reminder emails.
+- [x] **[Availability]** `MyScheduleResource` with approvals, Volunteer Liaison role, working-hours middleware (Europe/London).
+- [x] **[Service Users]** Notes timeline, profile sync, ethnicity, postcode lookup, emergency contacts, temporary emails, tab navigation.
+- [x] **[Quality]** Resolved 321 PHPStan level 7 errors.
+
+### Jul–Aug 2026: Support Status, Tasks, Dashboards
+- [x] **[Support]** Service user support status flagging, resolution tracking, needs-attention notifications.
+- [x] **[Dashboards]** Manager Dashboard and `ManagerStatsOverview`.
+- [x] **[Tasks]** Assignment/priority/note/due notifications, activity history timeline, role-restricted assignees.
+
+### Sep–Oct 2026: Aftercare Calls and Telephony
+- [x] **[Calls]** Call plans, calls and attempts, outcomes, overdue digests, Liaison Dashboard.
+- [x] **[Calls]** Active plans always keep one open call; reminders run at UK local time.
+- [~] **[Yeastar]** PBX Custom CRM integration (contact lookup, screen pop, call journal). Committed locally, not deployed.
+
+### Oct 2026: Outreach Directory
+- [x] **[Companies]** Outreach directory on `Company`: team-managed `CompanyType`, `MailingGroup` tags, active/inactive status, general email/phone/website/address.
+- [x] **[Contacts]** Named contacts as `Professional` People with role, mailing-list consent, email-invalid and unsubscribed flags.
+- [x] **[Engagement]** `CompanyEngagement` log of visits, talks, events and meetings.
+- [x] **[Import/Export]** `CompanyImporter` (company plus optional contact per row, updates by name) and updated `CompanyExporter`.
+- [x] **[Access]** `CompanyPermissions` limits the directory to managers and admins; panel home now sends each role to a page it can open.
+- [x] **[Outreach emails]** `OutreachEmail` drafts with Fin Mail templates, rich text and images, attachments and merge tags; recipients by mailing group, type or company; send, test send, duplicate and save as template.
+- [x] **[Quota]** `RecordOutgoingMail` logs every sent email; `MailQuota` keeps 30 of 100 daily sends for notifications and blocks oversized campaigns.
+- [x] **[Unsubscribe]** Signed unsubscribe links and `List-Unsubscribe` one-click headers; unsubscribed and invalid addresses are skipped.
+- [x] **[Fin Mail]** Installed; templates, themes, mail settings and sent-email log in the System Admin panel.
+
 ## Decisions
 | Date | Decision | Rationale | Owner |
 | --- | --- | --- | --- |
@@ -39,9 +73,18 @@ Date: 2026-02-08
 | 2026-02-08 | Proposed explicit `EnquiryStatus` and Service User fields for `People` | Ensures compliance with handoff requirements for consent and case management | Antigravity |
 | 2026-02-08 | Use `array_values()` in `CreateTeamCustomFields` listener | Resolves package bug where string keys were intermittently used as `sort_order` for custom field options. | Antigravity |
 | 2026-04-12 | **Clarified organizational model**: Team= Tenant/Organization, Department = Functional Team, ServiceTeam = Service Type | Corrects terminology for multi-tenancy and role-based access | Product |
+| 2026-05-05 | Proposal signed: £3,600 over three phases, 50% on acceptance, 50% on completion | Charity/equity model with revenue share | Product |
+| 2026-05-24 | Queue worker scheduled every minute instead of Horizon | Hostinger shared hosting has no long-running processes | Dev |
+| 2026-09-15 | An active call plan always keeps one open call | Aftercare follow-ups cannot silently stop | Dev |
+| 2026-10-08 | Yeastar via Custom CRM template; PBX never creates records; recordings stored as links | Data protection and record integrity | Dev |
+| 2026-10-16 | Outreach directory built on Companies (Organisation = tenant Team); managers and admins only | Avoids clashing with tenancy terminology; directory holds external contact details | Product |
+| 2026-10-16 | Outreach emails via Fin Mail and the Hostinger mailbox, 100/day with 30 kept for notifications; no open/click tracking; bounces marked by hand | Low volume; Postmark can replace SMTP later | Product |
 
 ## Risks and Blockers
-- **Pending**: Automated high-risk notifications for safeguarding team.
+- **Restricted notes** not yet implemented (Critical acceptance criteria NT-002/003).
+- **Test suite**: 135 of 656 tests failing, mostly inherited Relaticle tests out of step with the schema (unchanged by the directory work).
+- **Production**: `APP_DEBUG` was found enabled in October; confirm it is off.
+- **Yeastar**: awaiting supplier confirmation of PBX plan and number formats.
 
 ## Notes
 - `EnquiryPolicy` uses strict authorization mode, requiring comprehensive ability mapping (e.g., `deleteAny`).

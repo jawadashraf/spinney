@@ -1,7 +1,7 @@
 # Module Checklist (Definition of Done)
 
 Date: 2026-02-05
-Updated: 2026-04-12
+Updated: 2026-10-16
 
 **Terminology**
 - **Team** = Tenant/Organization (multi-tenancy boundary)
@@ -10,87 +10,102 @@ Updated: 2026-04-12
 
 **Legend**
 - [ ] Not started
-- [~] In progress
+- [~] In progress / partial
 - [x] Done
 
-## Enquiries
-- [ ] Data model and migration complete
-- [ ] Filament resource created
-- [ ] Conversion to service user implemented
-- [ ] Validation and error handling
-- [ ] Permissions enforced
-- [ ] Reporting included
-- [ ] Tests added and passing
+**Scope key** (signed proposal, 5 May 2026)
+- **P1** Phase 1: Foundation & Core · **P2** Phase 2: Practice Management · **P3** Phase 3: Engagement & Ops
+- **Extra** Built beyond the signed scope · **Future** Not in the signed scope (quote separately)
 
-## Service Users and Case File
-- [ ] People custom fields added
-- [ ] Case file layout and UI
-- [ ] Consent tracking visible
-- [ ] Risk and presenting issues captured
-- [ ] Permissions enforced
-- [ ] Tests added and passing
+## Enquiries (P1)
+- [x] Data model and migration complete
+- [x] Filament resource created
+- [x] Conversion to service user implemented
+- [x] Validation and error handling
+- [x] Permissions enforced
+- [~] Reporting included (dashboard widgets; no export yet)
+- [x] Tests added and passing
 
-## Notes and Collaboration
+## Service Users and Case File (P1)
+- [x] People custom fields added (`ServiceUserProfile` model)
+- [x] Case file layout and UI (tabbed form, notes timeline, care plans tab)
+- [x] Consent tracking visible
+- [x] Risk and presenting issues captured
+- [x] Permissions enforced (volunteer liaisons see assigned records only)
+- [x] Tests added and passing
+
+## Care Plans (P2)
+- [x] External (third-party) care plans with documents
+- [ ] Internal care plans (confirm with client whether required)
+- [~] Assessments (captured on the service user profile, no separate assessment record)
+
+## Notes and Collaboration (P2)
 - [ ] Visibility field added (`standard` vs `restricted`)
 - [ ] Restricted notes enforced for safeguarding leads
-- [ ] Note type and service type fields
-- [ ] Audit log on access and changes
+- [~] Note type and service type fields (searchable; no category field)
+- [~] Audit log on access and changes (changes logged; access not logged)
 - [ ] Tests added and passing
 
-## Appointments and Shared Diaries
-- [ ] Data model and migration complete
-- [ ] Booking UI for telephone team
-- [ ] Email confirmations implemented
-- [ ] Permissions enforced
-- [ ] Tests added and passing
+## Appointments and Shared Diaries (P2)
+- [x] Data model and migration complete (`Schedule`)
+- [x] Booking UI for telephone team
+- [x] Email confirmations implemented (booked, cancelled, reminder)
+- [x] Availability management (My Schedule with approvals, working hours)
+- [x] Permissions enforced
+- [x] Tests added and passing
 
-## Telephone Check-In and Aftercare
-- [ ] Data model and migration complete
-- [ ] Engagement log UI
-- [ ] **Automated follow-up task generation**:
-    - [ ] Weekly/Bi-weekly logic for Active users
-    - [ ] Monthly logic for Post-care users (< 2 years)
-- [ ] **Due/Overdue alert system**
-- [ ] Outcomes and next steps captured
-- [ ] Permissions enforced
-- [ ] Tests added and passing
+## Telephone Check-In and Aftercare (P2 reminders, Extra)
+- [x] Data model and migration complete (call plans, calls, attempts)
+- [x] Engagement log UI (calls and outcomes, Liaison Dashboard)
+- [x] **Automated follow-up task generation**:
+    - [x] Weekly/fortnightly/monthly/quarterly cadence per call plan
+    - [x] Next call booked automatically when a call is closed
+- [x] **Due/Overdue alert system** (daily digests at UK time)
+- [x] Outcomes and next steps captured
+- [x] Permissions enforced
+- [x] Tests added and passing
+- [~] Yeastar PBX integration (committed locally, not deployed)
 
-## Directories
-- [ ] Partner directory fields and UI
-- [ ] Education and outreach directory fields and UI
-- [ ] Donors and supporters directory fields and UI
-- [ ] Permissions enforced
-- [ ] Tests added and passing
+## Directories (P2 partners, P3 outreach)
+- [x] Outreach directory (Companies): team-managed types (Charity / Partner, Education Institute, Masjid, Madrassa, custom)
+- [x] Named contacts (People of type `professional`), mailing groups, active/inactive status
+- [x] Engagement history log (visits, talks, events, meetings)
+- [x] Spreadsheet import and CSV export
+- [x] Permissions enforced (managers and admins only)
+- [x] Tests added and passing
+- [x] Outreach emails from the CRM: Fin Mail templates, rich text with images, attachments, personalisation, recipients by group/type/company, daily quota, unsubscribe link, per-company email history
+- [ ] Production mail set-up (Hostinger SMTP credentials, `storage:link` for images) and a live test send
+- [ ] Donors and supporters directory fields and UI (`Donor` type exists, no UI)
 
-## Donations and Gift Aid
+## Donations and Gift Aid (P3)
 - [ ] Data model and migration complete
 - [ ] Donation history UI
 - [ ] Gift Aid consent/status captured
 - [ ] Permissions enforced
 - [ ] Tests added and passing
 
-## Safeguarding and Consent
-- [ ] Safeguarding flags model and UI
-- [ ] Alerting rules defined
+## Safeguarding and Consent (P1)
+- [x] Safeguarding flags model and UI (enquiry flags, service user support status)
+- [x] Alerting rules defined (safeguarding and needs-attention notifications)
 - [ ] Restricted notes access enforced
-- [ ] Consent tracking fields defined
-- [ ] Tests added and passing
+- [x] Consent tracking fields defined
+- [x] Tests added and passing
 
-## Team Management & Tasks
-- [ ] Team management module implemented
-- [ ] Task assignment to individuals within teams
-- [ ] Task alerts (attention, due time)
-- [ ] Permissions enforced
-- [ ] Tests added and passing
+## Team Management & Tasks (Extra)
+- [x] Team management module implemented (departments, roles)
+- [x] Task assignment to individuals within teams
+- [x] Task alerts (attention, due time)
+- [x] Permissions enforced
+- [x] Tests added and passing
 
-## Care Timeline & Session Logs
+## Care Timeline & Session Logs (Future)
 - [ ] Session log model for Check-In, Spiritual, and Therapy
-- [ ] Shared timeline view for service users
+- [~] Shared timeline view for service users (notes and activity timeline)
 - [ ] Therapist "suggest action" functionality
 - [ ] Restricted view permissions for session logs
 - [ ] Tests added and passing
 
-## Dynamic Scheduled Forms
+## Dynamic Scheduled Forms (Future)
 - [ ] Dynamic form builder/structure
 - [ ] Daily/Weekly schedule generation
 - [ ] Service user update UI
@@ -98,43 +113,55 @@ Updated: 2026-04-12
 - [ ] Team alerts based on submissions
 - [ ] Tests added and passing
 
-## Multi-Channel Notifications
-- [ ] Live notifications with actionable links
-- [ ] Targeted database notifications with filtering
-- [ ] Email notification system
-- [ ] Tests added and passing
+## Multi-Channel Notifications (P1)
+- [x] Live notifications with actionable links
+- [x] Targeted database notifications with filtering
+- [x] Email notification system (queued via scheduled worker)
+- [x] Tests added and passing
 
-## Payments & Charging
+## Payments & Charging (Future)
 - [ ] Therapist session charging logic
-- [ ] Online payment tracking
+- [~] Online payment tracking (appointments marked free/paid only)
 - [ ] Offline & Bank Transfer recording
 - [ ] Permissions enforced
 - [ ] Tests added and passing
 
-## AI Engagement (Chatbot)
+## Classes & Group Sessions (Future)
+- [~] Implementation plan and acceptance criteria written (`implementation-plan-classes.md`, `acceptance/12-classes.md`)
+- [ ] Not built
+
+## AI Engagement (Chatbot) (Future)
 - [ ] AI Chatbot frontend interface
 - [ ] Intent classification and lead capture logic
 - [ ] Automated Enquiry creation from chat sessions
 - [ ] Permissions and oversight views
 - [ ] Tests added and passing
 
-## Multi-Dashboard Infrastructure
-- [ ] Role-specific dashboard system (Check-In, Counselor, Therapist)
-- [ ] Multiple dashboards for managing admin
-- [ ] Custom metric/widget support
-- [ ] Permissions enforced
-- [ ] Tests added and passing
+## Multi-Dashboard Infrastructure (P3)
+- [~] Role-specific dashboard system (Manager and Liaison dashboards)
+- [x] Multiple dashboards for managing admin
+- [x] Custom metric/widget support
+- [x] Permissions enforced
+- [x] Tests added and passing
 
-## Reporting and Exports
-- [ ] Baseline reports implemented
-- [ ] Export functionality available
+## Reporting and Exports (P3)
+- [~] Baseline reports implemented (enquiry, call and workload widgets)
+- [ ] Export functionality available (CSV/PDF for enquiries, service users, calls, donations)
 - [ ] Payment and engagement reports
 - [ ] Permissions enforced
 - [ ] Tests added and passing
 
-## Audit Trail
-- [ ] Audit log model and storage
-- [ ] Logging for create/update/delete
+## Digital Presence (P3)
+- [ ] Public landing pages: Home, About, Contact, How we work (still the Relaticle template)
+
+## Audit Trail (P1)
+- [x] Audit log model and storage
+- [x] Logging for create/update/delete
 - [ ] Logging for access to restricted notes and session logs
-- [ ] Admin/management views
-- [ ] Tests added and passing
+- [x] Admin/management views (System Admin activity log and log viewer)
+- [x] Tests added and passing
+
+## Handover
+- [~] Training documentation (enquiries user guide only)
+- [ ] In-app documentation rewritten for Spinney Hill (still Relaticle text)
+- [ ] UAT against `acceptance/` criteria and client sign-off
