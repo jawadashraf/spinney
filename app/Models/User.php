@@ -293,6 +293,80 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     }
 
     /**
+     * Availability periods that appointments can be booked into. Overrides Zap's version so that only availability a
+     * manager has approved (metadata.is_approved = true) is offered, matching the Approval Status staff see.
+     *
+     * @return Collection<int, object>
+     */
+    protected function getAvailabilityPeriodsForDate(string $date): Collection
+    {
+        $checkDate = Carbon::parse($date);
+
+        $schedules = Schedule::query()
+            ->where('schedulable_type', $this->getMorphClass())
+            ->where('schedulable_id', $this->getKey())
+            ->availability()
+            ->active()
+            ->forDate($date)
+            ->where('metadata->is_approved', true)
+            ->with('periods')
+            ->get();
+
+        $periods = collect();
+
+        foreach ($schedules as $schedule) {
+            /** @var Schedule $schedule */
+            if (! $schedule->isActiveOn($date)) {
+                continue;
+            }
+
+            if ($schedule->is_recurring) {
+                if ($this->shouldCreateRecurringInstance($schedule, $checkDate)) {
+                    foreach ($schedule->periods as $period) {
+                        $periods->push((object) ['start_time' => $period->start_time, 'end_time' => $period->end_time]);
+                    }
+                }
+
+                continue;
+            }
+
+            $schedule->periods()->forDate($date)->get(['start_time', 'end_time'])->each(fn ($period) => $periods->push($period));
+        }
+
+        return $periods;
+    }
+
+    /**
+     * Counsellors and assessors only see the service users they have appointments with; staff with wider roles
+     * (liaison, manager, admin) keep their usual access.
+     */
+    public function isLimitedToOwnClients(): bool
+    {
+        return ! $this->managesAppointments()
+            && $this->hasAnyRole(['counselor', 'assessor'])
+            && ! $this->hasAnyRole(['liaison', 'volunteer_liaison']);
+    }
+
+    /**
+     * IDs of the service users this person has appointments with.
+     *
+     * @return array<int, int>
+     */
+    public function appointmentClientIds(): array
+    {
+        return Schedule::query()
+            ->where('schedulable_type', $this->getMorphClass())
+            ->where('schedulable_id', $this->getKey())
+            ->where('schedule_type', 'appointment')
+            ->pluck('metadata')
+            ->map(fn (mixed $metadata): int => (int) (is_array($metadata) ? ($metadata['service_user_id'] ?? 0) : 0))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
      * Managers and admins oversee all of a service user's activity, so they read restricted (e.g. safeguarding) notes.
      */
     public function canSeeRestrictedNotes(): bool

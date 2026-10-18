@@ -12,7 +12,9 @@ use App\Filament\Resources\Appointments\AppointmentResource;
 use App\Filament\Resources\Appointments\Pages\ListAppointments;
 use App\Filament\Resources\Appointments\Pages\ViewAppointment;
 use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
+use App\Filament\Resources\ServiceUsers\Pages\ListServiceUsers;
 use App\Filament\Resources\ServiceUsers\RelationManagers\ServiceUserAppointmentsRelationManager;
+use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Filament\Widgets\CounsellorSessionsWidget;
 use App\Models\People;
 use App\Models\Schedule;
@@ -96,6 +98,18 @@ function bookDaysAgo(User $counsellor, ?People $serviceUser, int $daysAgo): Sche
     }
 }
 
+function availabilityFor(User $counsellor, string $date, ?bool $approved): Schedule
+{
+    /** @var Schedule */
+    return Zap::for($counsellor)
+        ->named('Office hours')
+        ->availability()
+        ->from($date)
+        ->addPeriod('09:00', '12:00')
+        ->withMetadata($approved === null ? ['team_id' => $counsellor->current_team_id] : ['is_approved' => $approved])
+        ->save();
+}
+
 describe('booking', function () {
     it('records the slot and emails the counsellor and a consenting service user', function () {
         Notification::fake();
@@ -160,14 +174,14 @@ describe('booking', function () {
         $counsellor = counsellorIn($this->team);
         $serviceUser = serviceUserIn($this->team);
         $date = now()->addWeek()->next('Monday')->toDateString();
-        Zap::for($counsellor)->named('Office hours')->availability()->from($date)->addPeriod('09:00', '17:00')->save();
+        availabilityFor($counsellor, $date, approved: true);
 
         livewire(ServiceUserAppointmentsRelationManager::class, ['ownerRecord' => ServiceUser::query()->findOrFail($serviceUser->id), 'pageClass' => EditServiceUser::class])
             ->callAction(TestAction::make('create')->table(), [
                 'schedulable_id' => $counsellor->id,
                 'counselor_type' => CounselorType::DRUG->value,
                 'booking_date' => $date,
-                'selected_slot' => '14:00-15:00',
+                'selected_slot' => '10:00-11:00',
                 'name' => 'First session',
             ])
             ->assertHasNoActionErrors();
@@ -175,7 +189,7 @@ describe('booking', function () {
         $appointment = Schedule::query()->where('name', 'First session')->sole();
 
         expect($appointment->getCounselorType())->toBe(CounselorType::DRUG)
-            ->and($appointment->timeRange())->toBe('14:00 - 15:00')
+            ->and($appointment->timeRange())->toBe('10:00 - 11:00')
             ->and((int) $appointment->metadata['service_user_id'])->toBe($serviceUser->id);
         Notification::assertSentTo($counsellor, AppointmentBookedNotification::class);
     });
@@ -323,5 +337,69 @@ describe('counsellor track', function () {
             ->assertTableColumnStateSet('no_show_count', 1, $counsellor)
             ->assertTableColumnStateSet('needs_recording_count', 1, $counsellor)
             ->assertTableColumnStateSet('upcoming_count', 1, $counsellor);
+    });
+});
+
+describe('availability', function () {
+    it('offers slots only from availability a manager has approved', function (?bool $approved, int $slots) {
+        $counsellor = counsellorIn($this->team);
+        $date = now()->addWeek()->next('Tuesday')->toDateString();
+        availabilityFor($counsellor, $date, $approved);
+
+        $offered = collect($counsellor->getBookableSlots($date, 60))->where('is_available', true);
+
+        expect($offered)->toHaveCount($slots);
+    })->with([
+        'approved' => [true, 3],
+        'waiting for approval' => [false, 0],
+        'never approved' => [null, 0],
+    ]);
+
+    it('approves availability that managers added before approval was recorded', function () {
+        $counsellor = counsellorIn($this->team);
+        $legacy = availabilityFor($counsellor, now()->addWeek()->toDateString(), approved: null);
+        $pending = availabilityFor(counsellorIn($this->team), now()->addWeek()->toDateString(), approved: false);
+
+        (require database_path('migrations/2026_10_18_155420_approve_manager_created_availability.php'))->up();
+
+        expect($legacy->refresh()->metadata['is_approved'])->toBeTrue()
+            ->and($pending->refresh()->metadata['is_approved'])->toBeFalse();
+    });
+
+    it('stops staff changing availability a manager has locked', function () {
+        $counsellor = counsellorIn($this->team);
+        $availability = availabilityFor($counsellor, now()->addWeek()->toDateString(), approved: true);
+        $availability->forceFill(['metadata' => [...$availability->metadata, 'is_locked' => true]])->save();
+        $manager = signInToDirectoryAs($this->team, 'manager');
+        $manager->givePermissionTo(Permission::firstOrCreate(['name' => 'Update:Schedule', 'guard_name' => 'web']));
+        $counsellor->givePermissionTo(['Update:Schedule', Permission::firstOrCreate(['name' => 'Delete:Schedule', 'guard_name' => 'web'])]);
+
+        expect($counsellor->can('update', $availability))->toBeFalse()
+            ->and($counsellor->can('delete', $availability))->toBeFalse()
+            ->and($manager->can('update', $availability))->toBeTrue();
+    });
+});
+
+describe('counsellors and their clients', function () {
+    beforeEach(function () {
+        Notification::fake();
+    });
+
+    it('lets a counsellor read only the service users they have appointments with', function () {
+        $counsellor = counsellorIn($this->team);
+        $client = serviceUserIn($this->team);
+        $stranger = serviceUserIn($this->team, ['email' => 'other@example.org']);
+        bookWith($counsellor, $client, now()->addWeek()->toDateString());
+
+        $this->actingAs($counsellor);
+        Filament::setTenant($this->team);
+
+        livewire(ListServiceUsers::class)
+            ->assertCanSeeTableRecords([ServiceUser::query()->findOrFail($client->id)])
+            ->assertCanNotSeeTableRecords([ServiceUser::query()->findOrFail($stranger->id)]);
+
+        $this->get(ServiceUserResource::getUrl('view', ['record' => $client->id]))->assertOk();
+        $this->get(ServiceUserResource::getUrl('view', ['record' => $stranger->id]))->assertNotFound();
+        $this->get(ServiceUserResource::getUrl('edit', ['record' => $client->id]))->assertForbidden();
     });
 });

@@ -70,6 +70,15 @@ final class MySchedulesTable
                     ->state(fn (Schedule $record): string => ($record->metadata['is_approved'] ?? false) ? 'Approved' : 'Pending Approval')
                     ->color(fn (string $state): string => $state === 'Approved' ? 'success' : 'warning'),
 
+                TextColumn::make('lock_status')
+                    ->label('Locked')
+                    ->badge()
+                    ->state(fn (Schedule $record): ?string => $record->isLocked() ? 'Locked' : null)
+                    ->color('gray')
+                    ->icon('heroicon-o-lock-closed')
+                    ->tooltip('A manager has locked this availability because appointments rely on it. Ask a manager to change it.')
+                    ->placeholder('-'),
+
                 TextColumn::make('periods_summary')
                     ->label('Shift Timings')
                     ->state(fn (Schedule $record): string => $record->periods

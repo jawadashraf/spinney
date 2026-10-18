@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Schedule;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
-class SchedulePolicy
+final class SchedulePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Schedule');
@@ -29,12 +30,12 @@ class SchedulePolicy
 
     public function update(AuthUser $authUser, Schedule $schedule): bool
     {
-        return $authUser->can('Update:Schedule');
+        return $this->isUnlockedFor($authUser, $schedule) && $authUser->can('Update:Schedule');
     }
 
     public function delete(AuthUser $authUser, Schedule $schedule): bool
     {
-        return $authUser->can('Delete:Schedule');
+        return $this->isUnlockedFor($authUser, $schedule) && $authUser->can('Delete:Schedule');
     }
 
     public function restore(AuthUser $authUser, Schedule $schedule): bool
@@ -67,4 +68,12 @@ class SchedulePolicy
         return $authUser->can('Reorder:Schedule');
     }
 
+    /**
+     * A manager can lock someone's availability once appointments rely on it; after that only managers and admins
+     * can change or remove it.
+     */
+    private function isUnlockedFor(AuthUser $authUser, Schedule $schedule): bool
+    {
+        return ! $schedule->isLocked() || ($authUser instanceof User && $authUser->managesAppointments());
+    }
 }

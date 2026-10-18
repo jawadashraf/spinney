@@ -7,6 +7,7 @@ namespace App\Filament\Resources\ServiceUsers;
 use App\Filament\Resources\ServiceUsers\Pages\CreateServiceUser;
 use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
 use App\Filament\Resources\ServiceUsers\Pages\ListServiceUsers;
+use App\Filament\Resources\ServiceUsers\Pages\ViewServiceUser;
 use App\Filament\Resources\ServiceUsers\RelationManagers\NotesRelationManager;
 use App\Filament\Resources\ServiceUsers\RelationManagers\ServiceUserAppointmentsRelationManager;
 use App\Filament\Resources\ServiceUsers\RelationManagers\ThirdPartyCarePlansRelationManager;
@@ -62,6 +63,7 @@ final class ServiceUserResource extends Resource
         return [
             'index' => ListServiceUsers::route('/'),
             'create' => CreateServiceUser::route('/create'),
+            'view' => ViewServiceUser::route('/{record}'),
             'edit' => EditServiceUser::route('/{record}/edit'),
         ];
     }
@@ -103,6 +105,9 @@ final class ServiceUserResource extends Resource
 
         if ($user && $user->isRestrictedVolunteerLiaison()) {
             $query->visibleToVolunteerLiaison($user);
+        } elseif ($user && $user->isLimitedToOwnClients()) {
+            // Counsellors and assessors read the records of the people they have appointments with, nobody else's.
+            $query->whereKey($user->appointmentClientIds());
         }
 
         return $query;

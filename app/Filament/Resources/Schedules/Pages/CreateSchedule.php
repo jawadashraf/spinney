@@ -40,6 +40,11 @@ final class CreateSchedule extends CreateRecord
             $metadata = array_filter($metadata, fn ($value): bool => $value !== null && $value !== '');
         }
 
+        // The Schedules screen is for managers and admins, so availability they add is approved straight away.
+        if ($scheduleType === ScheduleType::AVAILABILITY) {
+            $metadata['is_approved'] = true;
+        }
+
         $builder = Zap::for($schedulable)
             ->named($data['name'] ?? '')
             ->from($data['start_date']);

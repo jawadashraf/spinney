@@ -9,20 +9,21 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
- * Lets counsellors and assessors reach the Appointments screens (AC AP-006). Which appointments they see is
- * limited to their own by AppointmentResource; managers and admins hold every permission already.
+ * Lets counsellors and assessors reach the Appointments screens (AC AP-006) and read the records of the service
+ * users they see. Which appointments and service users they get is limited to their own by AppointmentResource
+ * and ServiceUserResource; managers and admins hold every permission already.
  */
 final class AppointmentPermissions
 {
     /**
      * @var list<string>
      */
-    public const array COUNSELLOR = ['ViewAny:Appointment', 'View:Appointment', 'Update:Appointment'];
+    public const array COUNSELLOR = ['ViewAny:Appointment', 'View:Appointment', 'Update:Appointment', 'ViewAny:ServiceUser', 'View:ServiceUser'];
 
     /**
      * @var list<string>
      */
-    public const array ASSESSOR = ['ViewAny:Appointment', 'View:Appointment'];
+    public const array ASSESSOR = ['ViewAny:Appointment', 'View:Appointment', 'ViewAny:ServiceUser', 'View:ServiceUser'];
 
     /**
      * @return list<string>
@@ -41,7 +42,7 @@ final class AppointmentPermissions
      */
     public static function ensure(?int $teamId = null): void
     {
-        foreach (self::COUNSELLOR as $name) {
+        foreach (array_unique([...self::COUNSELLOR, ...self::ASSESSOR]) as $name) {
             Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
         }
 
