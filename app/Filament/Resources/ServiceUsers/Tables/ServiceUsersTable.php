@@ -15,8 +15,10 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -74,6 +76,22 @@ final class ServiceUsersTable
                         if ($data['value']) {
                             $query->whereHas('profile', fn ($q) => $q->where('engagement_status', $data['value']));
                         }
+                    }),
+                Filter::make('created_at')
+                    ->label('Date Registered')
+                    ->form([
+                        DatePicker::make('registered_from')->label('Registered from'),
+                        DatePicker::make('registered_until')->label('Registered until'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when($data['registered_from'] ?? null, fn (Builder $query, string $date): Builder => $query->whereDate('people.created_at', '>=', $date))
+                        ->when($data['registered_until'] ?? null, fn (Builder $query, string $date): Builder => $query->whereDate('people.created_at', '<=', $date)))
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['registered_from'] ?? null) {
+                            return "Registered from {$data['registered_from']}";
+                        }
+
+                        return null;
                     }),
                 TrashedFilter::make(),
             ])

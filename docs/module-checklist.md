@@ -164,11 +164,11 @@ Built 18 Oct 2026 against `acceptance/07-donations.md`. Managers and admins only
 - [x] Tests added and passing
 
 ## Reporting and Exports (P3)
-- [~] Baseline reports implemented (enquiry, call and workload widgets)
-- [ ] Export functionality available (CSV/PDF for enquiries, service users, calls; donations CSV/Excel done 18 Oct)
-- [ ] Payment and engagement reports
-- [ ] Permissions enforced
-- [ ] Tests added and passing
+- [x] Baseline reports implemented (enquiry volume & category RP-001, service user engagement RP-002, donation reports RP-003)
+- [x] Export functionality available (CSV/XLSX for enquiries, service users, calls - RP-004; donations CSV/Excel done 18 Oct)
+- [x] Payment and engagement reports (Service user engagement RP-002, donations RP-003)
+- [x] Permissions enforced (Role-based matrix RP-005 via ReportPermissions)
+- [x] Tests added and passing (tests/Feature/ReportingTest.php)
 
 ## Digital Presence (P3)
 - [ ] Public landing pages: Home, About, Contact, How we work (still the Relaticle template)

@@ -49,7 +49,7 @@ The main outstanding work is in Phase 3: outreach, reports and exports, and the 
 | Donation tracking and Gift Aid (managers and admins only) | ✅ Complete (18 Oct) |
 | Outreach emails from the CRM (Fin Mail, Hostinger mailbox, daily quota, unsubscribe) | ✅ Built (16 Oct); production mail set-up pending |
 | Outreach programme engagement metrics (Outreach dashboard) | ✅ Complete (16 Oct) |
-| Data exports (CSV/PDF) | ⏳ Not started |
+| Reports and data exports (Reports dashboard, Enquiry report, Engagement report, CSV/XLSX exports) | ✅ Complete (18 Oct) |
 | Public landing pages (Home, About, Contact, How we work) | ⏳ Not started |
 
 ---
@@ -68,6 +68,7 @@ The main outstanding work is in Phase 3: outreach, reports and exports, and the 
 | Aug | Tasks | Task notifications, due-date reminders, change history |
 | Sep | Aftercare | Call plans, calls and attempts, due/overdue digests, Liaison Dashboard |
 | Oct | Telephony | Yeastar PBX integration: caller lookup, screen pop, automatic call logging |
+| Oct | Reports & Exports | Reports dashboard, Enquiry volume/breakdown report, Service user engagement report, Enquiry/Service User/Call exports, role-based permission matrix |
 
 The aftercare call system, task management and Yeastar integration go beyond the signed scope.
 
@@ -105,12 +106,11 @@ Appointments stay in fixed 60-minute slots. Guides: Appointments Staff Guide, Ma
 | Item | Phase | Estimated Effort |
 |------|-------|------------------|
 | Outreach emails: production mail set-up and live test | P3 | 0.5 day |
-| Reports and exports (CSV/PDF) | P3 | 3–4 days |
 | Public landing pages | P3 | 1–2 days |
 | Automated test suite repairs | — | 1–3 days |
 | Yeastar go-live (deploy, PBX configuration) | Extra | 1–2 days |
 | Training manuals (remaining modules), UAT and sign-off | Handover | 2–3 days |
-| **Total** | | **~7–11 working days** |
+| **Total** | | **~4–8 working days** |
 
 ---
 

@@ -12,6 +12,7 @@ use App\Support\AppointmentPermissions;
 use App\Support\CallPermissions;
 use App\Support\CompanyPermissions;
 use App\Support\DonationPermissions;
+use App\Support\ReportPermissions;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -124,6 +125,7 @@ final class ShieldSeeder extends Seeder
             CompanyPermissions::ensure($team->id);
             AppointmentPermissions::ensure($team->id);
             DonationPermissions::ensure($team->id);
+            ReportPermissions::ensure($team->id);
 
             User::query()
                 ->where('is_system_admin', true)

@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Calls\Pages;
 
 use App\Filament\Concerns\SyncsPermissionTeamId;
+use App\Filament\Exports\CallExporter;
 use App\Filament\Resources\Calls\Actions\CoverAbsenceAction;
 use App\Filament\Resources\Calls\CallResource;
 use App\Models\Call;
+use App\Support\ReportPermissions;
 use Filament\Actions\CreateAction;
+use Filament\Actions\ExportAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Support\Enums\Size;
 use Illuminate\Database\Eloquent\Builder;
 
 final class ListCalls extends ListRecords
@@ -22,6 +26,11 @@ final class ListCalls extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ExportAction::make()
+                ->exporter(CallExporter::class)
+                ->color('gray')
+                ->size(Size::Small)
+                ->visible(fn (): bool => ReportPermissions::canExport(auth()->user(), Call::class)),
             CoverAbsenceAction::make(),
             CreateAction::make()
                 ->label('Schedule call'),

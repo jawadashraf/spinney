@@ -8,7 +8,9 @@ use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Exports\CompanyExporter;
 use App\Filament\Imports\CompanyImporter;
 use App\Filament\Resources\CompanyResource;
+use App\Models\Company;
 use App\Support\CustomFields\Concerns\InteractsWithCustomFields;
+use App\Support\ReportPermissions;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ExportAction;
@@ -39,7 +41,8 @@ final class ListCompanies extends ListRecords
                     ->authorize('create', CompanyResource::getModel()),
                 ExportAction::make()
                     ->exporter(CompanyExporter::class)
-                    ->label('Export companies'),
+                    ->label('Export companies')
+                    ->visible(fn (): bool => ReportPermissions::canExport(auth()->user(), Company::class)),
             ])
                 ->icon('heroicon-o-arrows-up-down')
                 ->button()

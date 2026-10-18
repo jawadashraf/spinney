@@ -4,9 +4,9 @@ Date: 2026-02-08
 Updated: 2026-10-18
 
 ## Current Sprint
-- **Sprint**: Phase 2 completion
+- **Sprint**: Phase 3
 - **Status**: In Progress
-- **Next Task**: Reports and exports.
+- **Next Task**: Digital Presence / Public landing pages.
 
 ## Accomplishments
 ### Sprint 1: Foundations (Enquiry)
@@ -72,6 +72,7 @@ Updated: 2026-10-18
 - [x] **[Appointments guides]** Staff guide, manager & admin guide and one-page quick reference (PDF, with screenshots).
 - [x] **[Donations & Gift Aid]** Donations from people or companies with purpose and payment method; Gift Aid declarations on the person's profile; Gift Aid status set from the covering declaration; donation report with filters, grouping, totals, Gift Aid value and export; managers and admins only, admins alone delete.
 - [x] **[Outreach dashboard]** Directory reach and verification, engagements and outreach emails per month, coverage by type, companies not contacted in six months.
+- [x] **[Reports and Exports]** Central `ReportsDashboard` page with team-scoped date range, category, status, and service team filters; Enquiry volume and category breakdown report (RP-001); Service user engagement distribution report (RP-002); Filament exports for Enquiries, Service Users, and Calls (RP-004); and role-based permissions matrix via `ReportPermissions` (RP-005) with 21 passing Pest tests.
 
 ## Decisions
 | Date | Decision | Rationale | Owner |
@@ -91,6 +92,8 @@ Updated: 2026-10-18
 | 2026-10-18 | Donations for managers and admins only (no fundraising role); a donor is anyone with a donation, not a People type; Gift Aid tracked through per-person declarations; company gifts are never Gift Aid | Keeps donor details from other staff; a service user or relative can also donate | Product |
 | 2026-10-16 | Appointment session notes visible to the counsellor, managers and admins only | Counselling notes are sensitive (requirements §7) | Product |
 | 2026-10-16 | Outreach emails via Fin Mail and the Hostinger mailbox, 100/day with 30 kept for notifications; no open/click tracking; bounces marked by hand | Low volume; Postmark can replace SMTP later | Product |
+| 2026-10-18 | ReportsDashboard isolates report widgets with `$isDiscovered = false` | Prevents aggregate report widgets from auto-loading on operational/liaison dashboards | Dev |
+| 2026-10-18 | Report & Export permissions centralized in `ReportPermissions` | Implements RP-005 matrix with role fallbacks for teams without granular Shield records | Dev |
 
 ## Risks and Blockers
 - **Test suite**: 123 of 732 tests failing, mostly inherited Relaticle tests out of step with the schema (12 fixed on 18 Oct by giving the note factory a body).

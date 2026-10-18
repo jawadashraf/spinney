@@ -20,11 +20,13 @@ use App\Models\Team;
 use App\Models\User;
 use App\Support\CompanyPermissions;
 use App\Support\DonationPermissions;
+use App\Support\ReportPermissions;
 use Database\Seeders\ShieldSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Laravel\Jetstream\Events\TeamCreated;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 use function Pest\Laravel\actingAs;
@@ -152,6 +154,20 @@ function signInToDonationsAs(Team $team, string $role): User
 {
     Role::firstOrCreate(['name' => $role, 'team_id' => $team->id], ['guard_name' => 'web']);
     DonationPermissions::ensure($team->id);
+
+    return signInToDirectoryAs($team, $role);
+}
+
+/**
+ * Sign in as a new member of the team with the given role, with reporting permissions granted as they are live.
+ */
+function signInToReportsAs(Team $team, string $role): User
+{
+    $r = Role::firstOrCreate(['name' => $role, 'team_id' => $team->id], ['guard_name' => 'web']);
+    if (in_array($role, ['admin', 'manager'], true)) {
+        $r->syncPermissions(Permission::all());
+    }
+    ReportPermissions::ensure($team->id);
 
     return signInToDirectoryAs($team, $role);
 }

@@ -9,7 +9,9 @@ use App\Filament\Exports\PeopleExporter;
 use App\Filament\Imports\PeopleImporter;
 use App\Filament\Resources\PeopleResource;
 use App\Models\Donation;
+use App\Models\People;
 use App\Support\CustomFields\Concerns\InteractsWithCustomFields;
+use App\Support\ReportPermissions;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ExportAction;
@@ -31,7 +33,9 @@ final class ListPeople extends ListRecords
         return [
             ActionGroup::make([
                 ImportAction::make()->importer(PeopleImporter::class),
-                ExportAction::make()->exporter(PeopleExporter::class),
+                ExportAction::make()
+                    ->exporter(PeopleExporter::class)
+                    ->visible(fn (): bool => ReportPermissions::canExport(auth()->user(), People::class)),
             ])
                 ->icon('heroicon-o-arrows-up-down')
                 ->color('gray')
