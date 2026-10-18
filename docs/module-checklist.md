@@ -49,14 +49,18 @@ Updated: 2026-10-16
 - [x] Tests added and passing
 
 ## Appointments and Shared Diaries (P2)
-Reviewed 16 Oct 2026 against `acceptance/04-appointments.md`; gaps fixed the same day.
+Reviewed 16 Oct 2026 against `acceptance/04-appointments.md`; gaps fixed the same day. Reviewed again on 18 Oct while writing the user guides; gaps fixed.
 - [x] Data model and migration complete (`Schedule`) (AP-001)
 - [x] Booking UI: counsellor, attendee, type, date and free 60-minute slot from availability (AP-001, AP-003); service user page books through the same path
 - [x] Availability management (My Schedule with approvals, working hours)
+- [x] Only approved availability is bookable; availability added by managers is approved at once; existing availability marked approved on 18 Oct
+- [x] Locked availability can only be changed or deleted by managers and admins; Locked badge shown
 - [x] Appointment types incl. Assessment and Aftercare (AP-002)
 - [x] Email confirmations on booking and cancellation, and day-before reminders, to the counsellor and the attendee's own email (AP-004); service users only with communications consent and a real address
 - [x] Status transitions with audit log; status shown in list (AP-005); scheduled → completed also allowed
 - [x] Counsellors see and manage their own appointments ("My appointments"); assessors view own (AP-006)
+- [x] Counsellors and assessors can read the records of their own clients (read-only), and no others
+- [x] Editing an appointment changes details only and keeps its slot, status and session record; to move one, cancel and rebook
 - [x] Session record on completion: attended/no-show, session note, next step; notes visible to the counsellor, managers and admins only
 - [x] Counsellor track on the Manager Dashboard: sessions held, no-shows, cancellations, upcoming, needs recording
 - [ ] Shared calendar view (AP-007, Desirable; needs a calendar plugin)
@@ -173,6 +177,6 @@ Reviewed 16 Oct 2026 against `acceptance/04-appointments.md`; gaps fixed the sam
 - [x] Tests added and passing
 
 ## Handover
-- [~] Training documentation (enquiries user guide only)
+- [~] Training documentation: enquiries user guide; call management guides; appointments staff guide, manager guide and quick reference (18 Oct)
 - [ ] In-app documentation rewritten for Spinney Hill (still Relaticle text)
 - [ ] UAT against `acceptance/` criteria and client sign-off

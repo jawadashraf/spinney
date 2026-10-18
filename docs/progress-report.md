@@ -1,6 +1,6 @@
 # Spinney Hill CRM - Progress Report
 
-**Report Date:** 16 October 2026
+**Report Date:** 18 October 2026
 **Agreement:** Signed proposal, 5 May 2026 (£3,600, three phases)
 **Previous Report:** 12 April 2026
 
@@ -10,7 +10,7 @@
 
 Phase 1 is complete and most of Phase 2 is in place. Since the last report the system has gained a full service user case file, appointments with availability management, support and safeguarding flags, a task system, and an aftercare call management system with automated reminders. A Yeastar phone system integration is built and awaiting deployment.
 
-The main outstanding work is in Phase 3: donations, outreach, exports and the public website. Phase 2 is now complete apart from the client's answer on internal care plans. The outreach directory was completed on 16 October and restricted notes on 18 October.
+The main outstanding work is in Phase 3: donations, outreach, exports and the public website. Phase 2 is now complete apart from the client's answer on internal care plans. The outreach directory was completed on 16 October and restricted notes on 18 October. Appointments were reviewed again on 18 October: only approved availability can be booked, locked availability is protected, counsellors can read their own clients' records, and staff and manager guides were written.
 
 ---
 
@@ -87,6 +87,17 @@ Booking works: staff pick a counsellor, date and a free slot from the counsellor
 
 Session notes will be visible only to the counsellor, managers and admins. A calendar view (AP-007, Desirable) and session charging (§13.5, outside the signed scope) are not included.
 
+A second review on 18 October, done while writing the appointments user guides, found and fixed:
+
+| Gap | Fix |
+|-----|-----|
+| Availability waiting for approval could already be booked | Only approved availability is bookable; availability added by managers is approved at once |
+| Locking availability had no effect | Locked availability can only be changed or deleted by managers and admins |
+| Counsellors could not open their clients' records | Counsellors and assessors can read the records of their own clients only |
+| Editing an appointment could not be saved and would have cleared its status and session notes | Edit changes details only; to move an appointment, cancel and rebook |
+
+Appointments stay in fixed 60-minute slots. Guides: Appointments Staff Guide, Manager & Admin Guide and Quick Reference (PDF).
+
 ---
 
 ## Remaining Work
@@ -99,8 +110,8 @@ Session notes will be visible only to the counsellor, managers and admins. A cal
 | Public landing pages | P3 | 1–2 days |
 | Automated test suite repairs | — | 1–3 days |
 | Yeastar go-live (deploy, PBX configuration) | Extra | 1–2 days |
-| Training manuals, UAT and sign-off | Handover | 3–4 days |
-| **Total** | | **~11–16 working days** |
+| Training manuals (remaining modules), UAT and sign-off | Handover | 2–3 days |
+| **Total** | | **~10–15 working days** |
 
 ---
 
@@ -108,10 +119,10 @@ Session notes will be visible only to the counsellor, managers and admins. A cal
 
 | Metric | Value |
 |--------|-------|
-| Automated tests | 725 (594 passing, 123 failing, 7 skipped, 1 risky) |
+| Automated tests | 732 (601 passing, 123 failing, 7 skipped, 1 risky) |
 | Models | 36 |
 | Filament resources | 18 |
-| Migrations | 62 (plus 5 settings migrations) |
+| Migrations | 67 (plus 5 settings migrations) |
 
 The failing tests are mostly older tests inherited from the base template that no longer match the schema. They are scheduled for repair before sign-off.
 

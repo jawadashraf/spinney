@@ -1,7 +1,7 @@
 # Progress Log
 
 Date: 2026-02-08
-Updated: 2026-10-16
+Updated: 2026-10-18
 
 ## Current Sprint
 - **Sprint**: Phase 2 completion
@@ -68,6 +68,8 @@ Updated: 2026-10-16
 - [x] **[Leicester directory]** Client research workbook (138 mosques, madrasahs, prayer rooms) converted and imported.
 - [x] **[Appointments]** Booking/cancellation/reminder emails to counsellor and attendee; counsellors' "My appointments"; Assessment and Aftercare types; audited status changes; session records (attended/no-show, note, next step) visible to counsellor, managers and admins; counsellor track on the Manager Dashboard.
 - [x] **[Restricted notes]** Note visibility (standard/restricted); restricted notes readable by managers and admins only via a global scope and the policy, hidden from background jobs and AI summaries; opening one logged as `viewed`.
+- [x] **[Appointments review]** Only approved availability is bookable; locks enforced for non-managers; counsellors and assessors read their own clients' records; appointment editing fixed (it could not save and would have cleared status and session notes); the Schedules tab no longer lists appointments; clearer labels.
+- [x] **[Appointments guides]** Staff guide, manager & admin guide and one-page quick reference (PDF, with screenshots).
 - [x] **[Outreach dashboard]** Directory reach and verification, engagements and outreach emails per month, coverage by type, companies not contacted in six months.
 
 ## Decisions
@@ -84,11 +86,12 @@ Updated: 2026-10-16
 | 2026-10-08 | Yeastar via Custom CRM template; PBX never creates records; recordings stored as links | Data protection and record integrity | Dev |
 | 2026-10-16 | Outreach directory built on Companies (Organisation = tenant Team); managers and admins only | Avoids clashing with tenancy terminology; directory holds external contact details | Product |
 | 2026-10-18 | Restricted notes readable by managers and admins only (no separate safeguarding role) | They oversee all of a service user's activity | Product |
+| 2026-10-18 | Appointments stay in fixed 60-minute slots; only approved availability is bookable; counsellors may read their own clients' records | Agreed while writing the appointments guide | Product |
 | 2026-10-16 | Appointment session notes visible to the counsellor, managers and admins only | Counselling notes are sensitive (requirements §7) | Product |
 | 2026-10-16 | Outreach emails via Fin Mail and the Hostinger mailbox, 100/day with 30 kept for notifications; no open/click tracking; bounces marked by hand | Low volume; Postmark can replace SMTP later | Product |
 
 ## Risks and Blockers
-- **Test suite**: 123 of 725 tests failing, mostly inherited Relaticle tests out of step with the schema (12 fixed on 18 Oct by giving the note factory a body).
+- **Test suite**: 123 of 732 tests failing, mostly inherited Relaticle tests out of step with the schema (12 fixed on 18 Oct by giving the note factory a body).
 - **Production**: `APP_DEBUG` was found enabled in October; confirm it is off.
 - **Yeastar**: awaiting supplier confirmation of PBX plan and number formats.
 
