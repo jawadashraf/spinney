@@ -96,6 +96,23 @@ Updated: 2026-10-18
 - **Test suite**: 123 of 732 tests failing, mostly inherited Relaticle tests out of step with the schema (12 fixed on 18 Oct by giving the note factory a body).
 - **Production**: `APP_DEBUG` was found enabled in October; confirm it is off.
 - **Yeastar**: awaiting supplier confirmation of PBX plan and number formats.
+- **Live data on the server**: the Hostinger database holds real service user data. Never run `migrate:fresh`, `migrate:reset`, `db:wipe` or reseeding there. Every migration must only add tables or columns, or seed in a way that is safe to repeat. New work is tested by pushing to `main` and deploying.
+
+## Open Client Questions
+- **Internal care plans and assessments**: wanted, or are external care plans enough?
+- **Donations** (built 18 Oct; no further changes until agreed with the client):
+  - Gift Aid declarations and donation tabs for service users (not possible yet: service users are not on the People list).
+  - A "mark selected as Claimed" action for finishing a Gift Aid claim (now one donation at a time).
+  - Whether adding a declaration that covers past gifts should update earlier "Not eligible" donations automatically.
+  - The list of donation purposes (now: general funds, zakat, sadaqah, food bank, appeal or campaign, other).
+  - Whether Claimed donations should be locked against edits.
+  - Whether people already tagged as donors on the live database need reviewing.
+
+## Production and Deployment
+- Hosted on Hostinger shared hosting, not Docker. The Dockerfile, `docker-compose.prod.yml`, Horizon config and `docker-publish.yml` are left over from Relaticle.
+- App path `~/domains/j-commerce.co.uk/public_html/spinney`. Deploy: pull the code, then `php artisan optimize:clear` and any new migrations.
+- No long-running processes: the scheduler runs `queue:work --stop-when-empty` every minute, from a Hostinger cron that runs `php artisan schedule:run`. If `schedule:list` shows "Has Mutex" and no worker is running, clear it with `php artisan schedule:clear-cache`.
+- Outreach email still needs production `MAIL_*` settings for the Hostinger mailbox, `php artisan storage:link`, and the real daily limit checked in hPanel.
 
 ## Notes
 - `EnquiryPolicy` uses strict authorization mode, requiring comprehensive ability mapping (e.g., `deleteAny`).
