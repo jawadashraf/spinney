@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\CreationSource;
+use App\Enums\NoteVisibility;
+use App\Filament\Actions\ViewNoteAction;
 use App\Filament\Exports\NoteExporter;
 use App\Filament\Resources\NoteResource\Forms\NoteForm;
 use App\Filament\Resources\NoteResource\Pages\ManageNotes;
 use App\Models\Note;
+use App\Models\User;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -53,10 +56,15 @@ final class NoteResource extends Resource
             ->columns([
                 TextColumn::make('title')
                     ->searchable(),
+                TextColumn::make('visibility')
+                    ->badge()
+                    ->toggleable(),
                 TextColumn::make('body')
-                    ->formatStateUsing(fn (string $state): HtmlString => new HtmlString($state))
+                    ->formatStateUsing(fn (string $state, Note $record): HtmlString|string => $record->isRestricted()
+                        ? 'Restricted: open the note to read it'
+                        : new HtmlString($state))
                     ->limit(50)
-                    ->tooltip(fn (Note $record): string => strip_tags((string) $record->body))
+                    ->tooltip(fn (Note $record): ?string => $record->isRestricted() ? null : strip_tags((string) $record->body))
                     ->toggleable(),
                 TextColumn::make('companies.name')
                     ->label('Companies')
@@ -90,6 +98,9 @@ final class NoteResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
+                SelectFilter::make('visibility')
+                    ->options(NoteVisibility::class)
+                    ->visible(fn (): bool => auth()->user() instanceof User && auth()->user()->canSeeRestrictedNotes()),
                 SelectFilter::make('creation_source')
                     ->label('Creation Source')
                     ->options(CreationSource::class)
@@ -98,6 +109,7 @@ final class NoteResource extends Resource
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ViewNoteAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),

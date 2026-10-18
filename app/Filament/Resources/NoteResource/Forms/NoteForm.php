@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\NoteResource\Forms;
 
+use App\Enums\NoteVisibility;
 use App\Enums\SupportStatus;
 use App\Models\User;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\MentionProvider;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Schema;
 
 final class NoteForm
 {
     /**
-     * @return array<int, TextInput|Select|RichEditor>
+     * @return array<int, TextInput|Select|ToggleButtons|RichEditor>
      */
     public static function getFormComponents(): array
     {
@@ -32,6 +34,16 @@ final class NoteForm
                 ->default(SupportStatus::Normal)
                 ->columnSpan(1)
                 ->required(),
+
+            ToggleButtons::make('visibility')
+                ->label('Who can read this note?')
+                ->options(NoteVisibility::class)
+                ->default(NoteVisibility::Standard)
+                ->inline()
+                ->required()
+                ->visible(fn (): bool => auth()->user() instanceof User && auth()->user()->canSeeRestrictedNotes())
+                ->helperText('Restricted notes can only be read by managers and admins, and each opening is recorded.')
+                ->columnSpanFull(),
 
             RichEditor::make('body')
                 ->label('Body')

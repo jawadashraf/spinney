@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\CompanyResource\RelationManagers;
 
 use App\Filament\Resources\NoteResource\Forms\NoteForm;
+use App\Models\Note;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
@@ -36,7 +37,9 @@ final class NotesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('title')
             ->columns([
-                TextColumn::make('title'),
+                TextColumn::make('title')
+                    ->icon(fn (Note $record): ?string => $record->isRestricted() ? 'heroicon-o-lock-closed' : null)
+                    ->iconColor('danger'),
                 TextColumn::make('people.name')
                     ->label('People')
                     ->badge()

@@ -10,7 +10,7 @@
 
 Phase 1 is complete and most of Phase 2 is in place. Since the last report the system has gained a full service user case file, appointments with availability management, support and safeguarding flags, a task system, and an aftercare call management system with automated reminders. A Yeastar phone system integration is built and awaiting deployment.
 
-The main outstanding work is in Phase 3: donations, outreach, exports and the public website. Restricted notes are the remaining Phase 2 item. The outreach directory was completed on 16 October.
+The main outstanding work is in Phase 3: donations, outreach, exports and the public website. Phase 2 is now complete apart from the client's answer on internal care plans. The outreach directory was completed on 16 October and restricted notes on 18 October.
 
 ---
 
@@ -36,7 +36,7 @@ The main outstanding work is in Phase 3: donations, outreach, exports and the pu
 | Availability management (My Schedule, approvals, working hours) | ✅ Complete |
 | Reminder system (appointments, tasks, aftercare calls at UK time) | ✅ Complete |
 | Interaction notes, searchable, with service user timeline | ✅ Complete |
-| Restricted notes for safeguarding | ⏳ Not started |
+| Restricted notes (managers and admins only, access audited) | ✅ Complete (18 Oct) |
 | Outreach directory (Companies): types, contacts, mailing groups, engagement log, import/export | ✅ Complete (16 Oct) |
 | Internal care plans and assessments | ❓ To confirm with client |
 
@@ -94,14 +94,13 @@ Session notes will be visible only to the counsellor, managers and admins. A cal
 | Item | Phase | Estimated Effort |
 |------|-------|------------------|
 | Outreach emails: production mail set-up and live test | P3 | 0.5 day |
-| Restricted notes and access logging | P2 | 2–3 days |
 | Donations, Gift Aid and donor directory | P3 | 3–4 days |
 | Reports and exports (CSV/PDF) | P3 | 3–4 days |
 | Public landing pages | P3 | 1–2 days |
 | Automated test suite repairs | — | 1–3 days |
 | Yeastar go-live (deploy, PBX configuration) | Extra | 1–2 days |
 | Training manuals, UAT and sign-off | Handover | 3–4 days |
-| **Total** | | **~13–19 working days** |
+| **Total** | | **~11–16 working days** |
 
 ---
 
@@ -109,7 +108,7 @@ Session notes will be visible only to the counsellor, managers and admins. A cal
 
 | Metric | Value |
 |--------|-------|
-| Automated tests | 683 (540 passing, 135 failing, 7 skipped, 1 risky) |
+| Automated tests | 725 (594 passing, 123 failing, 7 skipped, 1 risky) |
 | Models | 36 |
 | Filament resources | 18 |
 | Migrations | 62 (plus 5 settings migrations) |
@@ -135,7 +134,6 @@ The failing tests are mostly older tests inherited from the base template that n
 
 | Risk | Mitigation |
 |------|------------|
-| Restricted notes not yet in place | Scheduled as a Phase 2 priority |
 | Hostinger free mailbox sends about 100 emails a day | Quota panel keeps 30 for notifications; upgrade or Postmark later |
 | Debug mode found enabled in production (Oct) | Confirm `APP_DEBUG=false` on the server |
 | Yeastar plan and number formats unconfirmed | Awaiting supplier answers before go-live |

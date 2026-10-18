@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\NoteVisibility;
 use App\Models\Note;
 use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,6 +24,7 @@ final class NoteFactory extends Factory
     {
         return [
             'title' => $this->faker->sentence(),
+            'body' => '<p>'.$this->faker->paragraph().'</p>',
             'team_id' => Team::factory(),
         ];
     }
@@ -35,5 +37,13 @@ final class NoteFactory extends Factory
             'created_at' => now()->subMinutes($sequence->index),
             'updated_at' => now()->subMinutes($sequence->index),
         ]);
+    }
+
+    /**
+     * A note only managers and admins can read.
+     */
+    public function restricted(): self
+    {
+        return $this->state(['visibility' => NoteVisibility::Restricted]);
     }
 }

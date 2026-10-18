@@ -21,8 +21,10 @@ use App\Models\Team;
 use App\Models\ThirdPartyCarePlan;
 use App\Models\User;
 use App\Services\GitHubService;
+use App\Support\RestrictedNoteAccess;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -212,6 +214,13 @@ final class AppServiceProvider extends ServiceProvider
 
             return $action;
         });
+
+        // Opening a restricted note in any edit form shows its content, so it is logged like viewing it.
+        EditAction::configureUsing(fn (EditAction $action): EditAction => $action->beforeFormFilled(function (?Model $record): void {
+            if ($record instanceof Note) {
+                RestrictedNoteAccess::record($record);
+            }
+        }));
     }
 
     /**

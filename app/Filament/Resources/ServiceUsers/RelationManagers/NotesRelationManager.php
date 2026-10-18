@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ServiceUsers\RelationManagers;
 
+use App\Filament\Actions\ViewNoteAction;
 use App\Filament\Resources\NoteResource\Forms\NoteForm;
 use App\Models\Note;
 use App\Models\ServiceUser;
@@ -44,6 +45,7 @@ final class NotesRelationManager extends RelationManager
                     ->after(fn (Note $record, RelationManager $livewire) => self::flagSupportStatus($record, $livewire)),
             ])
             ->recordActions([
+                ViewNoteAction::make(),
                 EditAction::make()
                     ->after(fn (Note $record, RelationManager $livewire) => self::flagSupportStatus($record, $livewire)),
                 DeleteAction::make(),

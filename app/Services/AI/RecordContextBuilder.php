@@ -8,6 +8,7 @@ use App\Enums\CustomFields\CompanyField;
 use App\Enums\CustomFields\OpportunityField;
 use App\Enums\CustomFields\PeopleField;
 use App\Enums\CustomFields\TaskField;
+use App\Enums\NoteVisibility;
 use App\Models\Company;
 use App\Models\CustomFieldValue;
 use App\Models\Note;
@@ -15,6 +16,7 @@ use App\Models\Opportunity;
 use App\Models\People;
 use App\Models\Task;
 use Closure;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -45,12 +47,12 @@ final readonly class RecordContextBuilder
      */
     private function buildCompanyContext(Company $company): array
     {
-        $company->loadCount(['notes', 'tasks', 'opportunities', 'people']);
+        $company->loadCount(['notes' => fn (Builder $query): Builder => $query->where('notes.visibility', NoteVisibility::Standard->value), 'tasks', 'opportunities', 'people']);
 
         $company->load([
             'accountOwner',
             'customFieldValues.customField',
-            'notes' => $this->recentWithCustomFields('notes'),
+            'notes' => fn (Relation $query): Relation => $this->recentWithCustomFields('notes')($query)->where('notes.visibility', NoteVisibility::Standard->value),
             'tasks' => $this->recentWithCustomFields('tasks'),
             'opportunities' => $this->recentWithCustomFields('opportunities'),
         ]);
@@ -76,12 +78,12 @@ final readonly class RecordContextBuilder
      */
     private function buildPeopleContext(People $person): array
     {
-        $person->loadCount(['notes', 'tasks']);
+        $person->loadCount(['notes' => fn (Builder $query): Builder => $query->where('notes.visibility', NoteVisibility::Standard->value), 'tasks']);
 
         $person->load([
             'company',
             'customFieldValues.customField',
-            'notes' => $this->recentWithCustomFields('notes'),
+            'notes' => fn (Relation $query): Relation => $this->recentWithCustomFields('notes')($query)->where('notes.visibility', NoteVisibility::Standard->value),
             'tasks' => $this->recentWithCustomFields('tasks'),
         ]);
 
@@ -102,13 +104,13 @@ final readonly class RecordContextBuilder
      */
     private function buildOpportunityContext(Opportunity $opportunity): array
     {
-        $opportunity->loadCount(['notes', 'tasks']);
+        $opportunity->loadCount(['notes' => fn (Builder $query): Builder => $query->where('notes.visibility', NoteVisibility::Standard->value), 'tasks']);
 
         $opportunity->load([
             'company',
             'contact',
             'customFieldValues.customField',
-            'notes' => $this->recentWithCustomFields('notes'),
+            'notes' => fn (Relation $query): Relation => $this->recentWithCustomFields('notes')($query)->where('notes.visibility', NoteVisibility::Standard->value),
             'tasks' => $this->recentWithCustomFields('tasks'),
         ]);
 

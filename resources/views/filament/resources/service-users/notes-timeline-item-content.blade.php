@@ -5,7 +5,10 @@
 
     <div class="flex justify-between items-start mb-2">
         <div>
-            <div class="text-sm font-semibold text-gray-900 dark:text-white">
+            <div class="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
+                @if ($record->isRestricted())
+                    <x-filament::icon icon="heroicon-o-lock-closed" class="h-4 w-4 text-danger-600 dark:text-danger-400" />
+                @endif
                 {{ $record->title }}
             </div>
             <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
@@ -14,6 +17,11 @@
         </div>
     </div>
 
+    @if ($record->isRestricted())
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+            Restricted note. Use <span class="font-medium">Open restricted note</span> to read it; opening it is recorded.
+        </p>
+    @else
     <div class="text-sm text-gray-700 dark:text-gray-300">
         <div
             class="fi-prose prose-sm max-w-none dark:prose-invert"
@@ -42,4 +50,5 @@
             </button>
         @endif
     </div>
+    @endif
 </div>

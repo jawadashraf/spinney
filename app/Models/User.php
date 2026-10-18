@@ -293,6 +293,14 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     }
 
     /**
+     * Managers and admins oversee all of a service user's activity, so they read restricted (e.g. safeguarding) notes.
+     */
+    public function canSeeRestrictedNotes(): bool
+    {
+        return $this->isSuperAdmin() || $this->hasAnyRole(['admin', 'manager']);
+    }
+
+    /**
      * Managers and admins see and manage every appointment; other staff only those they are booked to hold.
      */
     public function managesAppointments(): bool

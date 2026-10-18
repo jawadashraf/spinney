@@ -40,11 +40,13 @@ Updated: 2026-10-16
 - [~] Assessments (captured on the service user profile, no separate assessment record)
 
 ## Notes and Collaboration (P2)
-- [ ] Visibility field added (`standard` vs `restricted`)
-- [ ] Restricted notes enforced for safeguarding leads
+- [x] Visibility field added (`standard` vs `restricted`) (NT-001, NT-002)
+- [x] Restricted notes readable by managers and admins only (decided 18 Oct 2026; no separate safeguarding role) (NT-002, NT-003)
+- [x] Hidden from every list, export, widget and AI summary for other staff, and from queued/background work (NT-003)
+- [x] Opening a restricted note (view or edit) logged as `viewed` in the audit log (NT-004, AT-002)
 - [~] Note type and service type fields (searchable; no category field)
-- [~] Audit log on access and changes (changes logged; access not logged)
-- [ ] Tests added and passing
+- [~] Edit/delete limited to own notes (NT-007): not yet enforced; permissions are role-based
+- [x] Tests added and passing
 
 ## Appointments and Shared Diaries (P2)
 Reviewed 16 Oct 2026 against `acceptance/04-appointments.md`; gaps fixed the same day.
@@ -96,7 +98,7 @@ Reviewed 16 Oct 2026 against `acceptance/04-appointments.md`; gaps fixed the sam
 ## Safeguarding and Consent (P1)
 - [x] Safeguarding flags model and UI (enquiry flags, service user support status)
 - [x] Alerting rules defined (safeguarding and needs-attention notifications)
-- [ ] Restricted notes access enforced
+- [x] Restricted notes access enforced (managers and admins)
 - [x] Consent tracking fields defined
 - [x] Tests added and passing
 
@@ -166,7 +168,7 @@ Reviewed 16 Oct 2026 against `acceptance/04-appointments.md`; gaps fixed the sam
 ## Audit Trail (P1)
 - [x] Audit log model and storage
 - [x] Logging for create/update/delete
-- [ ] Logging for access to restricted notes and session logs
+- [x] Logging for access to restricted notes (appointment session notes are gated, not logged)
 - [x] Admin/management views (System Admin activity log and log viewer)
 - [x] Tests added and passing
 
