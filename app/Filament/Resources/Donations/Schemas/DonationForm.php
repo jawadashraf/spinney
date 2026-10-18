@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Donations\Schemas;
 
+use App\Enums\CreationSource;
 use App\Enums\DonationPaymentMethod;
 use App\Enums\DonationPurpose;
 use App\Enums\GiftAidStatus;
@@ -39,12 +40,53 @@ final class DonationForm
                             ->titleAttribute('first_name')
                             ->searchColumns(['first_name', 'last_name', 'name', 'email'])
                             ->getOptionLabelFromRecordUsing(fn (People $person): string => $person->name)
-                            ->modifyOptionsQueryUsing(fn (Builder $query) => $query->where('team_id', Filament::getTenant()?->getKey())),
+                            ->modifyOptionsQueryUsing(fn (Builder $query) => $query->where('team_id', Filament::getTenant()?->getKey()))
+                            ->modifyKeySelectUsing(fn (Select $select) => $select
+                                ->createOptionForm([
+                                    TextInput::make('first_name')->required()->maxLength(255),
+                                    TextInput::make('last_name')->required()->maxLength(255),
+                                    TextInput::make('email')->email()->maxLength(255),
+                                    TextInput::make('phone')->tel()->maxLength(50),
+                                    TextInput::make('postcode')->maxLength(20),
+                                    Textarea::make('address')->rows(2),
+                                ])
+                                ->createOptionUsing(function (array $data): int|string {
+                                    $person = new People;
+                                    $person->forceFill([
+                                        ...$data,
+                                        'team_id' => Filament::getTenant()?->getKey(),
+                                        'creation_source' => CreationSource::WEB,
+                                    ]);
+                                    $person->save();
+
+                                    return $person->getKey();
+                                })
+                                ->createOptionModalHeading('Add New Person (Donor)')
+                            ),
                         Type::make(Company::class)
                             ->label('Company')
                             ->titleAttribute('name')
                             ->searchColumns(['name', 'email'])
-                            ->modifyOptionsQueryUsing(fn (Builder $query) => $query->where('team_id', Filament::getTenant()?->getKey())),
+                            ->modifyOptionsQueryUsing(fn (Builder $query) => $query->where('team_id', Filament::getTenant()?->getKey()))
+                            ->modifyKeySelectUsing(fn (Select $select) => $select
+                                ->createOptionForm([
+                                    TextInput::make('name')->required()->maxLength(255),
+                                    TextInput::make('email')->email()->maxLength(255),
+                                    TextInput::make('phone')->tel()->maxLength(50),
+                                ])
+                                ->createOptionUsing(function (array $data): int|string {
+                                    $company = new Company;
+                                    $company->forceFill([
+                                        ...$data,
+                                        'team_id' => Filament::getTenant()?->getKey(),
+                                        'creation_source' => CreationSource::WEB,
+                                    ]);
+                                    $company->save();
+
+                                    return $company->getKey();
+                                })
+                                ->createOptionModalHeading('Add New Company (Donor)')
+                            ),
                     ])
                     ->searchable()
                     ->live()

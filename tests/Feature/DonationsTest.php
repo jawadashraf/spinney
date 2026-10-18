@@ -10,6 +10,8 @@ use App\Filament\Resources\CompanyResource\Pages\ViewCompany;
 use App\Filament\Resources\Donations\DonationResource;
 use App\Filament\Resources\Donations\Pages\ListDonations;
 use App\Filament\Resources\Donations\RelationManagers\DonationsRelationManager;
+use App\Filament\Resources\Donations\Schemas\DonationForm;
+use App\Filament\Resources\PeopleResource;
 use App\Filament\Resources\PeopleResource\Pages\ListPeople;
 use App\Filament\Resources\PeopleResource\Pages\ViewPeople;
 use App\Filament\Resources\PeopleResource\RelationManagers\GiftAidDeclarationsRelationManager;
@@ -25,6 +27,9 @@ use Filament\Actions\ExportAction;
 use Filament\Actions\Exports\Models\Export;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\MorphToSelect;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
@@ -123,6 +128,47 @@ describe('access', function (): void {
         livewire(ListPeople::class, ['activeTab' => 'donors'])
             ->assertCanSeeTableRecords([$professional])
             ->assertCanNotSeeTableRecords([$nonDonor]);
+    });
+
+    it('registers People and Donors in navigation for managers', function (): void {
+        $user = signInToDonationsAs($this->team, 'manager');
+        $user->givePermissionTo(Permission::firstOrCreate(['name' => 'ViewAny:People', 'guard_name' => 'web']));
+        Filament::bootCurrentPanel();
+
+        expect(PeopleResource::shouldRegisterNavigation())->toBeTrue();
+
+        $groups = Filament::getCurrentPanel()->getNavigation();
+        $workspace = collect($groups)->first(fn ($group) => $group->getLabel() === 'Workspace');
+        expect($workspace)->not->toBeNull();
+
+        $items = collect($workspace->getItems());
+        $donorItem = $items->first(fn ($item) => $item->getLabel() === 'Donors');
+        $peopleItem = $items->first(fn ($item) => $item->getLabel() === 'People');
+
+        expect($donorItem)->not->toBeNull()
+            ->and($donorItem->getUrl())->toContain('activeTab=donors')
+            ->and($peopleItem)->not->toBeNull();
+    });
+
+    it('can create a person without an organisation', function (): void {
+        $user = signInToDonationsAs($this->team, 'manager');
+        $user->givePermissionTo(Permission::firstOrCreate(['name' => 'ViewAny:People', 'guard_name' => 'web']));
+        $user->givePermissionTo(Permission::firstOrCreate(['name' => 'Create:People', 'guard_name' => 'web']));
+        Filament::bootCurrentPanel();
+
+        livewire(ListPeople::class)
+            ->callAction(CreateAction::class, [
+                'first_name' => 'Fatima',
+                'last_name' => 'Zahra',
+                'email' => 'fatima@example.com',
+                'company_id' => null,
+            ])
+            ->assertHasNoActionErrors();
+
+        $person = People::query()->where('email', 'fatima@example.com')->first();
+        expect($person)->not->toBeNull()
+            ->and($person->company_id)->toBeNull()
+            ->and($person->name)->toBe('Fatima Zahra');
     });
 });
 
@@ -284,6 +330,62 @@ describe('recording donations', function (): void {
         expect(Donation::query()->sole())
             ->team_id->toBe($this->team->id)
             ->and(Donation::query()->sole()->donor->is($person))->toBeTrue();
+    });
+
+    it('allows inline creation of a person donor when recording a donation', function (): void {
+        signInToDonationsAs($this->team, 'manager');
+        $lw = livewire(ListDonations::class);
+        $schema = DonationForm::configure((new Schema($lw->instance()))->model(Donation::class));
+        $morphSelect = collect($schema->getComponents())->first(fn ($c) => $c instanceof MorphToSelect);
+        $peopleType = $morphSelect->getTypes()['people'];
+
+        $keySelect = new Select('donor_id');
+        $callback = $peopleType->getModifyKeySelectUsingCallback();
+        $callback($keySelect);
+
+        $createUsing = $keySelect->getCreateOptionUsing();
+        expect($createUsing)->not->toBeNull();
+
+        $personId = $createUsing([
+            'first_name' => 'Khadijah',
+            'last_name' => 'Ali',
+            'email' => 'khadijah@example.com',
+            'phone' => '07123456789',
+            'postcode' => 'LE2 0AA',
+            'address' => '10 High Street',
+        ]);
+
+        $person = People::query()->find($personId);
+        expect($person)->not->toBeNull()
+            ->and($person->name)->toBe('Khadijah Ali')
+            ->and($person->email)->toBe('khadijah@example.com')
+            ->and($person->team_id)->toBe($this->team->id);
+    });
+
+    it('allows inline creation of a company donor when recording a donation', function (): void {
+        signInToDonationsAs($this->team, 'manager');
+        $lw = livewire(ListDonations::class);
+        $schema = DonationForm::configure((new Schema($lw->instance()))->model(Donation::class));
+        $morphSelect = collect($schema->getComponents())->first(fn ($c) => $c instanceof MorphToSelect);
+        $companyType = $morphSelect->getTypes()['company'];
+
+        $keySelect = new Select('donor_id');
+        $callback = $companyType->getModifyKeySelectUsingCallback();
+        $callback($keySelect);
+
+        $createUsing = $keySelect->getCreateOptionUsing();
+        expect($createUsing)->not->toBeNull();
+
+        $companyId = $createUsing([
+            'name' => 'Leicester Community Trust',
+            'email' => 'contact@lct.org',
+            'phone' => '01161234567',
+        ]);
+
+        $company = Company::query()->find($companyId);
+        expect($company)->not->toBeNull()
+            ->and($company->name)->toBe('Leicester Community Trust')
+            ->and($company->team_id)->toBe($this->team->id);
     });
 });
 

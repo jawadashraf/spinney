@@ -12,8 +12,11 @@ use App\Filament\Pages\LiaisonDashboard;
 use App\Filament\Pages\ManagerDashboard;
 use App\Filament\Pages\Tenancy\EditOrganization;
 use App\Filament\Pages\Tenancy\RegisterOrganization;
+use App\Filament\Resources\PeopleResource;
 use App\Http\Middleware\EnsureVolunteerWorkHours;
 use App\Http\Middleware\SyncSpatiePermissionsTeamId;
+use App\Models\Donation;
+use App\Models\People;
 use App\Models\Team;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
@@ -24,6 +27,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Schemas\Components\Section;
@@ -159,6 +163,16 @@ final class AppPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Tasks')
                     ->icon('heroicon-o-shopping-cart'),
+            ])
+            ->navigationItems([
+                NavigationItem::make('Donors')
+                    ->group('Workspace')
+                    ->icon('heroicon-o-gift')
+                    ->sort(3)
+                    ->visible(fn (): bool => (auth()->user()?->can('viewAny', Donation::class) ?? false) && (auth()->user()?->can('viewAny', People::class) ?? false))
+                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.app.resources.people.index') && request()->query('activeTab') === 'donors')
+                    ->url(fn (): ?string => Filament::getTenant() ? PeopleResource::getUrl('index', ['activeTab' => 'donors']) : null)
+                    ->badge(fn (): ?string => ($count = People::query()->where('team_id', Filament::getTenant()?->getKey())->where('is_service_user', false)->whereHas('donations')->count()) > 0 ? (string) $count : null),
             ])
             ->middleware([
                 EncryptCookies::class,

@@ -16,6 +16,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Enums\Size;
@@ -54,7 +55,8 @@ final class ListPeople extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('type', 'service_user')),
             'donors' => Tab::make('Donors')
                 ->visible(fn (): bool => auth()->user()?->can('viewAny', Donation::class) ?? false)
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('donations')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('donations'))
+                ->badge(fn (): ?int => ($count = People::query()->where('team_id', Filament::getTenant()?->getKey())->where('is_service_user', false)->whereHas('donations')->count()) > 0 ? $count : null),
             'relatives' => Tab::make('Relatives')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('type', 'relative')),
             'professionals' => Tab::make('Professionals')

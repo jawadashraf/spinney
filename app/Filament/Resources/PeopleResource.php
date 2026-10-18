@@ -33,6 +33,7 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Set;
@@ -56,13 +57,29 @@ final class PeopleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user';
-
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Workspace';
+
+    /**
+     * @return array<NavigationItem>
+     */
+    public static function getNavigationItems(): array
+    {
+        return [
+            NavigationItem::make(self::getNavigationLabel())
+                ->group(self::getNavigationGroup())
+                ->parentItem(self::getNavigationParentItem())
+                ->icon(self::getNavigationIcon())
+                ->activeIcon(self::getActiveNavigationIcon())
+                ->isActiveWhen(fn (): bool => request()->routeIs('filament.app.resources.people.*') && request()->query('activeTab') !== 'donors')
+                ->sort(self::getNavigationSort())
+                ->badge(self::getNavigationBadge(), color: self::getNavigationBadgeColor())
+                ->url(self::getUrl('index')),
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -79,9 +96,11 @@ final class PeopleResource extends Resource
                         TextInput::make('last_name')
                             ->required()
                             ->maxLength(255)
-                            ->columnSpan(3)
+                            ->columnSpan(4)
                             ->disabled(fn (?People $record) => $record?->is_locked),
                         Select::make('company_id')
+                            ->label('Organisation')
+                            ->placeholder('None (Individual supporter / donor)')
                             ->relationship('company', 'name')
                             ->suffixAction(
                                 Action::make('Create Company')
@@ -107,9 +126,33 @@ final class PeopleResource extends Resource
                             )
                             ->searchable()
                             ->preload()
-                            ->required()
-                            ->columnSpan(5)
+                            ->nullable()
+                            ->columnSpan(4)
                             ->disabled(fn (?People $record) => $record?->is_locked),
+                        TextInput::make('email')
+                            ->email()
+                            ->maxLength(255)
+                            ->columnSpan(4),
+                        TextInput::make('phone')
+                            ->tel()
+                            ->maxLength(50)
+                            ->columnSpan(4),
+                        Select::make('type')
+                            ->label('Role')
+                            ->options([
+                                'donor' => 'Donor / Supporter',
+                                'relative' => 'Relative',
+                                'professional' => 'Professional',
+                            ])
+                            ->placeholder('General Person')
+                            ->nullable()
+                            ->columnSpan(4),
+                        TextInput::make('postcode')
+                            ->maxLength(20)
+                            ->columnSpan(4),
+                        TextInput::make('address')
+                            ->maxLength(255)
+                            ->columnSpan(8),
                     ])
                     ->columns(12),
                 CustomFields::form()->forSchema($schema)->build()
@@ -138,8 +181,16 @@ final class PeopleResource extends Resource
                     ->searchable(),
                 TextColumn::make('last_name')
                     ->searchable(),
+                TextColumn::make('email')
+                    ->searchable()
+                    ->copyable()
+                    ->toggleable(),
+                TextColumn::make('phone')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('company.name')
                     ->label('Company')
+                    ->placeholder('-')
                     ->url(fn (People $record): ?string => $record->company_id ? CompanyResource::getUrl('view', [$record->company_id]) : null)
                     ->searchable()
                     ->sortable(),
