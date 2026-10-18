@@ -26,6 +26,6 @@ final readonly class HomeController
             }
         }
 
-        return view('home.index2');
+        return view('home.landing');
     }
 }

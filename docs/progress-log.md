@@ -5,8 +5,8 @@ Updated: 2026-10-18
 
 ## Current Sprint
 - **Sprint**: Phase 3
-- **Status**: In Progress
-- **Next Task**: Digital Presence / Public landing pages.
+- **Status**: Core Scope Complete
+- **Next Task**: Handover & Operational setup (Outreach email live test, Yeastar deployment, inherited test repairs).
 
 ## Accomplishments
 ### Sprint 1: Foundations (Enquiry)
@@ -73,6 +73,7 @@ Updated: 2026-10-18
 - [x] **[Donations & Gift Aid]** Donations from people or companies with purpose and payment method; Gift Aid declarations on the person's profile; Gift Aid status set from the covering declaration; donation report with filters, grouping, totals, Gift Aid value and export; managers and admins only, admins alone delete.
 - [x] **[Outreach dashboard]** Directory reach and verification, engagements and outreach emails per month, coverage by type, companies not contacted in six months.
 - [x] **[Reports and Exports]** Central `ReportsDashboard` page with team-scoped date range, category, status, and service team filters; Enquiry volume and category breakdown report (RP-001); Service user engagement distribution report (RP-002); Filament exports for Enquiries, Service Users, and Calls (RP-004); and role-based permissions matrix via `ReportPermissions` (RP-005) with 21 passing Pest tests.
+- [x] **[Digital Presence]** Single-page charity landing page for Recovery Network (`recoverynetwork.com` / `spinneyhill.org.uk`) featuring emergency helpline callout, About Us, 3-Stage Holistic Pathway (Body, Mind, Soul), Comprehensive Services, authentic community testimonials (Wasim, Rizwan, Abdul Abz Alibhai, Suleman), Volunteer & Donate sections, and an integrated Livewire confidential callback request form (`PublicEnquiryForm`) feeding directly into CRM enquiries with 4 passing tests in `tests/Feature/LandingPageTest.php`.
 
 ## Decisions
 | Date | Decision | Rationale | Owner |

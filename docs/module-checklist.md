@@ -23,7 +23,7 @@ Updated: 2026-10-16
 - [x] Conversion to service user implemented
 - [x] Validation and error handling
 - [x] Permissions enforced
-- [~] Reporting included (dashboard widgets; no export yet)
+- [x] Reporting and export included (Reports dashboard, enquiry report, CSV/XLSX export)
 - [x] Tests added and passing
 
 ## Service Users and Case File (P1)
@@ -171,7 +171,7 @@ Built 18 Oct 2026 against `acceptance/07-donations.md`. Managers and admins only
 - [x] Tests added and passing (tests/Feature/ReportingTest.php)
 
 ## Digital Presence (P3)
-- [ ] Public landing pages: Home, About, Contact, How we work (still the Relaticle template)
+- [x] Single-page charity landing page for Recovery Network (recoverynetwork.com / spinneyhill.org.uk) featuring About Us, 3-Stage Pathway (Body, Mind, Soul), Comprehensive Services, Real Community Testimonials, Volunteer & Donate sections, and integrated confidential callback/enquiry Livewire form.
 
 ## Audit Trail (P1)
 - [x] Audit log model and storage
