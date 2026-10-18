@@ -9,6 +9,7 @@ use App\Enums\AttendanceStatus;
 use App\Enums\AttendeeType;
 use App\Enums\CounselorType;
 use App\Filament\Resources\Appointments\AppointmentResource;
+use App\Filament\Resources\Appointments\Pages\EditAppointment;
 use App\Filament\Resources\Appointments\Pages\ListAppointments;
 use App\Filament\Resources\Appointments\Pages\ViewAppointment;
 use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
@@ -401,5 +402,27 @@ describe('counsellors and their clients', function () {
         $this->get(ServiceUserResource::getUrl('view', ['record' => $client->id]))->assertOk();
         $this->get(ServiceUserResource::getUrl('view', ['record' => $stranger->id]))->assertNotFound();
         $this->get(ServiceUserResource::getUrl('edit', ['record' => $client->id]))->assertForbidden();
+    });
+});
+
+describe('editing', function () {
+    it('changes the details but keeps the slot, status and session record', function () {
+        Notification::fake();
+        $counsellor = counsellorIn($this->team);
+        $appointment = bookDaysAgo($counsellor, serviceUserIn($this->team), 1);
+        app(UpdateAppointmentStatus::class)->complete($appointment, $counsellor, AttendanceStatus::ATTENDED, 'Session note', 'Next step');
+        signInToDirectoryAs($this->team, 'manager');
+
+        livewire(EditAppointment::class, ['record' => $appointment->getKey()])
+            ->fillForm(['description' => 'Bring photo ID'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $metadata = $appointment->refresh()->metadata;
+
+        expect($appointment->description)->toBe('Bring photo ID')
+            ->and($appointment->getAppointmentStatus())->toBe(AppointmentStatus::COMPLETED)
+            ->and($metadata['session_note'])->toBe('Session note')
+            ->and($appointment->timeRange())->toBe('10:00 - 11:00');
     });
 });

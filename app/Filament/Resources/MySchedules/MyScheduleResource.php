@@ -30,6 +30,10 @@ final class MyScheduleResource extends Resource
 
     protected static ?string $navigationLabel = 'My Schedules';
 
+    protected static ?string $modelLabel = 'availability';
+
+    protected static ?string $pluralModelLabel = 'My Schedules';
+
     protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema

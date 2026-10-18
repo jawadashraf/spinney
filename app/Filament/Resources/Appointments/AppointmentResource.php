@@ -30,6 +30,10 @@ final class AppointmentResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static ?string $modelLabel = 'appointment';
+
+    protected static ?string $breadcrumb = 'Appointments';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Appointments';
@@ -50,6 +54,11 @@ final class AppointmentResource extends Resource
     public static function getNavigationLabel(): string
     {
         return self::currentUser()?->managesAppointments() ? 'Appointments' : 'My appointments';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return self::getNavigationLabel();
     }
 
     public static function form(Schema $schema): Schema

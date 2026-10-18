@@ -157,6 +157,8 @@ final class SchedulesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('name')
+            // Appointments live under Appointments and need no approval; this tab is for availability and blocked time.
+            ->modifyQueryUsing(fn ($query) => $query->where('schedule_type', '!=', ScheduleTypes::APPOINTMENT->value))
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
@@ -209,7 +211,7 @@ final class SchedulesRelationManager extends RelationManager
                 TextColumn::make('lock_status')
                     ->label('Locked')
                     ->badge()
-                    ->state(fn (Schedule $record): ?string => $record->isLocked() ? 'Locked' : null)
+                    ->state(fn (Schedule $record): ?string => ($record->metadata['is_locked'] ?? false) === true ? 'Locked' : null)
                     ->color('gray')
                     ->icon('heroicon-o-lock-closed')
                     ->tooltip('A manager has locked this availability because appointments rely on it. Ask a manager to change it.')

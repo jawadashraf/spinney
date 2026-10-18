@@ -27,7 +27,7 @@ final class AppointmentInfolist
                         TextEntry::make('name')
                             ->placeholder('—'),
                         TextEntry::make('schedulable.name')
-                            ->label('Assigned Counselor'),
+                            ->label('Counsellor'),
                         TextEntry::make('start_date')
                             ->label('Booking Date')
                             ->date(),

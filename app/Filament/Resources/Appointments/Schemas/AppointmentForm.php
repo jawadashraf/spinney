@@ -10,6 +10,7 @@ use App\Enums\PaymentType;
 use App\Enums\ScheduleType;
 use App\Enums\SessionType;
 use App\Models\People;
+use App\Models\Schedule as AppointmentSchedule;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\MorphToSelect;
@@ -17,11 +18,13 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Zap\Models\Schedule;
 
@@ -39,18 +42,19 @@ final class AppointmentForm
                     ->schema([
                         Grid::make(1)
                             ->schema([
-                                Section::make('Counselor & Time Selection')
+                                Section::make('Counsellor & time')
                                     ->schema([
                                         MorphToSelect::make('schedulable')
                                             ->types([
                                                 MorphToSelect\Type::make(User::class)
                                                     ->titleAttribute('name')
                                                     ->modifyOptionsQueryUsing(fn ($query) => $query->whereHas('roles', fn ($q) => $q->whereNot('name', 'service_user')))
-                                                    ->label('Counselor / Staff'),
+                                                    ->label('Staff member'),
                                                 MorphToSelect\Type::make(People::class)
                                                     ->titleAttribute('name')
                                                     ->label('Person'),
                                             ])
+                                            ->label('Counsellor')
                                             ->searchable()
                                             ->preload()
                                             ->required()
@@ -97,7 +101,23 @@ final class AppointmentForm
                                                     ->toArray();
                                             })
                                             ->visible(fn (Get $get): bool => filled($get('schedulable_id')) && filled($get('booking_date'))),
-                                    ]),
+                                    ])
+                                    ->visible(fn (string $operation): bool => $operation === 'create'),
+
+                                // Moving a booked slot is not supported: the time is shown, and staff cancel and book again.
+                                Section::make('Counsellor & time')
+                                    ->schema([
+                                        TextEntry::make('booked_slot')
+                                            ->hiddenLabel()
+                                            ->state(fn (?Model $record): string => $record instanceof AppointmentSchedule
+                                                ? $record->start_date->format('l j F Y').', '.$record->timeRange().' with '.data_get($record, 'schedulable.name', '-')
+                                                : '-'),
+                                        TextEntry::make('reschedule_hint')
+                                            ->hiddenLabel()
+                                            ->state('To change the counsellor, date or time, cancel this appointment and book a new one.')
+                                            ->color('gray'),
+                                    ])
+                                    ->visible(fn (string $operation): bool => $operation === 'edit'),
 
                                 Section::make('General')
                                     ->schema([

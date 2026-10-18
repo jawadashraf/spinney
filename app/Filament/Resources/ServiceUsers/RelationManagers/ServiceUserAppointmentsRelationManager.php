@@ -45,7 +45,7 @@ final class ServiceUserAppointmentsRelationManager extends RelationManager
             ->columns(2)
             ->components([
                 Select::make('schedulable_id')
-                    ->label('Counselor / Staff')
+                    ->label('Counsellor')
                     ->required()
                     ->live()
                     ->options(fn (): array => User::query()
@@ -112,7 +112,7 @@ final class ServiceUserAppointmentsRelationManager extends RelationManager
                     ->label('Time')
                     ->state(fn (Schedule $record): string => $record->timeRange()),
                 TextColumn::make('schedulable.name')
-                    ->label('Counselor'),
+                    ->label('Counsellor'),
                 TextColumn::make('type')
                     ->label('Type')
                     ->state(fn (Schedule $record): ?string => $record->getCounselorType()?->getLabel())
@@ -130,6 +130,9 @@ final class ServiceUserAppointmentsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->label('Book Appointment')
+                    ->modalHeading('Book an appointment')
+                    ->modalSubmitActionLabel('Book')
+                    ->createAnother(false)
                     ->icon('heroicon-o-calendar')
                     ->using(fn (array $data): Model => $this->book($data)),
             ])

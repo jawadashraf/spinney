@@ -32,9 +32,10 @@ final class AppointmentsTable
                     ->searchable()
                     ->sortable()
                     ->placeholder('—')
-                    ->limit(30),
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('schedulable.name')
-                    ->label('Assigned Counselor')
+                    ->label('Counsellor')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('attendee')
@@ -45,7 +46,7 @@ final class AppointmentsTable
                     ->label('Attendee Type')
                     ->formatStateUsing(fn (string $state): string => AttendeeType::tryFrom($state)?->getLabel() ?? '—')
                     ->badge()
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
                 TextColumn::make('start_date')
                     ->label('Date')
@@ -72,13 +73,13 @@ final class AppointmentsTable
                     ->label('Session')
                     ->formatStateUsing(fn (string $state): string => SessionType::tryFrom($state)?->getLabel() ?? '—')
                     ->badge()
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
                 TextColumn::make('metadata.payment_type')
                     ->label('Payment')
                     ->formatStateUsing(fn (string $state): string => PaymentType::tryFrom($state)?->getLabel() ?? '—')
                     ->badge()
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
                 IconColumn::make('is_active')
                     ->boolean()
