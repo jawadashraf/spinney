@@ -95,6 +95,7 @@ Updated: 2026-10-18
 | 2026-10-16 | Outreach emails via Fin Mail and the Hostinger mailbox, 100/day with 30 kept for notifications; no open/click tracking; bounces marked by hand | Low volume; Postmark can replace SMTP later | Product |
 | 2026-10-18 | ReportsDashboard isolates report widgets with `$isDiscovered = false` | Prevents aggregate report widgets from auto-loading on operational/liaison dashboards | Dev |
 | 2026-10-18 | Report & Export permissions centralized in `ReportPermissions` | Implements RP-005 matrix with role fallbacks for teams without granular Shield records | Dev |
+| 2026-10-18 | RecoveryNetwork.com single-page charity site connects directly to CRM via Livewire PublicEnquiryForm | Seamlessly captures web enquiries with priority flags and caller details without third-party form dependencies | Dev |
 
 ## Risks and Blockers
 - **Test suite**: 123 of 732 tests failing, mostly inherited Relaticle tests out of step with the schema (12 fixed on 18 Oct by giving the note factory a body).
