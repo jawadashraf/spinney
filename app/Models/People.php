@@ -8,12 +8,14 @@ use App\Enums\CreationSource;
 use App\Models\Concerns\HasAiSummary;
 use App\Models\Concerns\HasCreator;
 use App\Models\Concerns\HasCustomFields;
+use App\Models\Concerns\HasDonations;
 use App\Models\Concerns\HasNotes;
 use App\Models\Concerns\HasTeam;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
 use App\Observers\PeopleObserver;
 use App\Services\AvatarService;
 use App\Support\PhoneNumber;
+use Carbon\CarbonInterface;
 use Database\Factories\PeopleFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -44,6 +46,7 @@ class People extends Model implements HasCustomFieldsContract
     use HasChildren;
     use HasCreator;
     use HasCustomFields;
+    use HasDonations;
 
     /** @use HasFactory<PeopleFactory> */
     use HasFactory;
@@ -261,5 +264,24 @@ class People extends Model implements HasCustomFieldsContract
     public function serviceUserAppointments(): HasMany
     {
         return $this->hasMany(Schedule::class, 'metadata->service_user_id');
+    }
+
+    /**
+     * @return HasMany<GiftAidDeclaration, $this>
+     */
+    public function giftAidDeclarations(): HasMany
+    {
+        return $this->hasMany(GiftAidDeclaration::class, 'people_id');
+    }
+
+    /**
+     * The earliest declaration that covers a gift given on the date, if any.
+     */
+    public function giftAidDeclarationCovering(CarbonInterface $donatedAt): ?GiftAidDeclaration
+    {
+        return $this->giftAidDeclarations()
+            ->orderBy('declared_on')
+            ->get()
+            ->first(fn (GiftAidDeclaration $declaration): bool => $declaration->covers($donatedAt));
     }
 }

@@ -19,6 +19,7 @@ use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
 use App\Support\CompanyPermissions;
+use App\Support\DonationPermissions;
 use Database\Seeders\ShieldSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -142,4 +143,15 @@ function signInToDirectoryAs(Team $team, string $role): User
     Filament::setTenant($team);
 
     return $user;
+}
+
+/**
+ * Sign in as a new member of the team with the given role, with donation permissions granted as they are live.
+ */
+function signInToDonationsAs(Team $team, string $role): User
+{
+    Role::firstOrCreate(['name' => $role, 'team_id' => $team->id], ['guard_name' => 'web']);
+    DonationPermissions::ensure($team->id);
+
+    return signInToDirectoryAs($team, $role);
 }

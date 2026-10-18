@@ -10,6 +10,8 @@ use App\Models\Call;
 use App\Models\CallAttempt;
 use App\Models\CallPlan;
 use App\Models\Company;
+use App\Models\Donation;
+use App\Models\GiftAidDeclaration;
 use App\Models\Import;
 use App\Models\Note;
 use App\Models\Opportunity;
@@ -194,6 +196,8 @@ final class AppServiceProvider extends ServiceProvider
             'call' => Call::class,
             'call_attempt' => CallAttempt::class,
             'schedule' => Schedule::class,
+            'donation' => Donation::class,
+            'gift_aid_declaration' => GiftAidDeclaration::class,
         ]);
 
         // Bind our custom Import model to the Filament Import model

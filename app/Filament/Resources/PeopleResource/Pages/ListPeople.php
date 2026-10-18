@@ -8,6 +8,7 @@ use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Exports\PeopleExporter;
 use App\Filament\Imports\PeopleImporter;
 use App\Filament\Resources\PeopleResource;
+use App\Models\Donation;
 use App\Support\CustomFields\Concerns\InteractsWithCustomFields;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
@@ -48,7 +49,8 @@ final class ListPeople extends ListRecords
             'service_users' => Tab::make('Service Users')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('type', 'service_user')),
             'donors' => Tab::make('Donors')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('type', 'donor')),
+                ->visible(fn (): bool => auth()->user()?->can('viewAny', Donation::class) ?? false)
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('donations')),
             'relatives' => Tab::make('Relatives')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('type', 'relative')),
             'professionals' => Tab::make('Professionals')

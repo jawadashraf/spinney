@@ -13,6 +13,7 @@ use App\Filament\Resources\CompanyResource\RelationManagers\EngagementsRelationM
 use App\Filament\Resources\CompanyResource\RelationManagers\NotesRelationManager;
 use App\Filament\Resources\CompanyResource\RelationManagers\OutreachEmailsRelationManager;
 use App\Filament\Resources\CompanyResource\RelationManagers\TasksRelationManager;
+use App\Filament\Resources\Donations\RelationManagers\DonationsRelationManager;
 use App\Models\Company;
 use App\Support\CustomFields;
 use Filament\Actions\ActionGroup;
@@ -156,6 +157,7 @@ final class ViewCompany extends ViewRecord
             ContactsRelationManager::class,
             EngagementsRelationManager::class,
             OutreachEmailsRelationManager::class,
+            DonationsRelationManager::class,
             NotesRelationManager::class,
             TasksRelationManager::class,
         ];

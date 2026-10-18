@@ -10,7 +10,7 @@
 
 Phase 1 is complete and most of Phase 2 is in place. Since the last report the system has gained a full service user case file, appointments with availability management, support and safeguarding flags, a task system, and an aftercare call management system with automated reminders. A Yeastar phone system integration is built and awaiting deployment.
 
-The main outstanding work is in Phase 3: donations, outreach, exports and the public website. Phase 2 is now complete apart from the client's answer on internal care plans. The outreach directory was completed on 16 October and restricted notes on 18 October. Appointments were reviewed again on 18 October: only approved availability can be booked, locked availability is protected, counsellors can read their own clients' records, and staff and manager guides were written.
+The main outstanding work is in Phase 3: outreach, reports and exports, and the public website. Phase 2 is now complete apart from the client's answer on internal care plans. The outreach directory was completed on 16 October and restricted notes on 18 October. Appointments were reviewed again on 18 October: only approved availability can be booked, locked availability is protected, counsellors can read their own clients' records, and staff and manager guides were written. Donations and Gift Aid were built on 18 October for managers and admins.
 
 ---
 
@@ -46,7 +46,7 @@ The main outstanding work is in Phase 3: donations, outreach, exports and the pu
 |-------------|--------|
 | Role-specific dashboards (Manager, Liaison) | 🟡 Partial |
 | System Admin panel with audit log | ✅ Complete |
-| Donation tracking and Gift Aid | ⏳ Not started |
+| Donation tracking and Gift Aid (managers and admins only) | ✅ Complete (18 Oct) |
 | Outreach emails from the CRM (Fin Mail, Hostinger mailbox, daily quota, unsubscribe) | ✅ Built (16 Oct); production mail set-up pending |
 | Outreach programme engagement metrics (Outreach dashboard) | ✅ Complete (16 Oct) |
 | Data exports (CSV/PDF) | ⏳ Not started |
@@ -105,13 +105,12 @@ Appointments stay in fixed 60-minute slots. Guides: Appointments Staff Guide, Ma
 | Item | Phase | Estimated Effort |
 |------|-------|------------------|
 | Outreach emails: production mail set-up and live test | P3 | 0.5 day |
-| Donations, Gift Aid and donor directory | P3 | 3–4 days |
 | Reports and exports (CSV/PDF) | P3 | 3–4 days |
 | Public landing pages | P3 | 1–2 days |
 | Automated test suite repairs | — | 1–3 days |
 | Yeastar go-live (deploy, PBX configuration) | Extra | 1–2 days |
 | Training manuals (remaining modules), UAT and sign-off | Handover | 2–3 days |
-| **Total** | | **~10–15 working days** |
+| **Total** | | **~7–11 working days** |
 
 ---
 
@@ -120,9 +119,9 @@ Appointments stay in fixed 60-minute slots. Guides: Appointments Staff Guide, Ma
 | Metric | Value |
 |--------|-------|
 | Automated tests | 732 (601 passing, 123 failing, 7 skipped, 1 risky) |
-| Models | 36 |
-| Filament resources | 18 |
-| Migrations | 67 (plus 5 settings migrations) |
+| Models | 38 |
+| Filament resources | 19 |
+| Migrations | 70 (plus 5 settings migrations) |
 
 The failing tests are mostly older tests inherited from the base template that no longer match the schema. They are scheduled for repair before sign-off.
 

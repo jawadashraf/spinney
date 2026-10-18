@@ -6,8 +6,10 @@ namespace App\Filament\Resources;
 
 use App\Enums\CreationSource;
 use App\Filament\Exports\PeopleExporter;
+use App\Filament\Resources\Donations\RelationManagers\DonationsRelationManager;
 use App\Filament\Resources\PeopleResource\Pages\ListPeople;
 use App\Filament\Resources\PeopleResource\Pages\ViewPeople;
+use App\Filament\Resources\PeopleResource\RelationManagers\GiftAidDeclarationsRelationManager;
 use App\Filament\Resources\PeopleResource\RelationManagers\NotesRelationManager;
 use App\Filament\Resources\PeopleResource\RelationManagers\RelatedPeopleRelationManager;
 use App\Filament\Resources\PeopleResource\RelationManagers\TasksRelationManager;
@@ -231,6 +233,8 @@ final class PeopleResource extends Resource
             NotesRelationManager::class,
             RelatedPeopleRelationManager::class,
             ThirdPartyCarePlansRelationManager::class,
+            DonationsRelationManager::class,
+            GiftAidDeclarationsRelationManager::class,
         ];
     }
 

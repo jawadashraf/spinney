@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Support\AppointmentPermissions;
 use App\Support\CallPermissions;
 use App\Support\CompanyPermissions;
+use App\Support\DonationPermissions;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -97,6 +98,7 @@ final class SimplifiedRolePermissionSeeder extends Seeder
         CallPermissions::ensure($teamId);
         CompanyPermissions::ensure($teamId);
         AppointmentPermissions::ensure($teamId);
+        DonationPermissions::ensure($teamId);
 
         $this->command?->info('All roles and permissions have been seeded successfully.');
     }

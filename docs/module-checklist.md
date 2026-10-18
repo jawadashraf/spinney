@@ -90,14 +90,18 @@ Reviewed 16 Oct 2026 against `acceptance/04-appointments.md`; gaps fixed the sam
 - [x] Part of (parent organisation), verification status/note/source, "No email yet" filter
 - [x] Outreach dashboard: reach, verification, engagements and emails per month, coverage by type, not contacted in 6 months
 - [ ] Production mail set-up (Hostinger SMTP credentials, `storage:link` for images) and a live test send
-- [ ] Donors and supporters directory fields and UI (`Donor` type exists, no UI)
+- [x] Donors: anyone (person or company) with a donation; Donors tab on People for managers and admins (18 Oct)
 
 ## Donations and Gift Aid (P3)
-- [ ] Data model and migration complete
-- [ ] Donation history UI
-- [ ] Gift Aid consent/status captured
-- [ ] Permissions enforced
-- [ ] Tests added and passing
+Built 18 Oct 2026 against `acceptance/07-donations.md`. Managers and admins only (no fundraising role).
+- [x] Data model and migration complete (`Donation`, `GiftAidDeclaration`; new tables only) (DN-001)
+- [x] Donations from people or companies: amount, date, payment method, purpose, reference (DN-001)
+- [x] Donation history UI: Donations list, and Donations tab on person and company profiles
+- [x] Gift Aid declarations on the person's profile: date, method, past/future cover, declared address, withdrawal (DN-002)
+- [x] Gift Aid status per donation, set from the declaration covering its date; company gifts never Gift Aid; withdrawal releases later unclaimed gifts (DN-002)
+- [x] Report: filters by date, donor, Gift Aid status and purpose; group by donor, purpose or Gift Aid; totals and Gift Aid value; CSV/Excel export (DN-003)
+- [x] Permissions enforced: managers record, edit and report; only admins delete; declarations with donations cannot be deleted (DN-004)
+- [x] Tests added and passing
 
 ## Safeguarding and Consent (P1)
 - [x] Safeguarding flags model and UI (enquiry flags, service user support status)
@@ -161,7 +165,7 @@ Reviewed 16 Oct 2026 against `acceptance/04-appointments.md`; gaps fixed the sam
 
 ## Reporting and Exports (P3)
 - [~] Baseline reports implemented (enquiry, call and workload widgets)
-- [ ] Export functionality available (CSV/PDF for enquiries, service users, calls, donations)
+- [ ] Export functionality available (CSV/PDF for enquiries, service users, calls; donations CSV/Excel done 18 Oct)
 - [ ] Payment and engagement reports
 - [ ] Permissions enforced
 - [ ] Tests added and passing
@@ -177,6 +181,6 @@ Reviewed 16 Oct 2026 against `acceptance/04-appointments.md`; gaps fixed the sam
 - [x] Tests added and passing
 
 ## Handover
-- [~] Training documentation: enquiries user guide; call management guides; appointments staff guide, manager guide and quick reference (18 Oct)
+- [~] Training documentation: enquiries user guide; call management guides; appointments staff guide, manager guide and quick reference (18 Oct); donations manager & admin guide (18 Oct)
 - [ ] In-app documentation rewritten for Spinney Hill (still Relaticle text)
 - [ ] UAT against `acceptance/` criteria and client sign-off

@@ -10,6 +10,7 @@ use App\Enums\CreationSource;
 use App\Models\Concerns\HasAiSummary;
 use App\Models\Concerns\HasCreator;
 use App\Models\Concerns\HasCustomFields;
+use App\Models\Concerns\HasDonations;
 use App\Models\Concerns\HasNotes;
 use App\Models\Concerns\HasTeam;
 use App\Models\Contracts\HasCustomFields as HasCustomFieldsContract;
@@ -75,6 +76,7 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
     use HasAiSummary;
     use HasCreator;
     use HasCustomFields;
+    use HasDonations;
 
     /** @use HasFactory<CompanyFactory> */
     use HasFactory;

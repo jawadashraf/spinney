@@ -6,7 +6,7 @@ Updated: 2026-10-18
 ## Current Sprint
 - **Sprint**: Phase 2 completion
 - **Status**: In Progress
-- **Next Task**: Donations & Gift Aid, then reports and exports.
+- **Next Task**: Reports and exports.
 
 ## Accomplishments
 ### Sprint 1: Foundations (Enquiry)
@@ -70,6 +70,7 @@ Updated: 2026-10-18
 - [x] **[Restricted notes]** Note visibility (standard/restricted); restricted notes readable by managers and admins only via a global scope and the policy, hidden from background jobs and AI summaries; opening one logged as `viewed`.
 - [x] **[Appointments review]** Only approved availability is bookable; locks enforced for non-managers; counsellors and assessors read their own clients' records; appointment editing fixed (it could not save and would have cleared status and session notes); the Schedules tab no longer lists appointments; clearer labels.
 - [x] **[Appointments guides]** Staff guide, manager & admin guide and one-page quick reference (PDF, with screenshots).
+- [x] **[Donations & Gift Aid]** Donations from people or companies with purpose and payment method; Gift Aid declarations on the person's profile; Gift Aid status set from the covering declaration; donation report with filters, grouping, totals, Gift Aid value and export; managers and admins only, admins alone delete.
 - [x] **[Outreach dashboard]** Directory reach and verification, engagements and outreach emails per month, coverage by type, companies not contacted in six months.
 
 ## Decisions
@@ -87,6 +88,7 @@ Updated: 2026-10-18
 | 2026-10-16 | Outreach directory built on Companies (Organisation = tenant Team); managers and admins only | Avoids clashing with tenancy terminology; directory holds external contact details | Product |
 | 2026-10-18 | Restricted notes readable by managers and admins only (no separate safeguarding role) | They oversee all of a service user's activity | Product |
 | 2026-10-18 | Appointments stay in fixed 60-minute slots; only approved availability is bookable; counsellors may read their own clients' records | Agreed while writing the appointments guide | Product |
+| 2026-10-18 | Donations for managers and admins only (no fundraising role); a donor is anyone with a donation, not a People type; Gift Aid tracked through per-person declarations; company gifts are never Gift Aid | Keeps donor details from other staff; a service user or relative can also donate | Product |
 | 2026-10-16 | Appointment session notes visible to the counsellor, managers and admins only | Counselling notes are sensitive (requirements §7) | Product |
 | 2026-10-16 | Outreach emails via Fin Mail and the Hostinger mailbox, 100/day with 30 kept for notifications; no open/click tracking; bounces marked by hand | Low volume; Postmark can replace SMTP later | Product |
 
