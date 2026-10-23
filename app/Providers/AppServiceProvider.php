@@ -28,6 +28,8 @@ use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\ToggleColumn;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades;
@@ -209,6 +211,18 @@ final class AppServiceProvider extends ServiceProvider
      */
     private function configureFilament(): void
     {
+        Toggle::configureUsing(function (Toggle $toggle): void {
+            $toggle
+                ->onColor('success')
+                ->offColor('danger');
+        });
+
+        ToggleColumn::configureUsing(function (ToggleColumn $column): void {
+            $column
+                ->onColor('success')
+                ->offColor('danger');
+        });
+
         $slideOverActions = ['create', 'edit', 'view'];
 
         Action::configureUsing(function (Action $action) use ($slideOverActions): Action {

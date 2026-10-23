@@ -295,6 +295,15 @@
     @apply rounded-full;
 }
 
+/* Allow custom off-colors (like danger) to override the Shadcn theme's forced gray */
+.fi-toggle.fi-toggle-off.fi-color {
+    background-color: var(--bg) !important;
+}
+
+.dark .fi-toggle.fi-toggle-off.fi-color {
+    background-color: var(--dark-bg) !important;
+}
+
 /* Color Picker */
 .fi-color-picker {
     @apply rounded-xl;
