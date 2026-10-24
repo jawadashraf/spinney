@@ -10,6 +10,7 @@ use App\Enums\CounselorType;
 use App\Enums\PaymentType;
 use App\Enums\SessionType;
 use App\Models\Schedule;
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -98,6 +99,12 @@ final class AppointmentsTable
                     ->options(AppointmentStatus::class)
                     ->query(fn (Builder $query, array $data): Builder => filled($data['value'])
                         ? Schedule::whereAppointmentStatus($query, [AppointmentStatus::from($data['value'])])
+                        : $query),
+                SelectFilter::make('counsellor')
+                    ->label('Counsellor')
+                    ->options(fn () => User::query()->whereHas('roles', fn ($q) => $q->whereIn('name', ['counsellor', 'assessor', 'manager', 'admin']))->pluck('name', 'id'))
+                    ->query(fn (Builder $query, array $data): Builder => filled($data['value'])
+                        ? $query->where('schedulable_type', User::class)->where('schedulable_id', $data['value'])
                         : $query),
                 SelectFilter::make('metadata_counselor_type')
                     ->options(CounselorType::class)

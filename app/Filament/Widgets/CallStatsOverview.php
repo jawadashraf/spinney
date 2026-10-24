@@ -45,21 +45,26 @@ final class CallStatsOverview extends StatsOverviewWidget
             Stat::make('Calls due today', (string) $dueToday)
                 ->descriptionIcon('heroicon-o-calendar')
                 ->description('Still to be made today')
-                ->color('info'),
+                ->color('info')
+                ->url(fn (): string => CallResource::getUrl('index', ['activeTab' => 'today'])),
             Stat::make('Overdue calls', (string) $overdue)
                 ->descriptionIcon('heroicon-o-exclamation-triangle')
                 ->description('Past their due time')
-                ->color($overdue > 0 ? 'danger' : 'success'),
+                ->color($overdue > 0 ? 'danger' : 'success')
+                ->url(fn (): string => CallResource::getUrl('index', ['activeTab' => 'overdue'])),
             Stat::make('Completed this week', (string) $completedThisWeek)
                 ->descriptionIcon('heroicon-o-check-circle')
-                ->color('success'),
+                ->color('success')
+                ->url(fn (): string => CallResource::getUrl('index', ['activeTab' => 'history'])),
             Stat::make('Missed (30 days)', (string) $missedThisMonth)
                 ->description('Unreachable after all attempts')
                 ->descriptionIcon('heroicon-o-phone-x-mark')
-                ->color($missedThisMonth > 0 ? 'warning' : 'gray'),
+                ->color($missedThisMonth > 0 ? 'warning' : 'gray')
+                ->url(fn (): string => CallResource::getUrl('index', ['activeTab' => 'history'])),
             Stat::make('Contact rate (30 days)', "{$contactRate}%")
                 ->description("{$answeredAttempts} of {$totalAttempts} attempts answered")
-                ->color($contactRate >= 70 ? 'success' : 'warning'),
+                ->color($contactRate >= 70 ? 'success' : 'warning')
+                ->url(fn (): string => CallResource::getUrl('index')),
         ];
     }
 

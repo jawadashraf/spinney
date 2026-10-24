@@ -13,10 +13,9 @@ final class DepartmentWorkloadChart extends ChartWidget
 {
     protected static ?int $sort = 4;
 
-    public function getHeading(): string
-    {
-        return 'Open Enquiries by Department';
-    }
+    protected ?string $heading = 'Open Enquiries by Department';
+
+    protected ?string $description = 'Open & in-progress enquiries allocated across departments';
 
     protected function getData(): array
     {

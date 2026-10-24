@@ -7,8 +7,10 @@ namespace App\Filament\Widgets;
 use App\Enums\AppointmentStatus;
 use App\Enums\AttendanceStatus;
 use App\Enums\ScheduleType;
+use App\Filament\Resources\Appointments\AppointmentResource;
 use App\Models\Schedule;
 use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -63,11 +65,20 @@ final class CounsellorSessionsWidget extends TableWidget
                 ]))
             ->defaultSort('name')
             ->paginated([10, 25])
+            ->recordUrl(fn (User $record): string => AppointmentResource::getUrl('index', ['tableFilters' => ['counsellor' => ['value' => $record->id]]]))
+            ->headerActions([
+                Action::make('view_all_appointments')
+                    ->label('View all in Appointments')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('gray')
+                    ->url(fn (): string => AppointmentResource::getUrl('index')),
+            ])
             ->columns([
                 TextColumn::make('name')
                     ->label('Counsellor')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn (User $record): string => AppointmentResource::getUrl('index', ['tableFilters' => ['counsellor' => ['value' => $record->id]]])),
                 TextColumn::make('attended_count')
                     ->label('Sessions held')
                     ->numeric()

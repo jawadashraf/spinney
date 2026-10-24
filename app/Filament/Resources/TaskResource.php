@@ -155,6 +155,10 @@ final class TaskResource extends Resource
                     ->searchable()
                     ->preload()
                     ->visible(fn (): bool => auth()->user()->hasAnyRole(['super_admin', 'admin', 'manager'])),
+                Filter::make('overdue')
+                    ->label('Overdue')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('due_date')->where('due_date', '<', now())),
                 Filter::make('due_this_week')
                     ->label('Due this week')
                     ->toggle()

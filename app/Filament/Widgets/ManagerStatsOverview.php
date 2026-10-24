@@ -7,6 +7,10 @@ namespace App\Filament\Widgets;
 use App\Enums\EnquiryStatus;
 use App\Enums\SupportStatus;
 use App\Enums\ThirdPartyCarePlanStatus;
+use App\Filament\Resources\Enquiries\EnquiryResource;
+use App\Filament\Resources\ServiceUsers\ServiceUserResource;
+use App\Filament\Resources\TaskResource;
+use App\Filament\Resources\ThirdPartyCarePlans\ThirdPartyCarePlanResource;
 use App\Models\Enquiry;
 use App\Models\ServiceUser;
 use App\Models\Task;
@@ -16,6 +20,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 final class ManagerStatsOverview extends BaseWidget
 {
+    protected static bool $isDiscovered = false;
+
     protected static ?int $sort = 1;
 
     protected function getStats(): array
@@ -45,22 +51,26 @@ final class ManagerStatsOverview extends BaseWidget
             Stat::make('Users Needing Support', (string) $needingAttentionCount)
                 ->description('Service users flagged with support status')
                 ->descriptionIcon('heroicon-o-exclamation-triangle')
-                ->color($needingAttentionCount > 0 ? 'danger' : 'success'),
+                ->color($needingAttentionCount > 0 ? 'danger' : 'success')
+                ->url(fn (): string => ServiceUserResource::getUrl('index', ['tableFilters' => ['needing_attention' => ['isActive' => true]]])),
 
             Stat::make('Safeguarding Concerns', (string) $safeguardingCount)
                 ->description('Unresolved enquiry safeguarding flags')
                 ->descriptionIcon('heroicon-o-shield-exclamation')
-                ->color($safeguardingCount > 0 ? 'danger' : 'success'),
+                ->color($safeguardingCount > 0 ? 'danger' : 'success')
+                ->url(fn (): string => EnquiryResource::getUrl('index', ['tableFilters' => ['safeguarding_flags' => ['value' => true]]])),
 
             Stat::make('Overdue Tasks', (string) $overdueTasksCount)
                 ->description('Tasks past due date requiring attention')
                 ->descriptionIcon('heroicon-o-clock')
-                ->color($overdueTasksCount > 0 ? 'warning' : 'gray'),
+                ->color($overdueTasksCount > 0 ? 'warning' : 'gray')
+                ->url(fn (): string => TaskResource::getUrl('index', ['tableFilters' => ['overdue' => ['isActive' => true], 'due_this_week' => ['isActive' => false]]])),
 
             Stat::make('Active Care Plans', (string) $activeCarePlansCount)
                 ->description('Pending & in-progress care plans')
                 ->descriptionIcon('heroicon-o-document-text')
-                ->color('info'),
+                ->color('info')
+                ->url(fn (): string => ThirdPartyCarePlanResource::getUrl('index', ['tableFilters' => ['active' => ['isActive' => true]]])),
         ];
     }
 }

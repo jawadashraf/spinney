@@ -15,6 +15,8 @@ final class OverdueCallsByLiaisonChart extends ChartWidget
 
     protected ?string $heading = 'Overdue calls by liaison';
 
+    protected ?string $description = 'Liaison assignment breakdown for past-due calls';
+
     protected ?string $pollingInterval = null;
 
     protected function getData(): array

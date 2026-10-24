@@ -31,7 +31,8 @@ final class ServiceUsersNeedingSupport extends BaseWidget
                 Tables\Columns\TextColumn::make('name')
                     ->label('Service User')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn (ServiceUser $record): string => ServiceUserResource::getUrl('view', ['record' => $record])),
                 Tables\Columns\TextColumn::make('profile.support_status')
                     ->label('Status')
                     ->badge()
@@ -60,11 +61,19 @@ final class ServiceUsersNeedingSupport extends BaseWidget
                     ->dateTime()
                     ->sortable(),
             ])
+            ->recordUrl(fn (ServiceUser $record): string => ServiceUserResource::getUrl('view', ['record' => $record]))
+            ->headerActions([
+                Action::make('view_all_service_users')
+                    ->label('View all in Service Users')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('gray')
+                    ->url(fn (): string => ServiceUserResource::getUrl('index', ['tableFilters' => ['needing_attention' => ['isActive' => true]]])),
+            ])
             ->actions([
                 Action::make('view')
                     ->label('View User')
                     ->icon('heroicon-o-eye')
-                    ->url(fn (ServiceUser $record): string => ServiceUserResource::getUrl('edit', ['record' => $record])),
+                    ->url(fn (ServiceUser $record): string => ServiceUserResource::getUrl('view', ['record' => $record])),
                 Action::make('resolve')
                     ->label('Mark as Resolved')
                     ->icon('heroicon-o-check-circle')
@@ -96,5 +105,10 @@ final class ServiceUsersNeedingSupport extends BaseWidget
                         }
                     }),
             ]);
+    }
+
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('viewAny', ServiceUser::class) ?? false;
     }
 }

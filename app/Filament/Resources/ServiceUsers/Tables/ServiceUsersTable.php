@@ -6,6 +6,7 @@ namespace App\Filament\Resources\ServiceUsers\Tables;
 
 use App\Enums\EngagementStatus;
 use App\Enums\ServiceTeam;
+use App\Enums\SupportStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -77,6 +78,19 @@ final class ServiceUsersTable
                             $query->whereHas('profile', fn ($q) => $q->where('engagement_status', $data['value']));
                         }
                     }),
+                SelectFilter::make('support_status')
+                    ->options(SupportStatus::class)
+                    ->query(function (Builder $query, array $data): void {
+                        if ($data['value']) {
+                            $query->whereHas('profile', fn ($q) => $q->where('support_status', $data['value']));
+                        }
+                    }),
+                Filter::make('needing_attention')
+                    ->label('Needing Support')
+                    ->query(fn (Builder $query): Builder => $query->whereHas('profile', fn ($q) => $q->whereIn('support_status', [
+                        SupportStatus::NeedsAttention,
+                        SupportStatus::UrgentAttention,
+                    ]))),
                 Filter::make('created_at')
                     ->label('Date Registered')
                     ->form([

@@ -6,6 +6,7 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Calls\Actions\RecordCallOutcomeAction;
 use App\Filament\Resources\Calls\CallResource;
+use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Models\Call;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
@@ -36,7 +37,8 @@ final class OverdueCallsWidget extends TableWidget
             ->defaultPaginationPageOption(5)
             ->columns([
                 TextColumn::make('serviceUser.name')
-                    ->label('Service user'),
+                    ->label('Service user')
+                    ->url(fn (Call $record): ?string => $record->people_id ? ServiceUserResource::getUrl('view', ['record' => $record->people_id]) : null),
                 TextColumn::make('due_at')
                     ->label('Was due')
                     ->dateTime('D d M, H:i')
@@ -54,6 +56,14 @@ final class OverdueCallsWidget extends TableWidget
                     ->boolean()
                     ->trueColor('danger')
                     ->falseColor('gray'),
+            ])
+            ->recordUrl(fn (Call $record): string => CallResource::getUrl('view', ['record' => $record]))
+            ->headerActions([
+                Action::make('view_all_overdue')
+                    ->label('View all in Calls')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('gray')
+                    ->url(fn (): string => CallResource::getUrl('index', ['activeTab' => 'overdue'])),
             ])
             ->recordActions([
                 RecordCallOutcomeAction::make(),

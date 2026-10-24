@@ -12,9 +12,11 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 final class ThirdPartyCarePlansTable
 {
@@ -77,6 +79,9 @@ final class ThirdPartyCarePlansTable
             ])
             ->filters([
                 TrashedFilter::make(),
+                Filter::make('active')
+                    ->label('Active Care Plans')
+                    ->query(fn (Builder $query): Builder => $query->whereIn('status', [ThirdPartyCarePlanStatus::PENDING, ThirdPartyCarePlanStatus::IN_PROGRESS])),
                 SelectFilter::make('status')
                     ->options(ThirdPartyCarePlanStatus::class)
                     ->label('Status'),
