@@ -12,6 +12,9 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Relaticle\SystemAdmin\Filament\Resources\CompanyResource;
+use Relaticle\SystemAdmin\Filament\Resources\OpportunityResource;
+use Relaticle\SystemAdmin\Filament\Resources\TaskResource;
 use Relaticle\SystemAdmin\Filament\Widgets\Concerns\HasCustomFieldQueries;
 
 final class BusinessOverviewWidget extends BaseWidget
@@ -32,6 +35,7 @@ final class BusinessOverviewWidget extends BaseWidget
                 ->descriptionIcon('heroicon-o-banknotes')
                 ->color('success')
                 ->chart($businessData['pipeline_trend'])
+                ->url(fn (): string => OpportunityResource::getUrl('index'))
                 ->extraAttributes([
                     'class' => 'relative overflow-hidden',
                 ]),
@@ -40,6 +44,7 @@ final class BusinessOverviewWidget extends BaseWidget
                 ->description($this->getGrowthDescription($businessData['opportunities_growth'], 'opportunities'))
                 ->descriptionIcon($businessData['opportunities_growth'] >= 0 ? 'heroicon-o-arrow-trending-up' : 'heroicon-o-arrow-trending-down')
                 ->color($this->getGrowthColor($businessData['opportunities_growth']))
+                ->url(fn (): string => OpportunityResource::getUrl('index'))
                 ->extraAttributes([
                     'class' => 'relative overflow-hidden',
                 ]),
@@ -48,6 +53,7 @@ final class BusinessOverviewWidget extends BaseWidget
                 ->description($this->getCompletionDescription($businessData['completion_rate']))
                 ->descriptionIcon($this->getCompletionIcon($businessData['completion_rate']))
                 ->color($this->getCompletionColor($businessData['completion_rate']))
+                ->url(fn (): string => TaskResource::getUrl('index'))
                 ->extraAttributes([
                     'class' => 'relative overflow-hidden',
                 ]),
@@ -56,6 +62,7 @@ final class BusinessOverviewWidget extends BaseWidget
                 ->description($this->getGrowthDescription($businessData['companies_growth'], 'companies'))
                 ->descriptionIcon($businessData['companies_growth'] >= 0 ? 'heroicon-o-building-office-2' : 'heroicon-o-building-office')
                 ->color($this->getGrowthColor($businessData['companies_growth']))
+                ->url(fn (): string => CompanyResource::getUrl('index'))
                 ->extraAttributes([
                     'class' => 'relative overflow-hidden',
                 ]),

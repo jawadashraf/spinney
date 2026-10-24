@@ -6,12 +6,17 @@ namespace Relaticle\SystemAdmin\Filament\Widgets;
 
 use App\Enums\CreationSource;
 use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
+use Relaticle\SystemAdmin\Filament\Resources\CompanyResource;
+use Relaticle\SystemAdmin\Filament\Resources\OpportunityResource;
+use Relaticle\SystemAdmin\Filament\Resources\TaskResource;
+use Relaticle\SystemAdmin\Filament\Resources\UserResource;
 use Relaticle\SystemAdmin\Filament\Widgets\Concerns\HasCustomFieldQueries;
 
 final class TeamPerformanceTableWidget extends BaseWidget
@@ -46,7 +51,8 @@ final class TeamPerformanceTableWidget extends BaseWidget
                     ->searchable()
                     ->sortable()
                     ->weight('semibold')
-                    ->icon('heroicon-o-user'),
+                    ->icon('heroicon-o-user')
+                    ->url(fn (User $record): string => UserResource::getUrl('view', ['record' => $record])),
 
                 Tables\Columns\TextColumn::make('tasks_created')
                     ->label('Tasks')
@@ -54,7 +60,8 @@ final class TeamPerformanceTableWidget extends BaseWidget
                     ->sortable()
                     ->alignCenter()
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')
+                    ->url(fn (): string => TaskResource::getUrl('index')),
 
                 Tables\Columns\TextColumn::make('tasks_completed')
                     ->label('Completed')
@@ -80,7 +87,8 @@ final class TeamPerformanceTableWidget extends BaseWidget
                     ->sortable()
                     ->alignCenter()
                     ->badge()
-                    ->color('info'),
+                    ->color('info')
+                    ->url(fn (): string => OpportunityResource::getUrl('index')),
 
                 Tables\Columns\TextColumn::make('companies_created')
                     ->label('Companies')
@@ -88,7 +96,8 @@ final class TeamPerformanceTableWidget extends BaseWidget
                     ->sortable()
                     ->alignCenter()
                     ->badge()
-                    ->color('warning'),
+                    ->color('warning')
+                    ->url(fn (): string => CompanyResource::getUrl('index')),
 
                 Tables\Columns\TextColumn::make('last_activity')
                     ->label('Last Activity')
@@ -98,6 +107,14 @@ final class TeamPerformanceTableWidget extends BaseWidget
                     ->toggleable(),
             ])
             ->defaultSort('tasks_created', 'desc')
+            ->recordUrl(fn (User $record): string => UserResource::getUrl('view', ['record' => $record]))
+            ->headerActions([
+                Action::make('view_all_users')
+                    ->label('View all in Users')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('gray')
+                    ->url(fn (): string => UserResource::getUrl('index')),
+            ])
             ->paginated([10, 25, 50])
             ->defaultPaginationPageOption(10)
             ->striped()
@@ -112,6 +129,7 @@ final class TeamPerformanceTableWidget extends BaseWidget
     protected function getTableQuery(): Builder
     {
         $systemSource = CreationSource::SYSTEM->value;
+        $greatestFunc = DB::getDriverName() === 'sqlite' ? 'MAX' : 'GREATEST';
 
         return User::query()
             ->addSelect([
@@ -123,7 +141,7 @@ final class TeamPerformanceTableWidget extends BaseWidget
                 DB::raw('0 as completion_rate'),
                 DB::raw("(SELECT COUNT(*) FROM opportunities WHERE opportunities.creator_id = users.id AND opportunities.deleted_at IS NULL AND opportunities.creation_source != '{$systemSource}') as opportunities_created"),
                 DB::raw("(SELECT COUNT(*) FROM companies WHERE companies.creator_id = users.id AND companies.deleted_at IS NULL AND companies.creation_source != '{$systemSource}') as companies_created"),
-                DB::raw("GREATEST(
+                DB::raw("{$greatestFunc}(
                     COALESCE((SELECT MAX(created_at) FROM tasks WHERE creator_id = users.id AND creation_source != '{$systemSource}'), '1970-01-01'),
                     COALESCE((SELECT MAX(created_at) FROM opportunities WHERE creator_id = users.id AND creation_source != '{$systemSource}'), '1970-01-01'),
                     COALESCE((SELECT MAX(created_at) FROM companies WHERE creator_id = users.id AND creation_source != '{$systemSource}'), '1970-01-01'),
