@@ -132,6 +132,13 @@ final class EnquiriesTable
                     ->trueLabel('With safeguarding flags')
                     ->falseLabel('No safeguarding flags'),
 
+                Filter::make('overdue')
+                    ->label('Overdue')
+                    ->query(fn (Builder $query): Builder => $query
+                        ->whereNotIn('status', [EnquiryStatus::CLOSED, EnquiryStatus::CONVERTED])
+                        ->whereNotNull('due_date')
+                        ->where('due_date', '<', now())),
+
                 Filter::make('occurred_at')
                     ->form([
                         DatePicker::make('occurred_from'),

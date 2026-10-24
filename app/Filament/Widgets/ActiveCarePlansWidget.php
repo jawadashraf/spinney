@@ -12,10 +12,9 @@ final class ActiveCarePlansWidget extends ChartWidget
 {
     protected static ?int $sort = 1;
 
-    public function getHeading(): string
-    {
-        return 'Care Plans by Status';
-    }
+    protected ?string $heading = 'Care Plans by Status';
+
+    protected ?string $description = 'Distribution of external care plans by status';
 
     protected function getData(): array
     {

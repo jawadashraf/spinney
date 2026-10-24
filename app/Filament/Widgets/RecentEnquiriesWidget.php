@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Enquiries\EnquiryResource;
+use App\Filament\Resources\PeopleResource;
 use App\Models\Enquiry;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
@@ -42,7 +43,8 @@ final class RecentEnquiriesWidget extends TableWidget
                 TextColumn::make('people.name')
                     ->label('Contact')
                     ->default('Anonymous')
-                    ->searchable(),
+                    ->searchable()
+                    ->url(fn (Enquiry $record): ?string => $record->people_id ? PeopleResource::getUrl('view', ['record' => $record->people_id]) : null),
 
                 TextColumn::make('category')
                     ->badge(),
@@ -59,6 +61,14 @@ final class RecentEnquiriesWidget extends TableWidget
                     ->boolean()
                     ->label('SG')
                     ->color(fn (bool $state): string => $state ? 'danger' : 'gray'),
+            ])
+            ->recordUrl(fn (Enquiry $record): string => EnquiryResource::getUrl('view', ['record' => $record]))
+            ->headerActions([
+                Action::make('view_all_enquiries')
+                    ->label('View all in Enquiries')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('gray')
+                    ->url(fn (): string => EnquiryResource::getUrl('index')),
             ])
             ->actions([
                 Action::make('view')

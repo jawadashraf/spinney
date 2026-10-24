@@ -110,3 +110,40 @@ it('shows recent enquiries in widget', function () {
     livewire(LiaisonDashboard::class)
         ->assertOk();
 });
+
+use App\Filament\Widgets\ActiveCarePlansWidget;
+use App\Filament\Widgets\EnquiriesByCategoryChart;
+use App\Filament\Widgets\EnquiryStatsOverview;
+use App\Filament\Widgets\RecentEnquiriesWidget;
+use App\Filament\Widgets\UpcomingCallsWidget;
+use App\Filament\Widgets\UpcomingCarePlanReferralsWidget;
+
+it('renders enquiry stats overview with filtered resource urls', function () {
+    $user = createSuperAdminUser();
+    actingAs($user);
+
+    $component = livewire(EnquiryStatsOverview::class)
+        ->assertSuccessful();
+
+    $stats = (fn () => $this->getCachedStats())->call($component->instance());
+    expect($stats)->toHaveCount(4);
+    expect($stats[0]->getUrl())->toContain('tableFilters');
+    expect($stats[0]->getUrl())->toContain('open');
+    expect($stats[1]->getUrl())->toContain('tableFilters');
+    expect($stats[1]->getUrl())->toContain('in_progress');
+    expect($stats[2]->getUrl())->toContain('tableFilters');
+    expect($stats[2]->getUrl())->toContain('overdue');
+    expect($stats[3]->getUrl())->toContain('tableFilters');
+    expect($stats[3]->getUrl())->toContain('closed');
+});
+
+it('renders liaison table and chart widgets successfully', function () {
+    $user = createSuperAdminUser();
+    actingAs($user);
+
+    livewire(UpcomingCallsWidget::class)->assertSuccessful();
+    livewire(RecentEnquiriesWidget::class)->assertSuccessful();
+    livewire(UpcomingCarePlanReferralsWidget::class)->assertSuccessful();
+    livewire(ActiveCarePlansWidget::class)->assertSuccessful();
+    livewire(EnquiriesByCategoryChart::class)->assertSuccessful();
+});

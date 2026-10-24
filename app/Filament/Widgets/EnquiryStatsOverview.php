@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Enums\EnquiryStatus;
+use App\Filament\Resources\Enquiries\EnquiryResource;
 use App\Models\Enquiry;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -18,11 +19,13 @@ final class EnquiryStatsOverview extends StatsOverviewWidget
         return [
             Stat::make('Open Enquiries', Enquiry::where('status', EnquiryStatus::OPEN)->count())
                 ->color('info')
-                ->icon('heroicon-o-inbox-arrow-down'),
+                ->icon('heroicon-o-inbox-arrow-down')
+                ->url(fn (): string => EnquiryResource::getUrl('index', ['tableFilters' => ['status' => ['value' => EnquiryStatus::OPEN->value]]])),
 
             Stat::make('In Progress', Enquiry::where('status', EnquiryStatus::IN_PROGRESS)->count())
                 ->color('warning')
-                ->icon('heroicon-o-arrow-path'),
+                ->icon('heroicon-o-arrow-path')
+                ->url(fn (): string => EnquiryResource::getUrl('index', ['tableFilters' => ['status' => ['value' => EnquiryStatus::IN_PROGRESS->value]]])),
 
             Stat::make('Overdue', Enquiry::where('direction', 'outbound')
                 ->whereNotIn('status', [EnquiryStatus::CLOSED, EnquiryStatus::CONVERTED])
@@ -30,14 +33,16 @@ final class EnquiryStatsOverview extends StatsOverviewWidget
                 ->where('due_date', '<', now())
                 ->count())
                 ->color('danger')
-                ->icon('heroicon-o-clock'),
+                ->icon('heroicon-o-clock')
+                ->url(fn (): string => EnquiryResource::getUrl('index', ['tableFilters' => ['overdue' => ['isActive' => true]]])),
 
             Stat::make('Closed This Month', Enquiry::where('status', EnquiryStatus::CLOSED)
                 ->whereMonth('updated_at', now()->month)
                 ->whereYear('updated_at', now()->year)
                 ->count())
                 ->color('success')
-                ->icon('heroicon-o-check-circle'),
+                ->icon('heroicon-o-check-circle')
+                ->url(fn (): string => EnquiryResource::getUrl('index', ['tableFilters' => ['status' => ['value' => EnquiryStatus::CLOSED->value]]])),
         ];
     }
 

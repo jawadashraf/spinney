@@ -13,10 +13,9 @@ final class EnquiriesByCategoryChart extends ChartWidget
 {
     protected static ?int $sort = 3;
 
-    public function getHeading(): string
-    {
-        return 'Enquiries by Category';
-    }
+    protected ?string $heading = 'Enquiries by Category';
+
+    protected ?string $description = 'Active enquiries grouped by category';
 
     protected function getData(): array
     {
