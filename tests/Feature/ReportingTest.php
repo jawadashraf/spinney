@@ -149,6 +149,14 @@ describe('RP-001: Enquiry volume and category report', function (): void {
 
         expect($data['totalEnquiries'])->toBe(1);
     });
+
+    it('renders report links to enquiry resource', function (): void {
+        signInToReportsAs($this->team, 'manager');
+
+        livewire(EnquiryVolumeReportWidget::class)
+            ->assertSeeHtml('enquiries')
+            ->assertSeeHtml('tableFilters');
+    });
 });
 
 describe('RP-002: Service user engagement report', function (): void {
@@ -247,6 +255,14 @@ describe('RP-002: Service user engagement report', function (): void {
         $data = $widget->instance()->getReportData();
 
         expect($data['totalServiceUsers'])->toBe(1);
+    });
+
+    it('renders report links to service user resource', function (): void {
+        signInToReportsAs($this->team, 'manager');
+
+        livewire(ServiceUserEngagementReportWidget::class)
+            ->assertSeeHtml('service-users')
+            ->assertSeeHtml('tableFilters');
     });
 
     it('filters service users list table by date registered', function (): void {

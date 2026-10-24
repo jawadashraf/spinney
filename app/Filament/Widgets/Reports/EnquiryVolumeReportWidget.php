@@ -121,6 +121,7 @@ final class EnquiryVolumeReportWidget extends Widget
             $percentage = $totalEnquiries > 0 ? round(($count / $totalEnquiries) * 100, 1) : 0.0;
 
             return [
+                'user_id' => $row->user_id,
                 'staff' => $name,
                 'total' => $count,
                 'open' => (int) $row->open_count,
