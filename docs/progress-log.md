@@ -112,6 +112,8 @@ Updated: 2026-10-18
   - The list of donation purposes (now: general funds, zakat, sadaqah, food bank, appeal or campaign, other).
   - Whether Claimed donations should be locked against edits.
   - Whether people already tagged as donors on the live database need reviewing.
+  - Taking a Gift Aid declaration while adding a new donor from "Record donation" (today staff must save, open the person, add the declaration, then fix the gift).
+  - Whether the Donors menu should list company donors too (it shows people only).
 
 ## Production and Deployment
 - Hosted on Hostinger shared hosting, not Docker. The Dockerfile, `docker-compose.prod.yml`, Horizon config and `docker-publish.yml` are left over from Relaticle.

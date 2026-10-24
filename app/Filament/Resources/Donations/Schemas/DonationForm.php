@@ -11,6 +11,7 @@ use App\Enums\GiftAidStatus;
 use App\Models\Company;
 use App\Models\GiftAidDeclaration;
 use App\Models\People;
+use App\Support\PhoneNumber;
 use Closure;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
@@ -19,12 +20,15 @@ use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 final class DonationForm
 {
@@ -43,12 +47,18 @@ final class DonationForm
                             ->modifyOptionsQueryUsing(fn (Builder $query) => $query->where('team_id', Filament::getTenant()?->getKey()))
                             ->modifyKeySelectUsing(fn (Select $select) => $select
                                 ->createOptionForm([
-                                    TextInput::make('first_name')->required()->maxLength(255),
-                                    TextInput::make('last_name')->required()->maxLength(255),
-                                    TextInput::make('email')->email()->maxLength(255),
-                                    TextInput::make('phone')->tel()->maxLength(50),
+                                    TextInput::make('first_name')->required()->maxLength(255)->live(onBlur: true),
+                                    TextInput::make('last_name')->required()->maxLength(255)->live(onBlur: true),
+                                    TextInput::make('email')->email()->maxLength(255)->live(onBlur: true),
+                                    TextInput::make('phone')->tel()->maxLength(50)->live(onBlur: true),
                                     TextInput::make('postcode')->maxLength(20),
                                     Textarea::make('address')->rows(2),
+                                    self::possibleDuplicatesCallout(fn (Get $get): Collection => self::peopleMatching(
+                                        $get('first_name'),
+                                        $get('last_name'),
+                                        $get('email'),
+                                        $get('phone'),
+                                    )->map(fn (People $person): string => self::describeMatch($person->name, $person->email, $person->postcode))),
                                 ])
                                 ->createOptionUsing(function (array $data): int|string {
                                     $person = new People;
@@ -61,7 +71,7 @@ final class DonationForm
 
                                     return $person->getKey();
                                 })
-                                ->createOptionModalHeading('Add New Person (Donor)')
+                                ->createOptionModalHeading('Add a new person')
                             ),
                         Type::make(Company::class)
                             ->label('Company')
@@ -70,9 +80,13 @@ final class DonationForm
                             ->modifyOptionsQueryUsing(fn (Builder $query) => $query->where('team_id', Filament::getTenant()?->getKey()))
                             ->modifyKeySelectUsing(fn (Select $select) => $select
                                 ->createOptionForm([
-                                    TextInput::make('name')->required()->maxLength(255),
-                                    TextInput::make('email')->email()->maxLength(255),
+                                    TextInput::make('name')->required()->maxLength(255)->live(onBlur: true),
+                                    TextInput::make('email')->email()->maxLength(255)->live(onBlur: true),
                                     TextInput::make('phone')->tel()->maxLength(50),
+                                    self::possibleDuplicatesCallout(fn (Get $get): Collection => self::companiesMatching(
+                                        $get('name'),
+                                        $get('email'),
+                                    )->map(fn (Company $company): string => self::describeMatch($company->name, $company->email))),
                                 ])
                                 ->createOptionUsing(function (array $data): int|string {
                                     $company = new Company;
@@ -85,9 +99,11 @@ final class DonationForm
 
                                     return $company->getKey();
                                 })
-                                ->createOptionModalHeading('Add New Company (Donor)')
+                                ->createOptionModalHeading('Add a new company')
                             ),
                     ])
+                    ->typeSelectToggleButtons()
+                    ->modifyTypeSelectUsing(fn (ToggleButtons $toggleButtons): ToggleButtons => $toggleButtons->default('people'))
                     ->searchable()
                     ->live()
                     ->required()
@@ -152,6 +168,73 @@ final class DonationForm
                 ->rows(3)
                 ->columnSpanFull(),
         ];
+    }
+
+    /**
+     * Warns before a donor is added again, so their gifts and Gift Aid declarations stay on one record.
+     *
+     * @param  Closure(Get): Collection<int, string>  $matches
+     */
+    private static function possibleDuplicatesCallout(Closure $matches): Callout
+    {
+        return Callout::make('Already on record?')
+            ->key('possibleDuplicates')
+            ->warning()
+            ->description(fn (Get $get): string => 'Close this window and search for them instead of adding them again: '.$matches($get)->implode('; ').'.')
+            ->visible(fn (Get $get): bool => $matches($get)->isNotEmpty());
+    }
+
+    /**
+     * People in this team with the same email, phone number or full name.
+     *
+     * @return Collection<int, People>
+     */
+    private static function peopleMatching(?string $firstName, ?string $lastName, ?string $email, ?string $phone): Collection
+    {
+        $phoneNormalized = PhoneNumber::normalize($phone);
+        $hasFullName = filled($firstName) && filled($lastName);
+
+        if (! $hasFullName && blank($email) && blank($phoneNormalized)) {
+            return collect();
+        }
+
+        return People::query()
+            ->where('team_id', Filament::getTenant()?->getKey())
+            ->where(fn (Builder $query) => $query
+                ->when(filled($email), fn (Builder $query) => $query->orWhereRaw('LOWER(email) = ?', [mb_strtolower(mb_trim((string) $email))]))
+                ->when(filled($phoneNormalized), fn (Builder $query) => $query->orWhere('phone_normalized', $phoneNormalized))
+                ->when($hasFullName, fn (Builder $query) => $query->orWhere(fn (Builder $query) => $query
+                    ->whereRaw('LOWER(first_name) = ?', [mb_strtolower(mb_trim((string) $firstName))])
+                    ->whereRaw('LOWER(last_name) = ?', [mb_strtolower(mb_trim((string) $lastName))]))))
+            ->limit(5)
+            ->get();
+    }
+
+    /**
+     * Companies in this team with the same name or email.
+     *
+     * @return Collection<int, Company>
+     */
+    private static function companiesMatching(?string $name, ?string $email): Collection
+    {
+        if (blank($name) && blank($email)) {
+            return collect();
+        }
+
+        return Company::query()
+            ->where('team_id', Filament::getTenant()?->getKey())
+            ->where(fn (Builder $query) => $query
+                ->when(filled($name), fn (Builder $query) => $query->orWhereRaw('LOWER(name) = ?', [mb_strtolower(mb_trim((string) $name))]))
+                ->when(filled($email), fn (Builder $query) => $query->orWhereRaw('LOWER(email) = ?', [mb_strtolower(mb_trim((string) $email))])))
+            ->limit(5)
+            ->get();
+    }
+
+    private static function describeMatch(string $name, ?string ...$details): string
+    {
+        $details = array_filter($details, filled(...));
+
+        return $details === [] ? $name : $name.' ('.implode(', ', $details).')';
     }
 
     private static function donorFromState(mixed $type, mixed $id): ?Model

@@ -10,7 +10,6 @@ use App\Filament\Resources\CompanyResource\Pages\ViewCompany;
 use App\Filament\Resources\Donations\DonationResource;
 use App\Filament\Resources\Donations\Pages\ListDonations;
 use App\Filament\Resources\Donations\RelationManagers\DonationsRelationManager;
-use App\Filament\Resources\Donations\Schemas\DonationForm;
 use App\Filament\Resources\PeopleResource;
 use App\Filament\Resources\PeopleResource\Pages\ListPeople;
 use App\Filament\Resources\PeopleResource\Pages\ViewPeople;
@@ -27,9 +26,7 @@ use Filament\Actions\ExportAction;
 use Filament\Actions\Exports\Models\Export;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\MorphToSelect;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Callout;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
@@ -169,6 +166,39 @@ describe('access', function (): void {
         expect($person)->not->toBeNull()
             ->and($person->company_id)->toBeNull()
             ->and($person->name)->toBe('Fatima Zahra');
+    });
+
+    it('no longer offers the old donor tag for a new person', function (): void {
+        $user = signInToDonationsAs($this->team, 'manager');
+        $user->givePermissionTo(Permission::firstOrCreate(['name' => 'ViewAny:People', 'guard_name' => 'web']));
+        $user->givePermissionTo(Permission::firstOrCreate(['name' => 'Create:People', 'guard_name' => 'web']));
+        Filament::bootCurrentPanel();
+
+        livewire(ListPeople::class)
+            ->callAction(CreateAction::class, [
+                'first_name' => 'Fatima',
+                'last_name' => 'Zahra',
+                'type' => 'donor',
+            ])
+            ->assertHasActionErrors(['type']);
+
+        expect(People::query()->where('first_name', 'Fatima')->exists())->toBeFalse();
+    });
+
+    it('keeps the old donor tag when editing someone who already has it', function (): void {
+        $user = signInToDonationsAs($this->team, 'manager');
+        $user->givePermissionTo(Permission::firstOrCreate(['name' => 'ViewAny:People', 'guard_name' => 'web']));
+        $user->givePermissionTo(Permission::firstOrCreate(['name' => 'Update:People', 'guard_name' => 'web']));
+        Filament::bootCurrentPanel();
+        $person = People::factory()->for($this->team)->create(['type' => 'donor']);
+
+        livewire(ListPeople::class)
+            ->callAction(TestAction::make('edit')->table($person), ['phone' => '07123456789'])
+            ->assertHasNoActionErrors();
+
+        expect($person->refresh())
+            ->type->toBe('donor')
+            ->phone->toBe('07123456789');
     });
 });
 
@@ -332,60 +362,103 @@ describe('recording donations', function (): void {
             ->and(Donation::query()->sole()->donor->is($person))->toBeTrue();
     });
 
-    it('allows inline creation of a person donor when recording a donation', function (): void {
+    it('starts a new donation with a person as the donor type', function (): void {
         signInToDonationsAs($this->team, 'manager');
-        $lw = livewire(ListDonations::class);
-        $schema = DonationForm::configure((new Schema($lw->instance()))->model(Donation::class));
-        $morphSelect = collect($schema->getComponents())->first(fn ($c) => $c instanceof MorphToSelect);
-        $peopleType = $morphSelect->getTypes()['people'];
 
-        $keySelect = new Select('donor_id');
-        $callback = $peopleType->getModifyKeySelectUsingCallback();
-        $callback($keySelect);
+        livewire(ListDonations::class)
+            ->mountAction(CreateAction::class)
+            ->assertSchemaStateSet(['donor_type' => 'people'], 'mountedActionSchema0');
+    });
 
-        $createUsing = $keySelect->getCreateOptionUsing();
-        expect($createUsing)->not->toBeNull();
+    it('adds a new person as the donor from the donation form', function (): void {
+        signInToDonationsAs($this->team, 'manager');
 
-        $personId = $createUsing([
+        $component = livewire(ListDonations::class)
+            ->mountAction(CreateAction::class)
+            ->mountAction(TestAction::make('createOption')->schemaComponent('donor_id', schema: 'mountedActionSchema0'))
+            ->fillForm([
+                'first_name' => 'Khadijah',
+                'last_name' => 'Ali',
+                'email' => 'khadijah@example.com',
+                'phone' => '07123 456789',
+                'postcode' => 'LE2 0AA',
+                'address' => '10 High Street',
+            ])
+            ->callMountedAction()
+            ->assertHasNoFormErrors();
+
+        $person = People::query()->where('email', 'khadijah@example.com')->sole();
+
+        expect($person)
+            ->name->toBe('Khadijah Ali')
+            ->team_id->toBe($this->team->id)
+            ->type->toBeNull();
+
+        $component->assertSchemaStateSet(['donor_type' => 'people', 'donor_id' => $person->getKey()], 'mountedActionSchema0');
+    });
+
+    it('adds a new company as the donor from the donation form', function (): void {
+        signInToDonationsAs($this->team, 'manager');
+
+        $component = livewire(ListDonations::class)
+            ->mountAction(CreateAction::class)
+            ->fillForm(['donor_type' => 'company'])
+            ->mountAction(TestAction::make('createOption')->schemaComponent('donor_id', schema: 'mountedActionSchema0'))
+            ->fillForm(['name' => 'Leicester Community Trust', 'email' => 'contact@lct.org'])
+            ->callMountedAction()
+            ->assertHasNoFormErrors();
+
+        $company = Company::query()->where('name', 'Leicester Community Trust')->sole();
+
+        expect($company->team_id)->toBe($this->team->id);
+        $component->assertSchemaStateSet(['donor_type' => 'company', 'donor_id' => $company->getKey()], 'mountedActionSchema0');
+    });
+
+    it('warns when a new person donor may already be on record', function (array $input): void {
+        signInToDonationsAs($this->team, 'manager');
+        People::factory()->for($this->team)->create([
             'first_name' => 'Khadijah',
             'last_name' => 'Ali',
             'email' => 'khadijah@example.com',
             'phone' => '07123456789',
             'postcode' => 'LE2 0AA',
-            'address' => '10 High Street',
         ]);
 
-        $person = People::query()->find($personId);
-        expect($person)->not->toBeNull()
-            ->and($person->name)->toBe('Khadijah Ali')
-            ->and($person->email)->toBe('khadijah@example.com')
-            ->and($person->team_id)->toBe($this->team->id);
+        livewire(ListDonations::class)
+            ->mountAction(CreateAction::class)
+            ->mountAction(TestAction::make('createOption')->schemaComponent('donor_id', schema: 'mountedActionSchema0'))
+            ->fillForm($input)
+            ->assertSchemaComponentExists('possibleDuplicates', 'mountedActionSchema1', fn (Callout $callout): bool => $callout->isVisible()
+                && str_contains((string) $callout->getDescription(), 'Khadijah Ali (khadijah@example.com, LE2 0AA)'));
+    })->with([
+        'same email, any case' => [['email' => 'KHADIJAH@example.com']],
+        'same phone, written differently' => [['phone' => '+44 7123 456789']],
+        'same full name' => [['first_name' => 'khadijah', 'last_name' => 'ALI']],
+    ]);
+
+    it('does not warn about people who only share a first name or belong to another team', function (): void {
+        signInToDonationsAs($this->team, 'manager');
+        People::factory()->for($this->team)->create(['first_name' => 'Khadijah', 'last_name' => 'Begum']);
+        People::factory()->for(Team::factory())->create(['first_name' => 'Khadijah', 'last_name' => 'Ali', 'email' => 'khadijah@example.com']);
+
+        livewire(ListDonations::class)
+            ->mountAction(CreateAction::class)
+            ->mountAction(TestAction::make('createOption')->schemaComponent('donor_id', schema: 'mountedActionSchema0'))
+            ->fillForm(['first_name' => 'Khadijah', 'last_name' => 'Ali', 'email' => 'khadijah@example.com'])
+            ->assertSchemaComponentHidden('possibleDuplicates', 'mountedActionSchema1');
     });
 
-    it('allows inline creation of a company donor when recording a donation', function (): void {
+    it('warns when a new company donor may already be on record', function (): void {
         signInToDonationsAs($this->team, 'manager');
-        $lw = livewire(ListDonations::class);
-        $schema = DonationForm::configure((new Schema($lw->instance()))->model(Donation::class));
-        $morphSelect = collect($schema->getComponents())->first(fn ($c) => $c instanceof MorphToSelect);
-        $companyType = $morphSelect->getTypes()['company'];
+        Company::factory()->for($this->team)->create(['name' => 'Leicester Community Trust', 'email' => 'contact@lct.org']);
 
-        $keySelect = new Select('donor_id');
-        $callback = $companyType->getModifyKeySelectUsingCallback();
-        $callback($keySelect);
-
-        $createUsing = $keySelect->getCreateOptionUsing();
-        expect($createUsing)->not->toBeNull();
-
-        $companyId = $createUsing([
-            'name' => 'Leicester Community Trust',
-            'email' => 'contact@lct.org',
-            'phone' => '01161234567',
-        ]);
-
-        $company = Company::query()->find($companyId);
-        expect($company)->not->toBeNull()
-            ->and($company->name)->toBe('Leicester Community Trust')
-            ->and($company->team_id)->toBe($this->team->id);
+        livewire(ListDonations::class)
+            ->mountAction(CreateAction::class)
+            ->fillForm(['donor_type' => 'company'])
+            ->mountAction(TestAction::make('createOption')->schemaComponent('donor_id', schema: 'mountedActionSchema0'))
+            ->fillForm(['name' => 'leicester community trust'])
+            ->assertSchemaComponentExists('possibleDuplicates', 'mountedActionSchema1', fn (Callout $callout): bool => $callout->isVisible()
+                && str_contains((string) $callout->getDescription(), 'Leicester Community Trust (contact@lct.org)'));
     });
 });
 

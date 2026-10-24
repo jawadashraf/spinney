@@ -30,7 +30,9 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Navigation\NavigationItem;
@@ -79,6 +81,22 @@ final class PeopleResource extends Resource
                 ->badge(self::getNavigationBadge(), color: self::getNavigationBadgeColor())
                 ->url(self::getUrl('index')),
         ];
+    }
+
+    /**
+     * The count shown on the Donors menu item and tab, worked out once per request.
+     */
+    public static function getDonorsBadge(): ?string
+    {
+        return once(function (): ?string {
+            $count = People::query()
+                ->where('team_id', Filament::getTenant()?->getKey())
+                ->where('is_service_user', false)
+                ->whereHas('donations')
+                ->count();
+
+            return $count > 0 ? (string) $count : null;
+        });
     }
 
     public static function form(Schema $schema): Schema
@@ -139,19 +157,20 @@ final class PeopleResource extends Resource
                             ->columnSpan(4),
                         Select::make('type')
                             ->label('Role')
-                            ->options([
-                                'donor' => 'Donor / Supporter',
+                            ->options(fn (?People $record): array => [
                                 'relative' => 'Relative',
                                 'professional' => 'Professional',
+                                ...($record?->type === 'donor' ? ['donor' => 'Donor (old tag)'] : []),
                             ])
+                            ->helperText('Anyone who gives a donation is listed under Donors automatically.')
                             ->placeholder('General Person')
                             ->nullable()
                             ->columnSpan(4),
                         TextInput::make('postcode')
                             ->maxLength(20)
                             ->columnSpan(4),
-                        TextInput::make('address')
-                            ->maxLength(255)
+                        Textarea::make('address')
+                            ->rows(2)
                             ->columnSpan(8),
                     ])
                     ->columns(12),
