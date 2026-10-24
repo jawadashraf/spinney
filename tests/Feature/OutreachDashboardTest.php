@@ -8,6 +8,7 @@ use App\Enums\OutreachRecipientStatus;
 use App\Filament\Pages\OutreachDashboard;
 use App\Filament\Widgets\Outreach\CompaniesNotContactedWidget;
 use App\Filament\Widgets\Outreach\DirectoryCoverageWidget;
+use App\Filament\Widgets\Outreach\OutreachStatsOverview;
 use App\Models\Company;
 use App\Models\CompanyEngagement;
 use App\Models\CompanyType;
@@ -150,5 +151,34 @@ describe('tables', function () {
         livewire(CompaniesNotContactedWidget::class)
             ->assertCanSeeTableRecords([$never, $longAgo, $failedEmailOnly])
             ->assertCanNotSeeTableRecords([$recentlyEngaged, $recentlyEmailed, $inactive]);
+    });
+});
+
+describe('widget links', function () {
+    beforeEach(function () {
+        signInToDirectoryAs($this->team, 'manager');
+    });
+
+    it('renders outreach stats overview with resource urls', function () {
+        $widget = new OutreachStatsOverview;
+        $stats = (fn () => $this->getStats())->call($widget);
+
+        expect($stats)->toHaveCount(6);
+        expect($stats[0]->getUrl())->toContain('companies');
+        expect($stats[1]->getUrl())->toContain('reachable_by_email');
+        expect($stats[2]->getUrl())->toContain('verification_status');
+        expect($stats[3]->getUrl())->toContain('companies');
+        expect($stats[4]->getUrl())->toContain('outreach-emails');
+        expect($stats[5]->getUrl())->toContain('unsubscribed');
+    });
+
+    it('renders directory coverage and companies not contacted with header actions', function () {
+        livewire(DirectoryCoverageWidget::class)
+            ->assertSuccessful()
+            ->assertTableHeaderActionsExistInOrder(['view_all_companies']);
+
+        livewire(CompaniesNotContactedWidget::class)
+            ->assertSuccessful()
+            ->assertTableHeaderActionsExistInOrder(['view_all_companies']);
     });
 });

@@ -257,6 +257,12 @@ final class CompanyResource extends Resource
                     ->query(fn (Builder $query): Builder => $query
                         ->whereNull('email')
                         ->whereDoesntHave('contacts', fn (Builder $query) => $query->whereNotNull('email'))),
+                Filter::make('reachable_by_email')
+                    ->label('Reachable by email')
+                    ->query(fn (Builder $query): Builder => $query->reachableByEmail()),
+                Filter::make('unsubscribed')
+                    ->label('Unsubscribed')
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('unsubscribed_at')),
                 TrashedFilter::make(),
             ])
             ->recordActions([

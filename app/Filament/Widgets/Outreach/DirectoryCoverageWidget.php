@@ -6,8 +6,10 @@ namespace App\Filament\Widgets\Outreach;
 
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyVerificationStatus;
+use App\Filament\Resources\CompanyResource;
 use App\Models\Company;
 use App\Models\CompanyType;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -48,26 +50,60 @@ final class DirectoryCoverageWidget extends TableWidget
             ->paginated(false)
             ->columns([
                 TextColumn::make('name')
-                    ->label('Type'),
+                    ->label('Type')
+                    ->url(fn (CompanyType $record): string => CompanyResource::getUrl('index', [
+                        'tableFilters' => ['company_type_id' => ['values' => [$record->id]]],
+                    ])),
                 TextColumn::make('active_count')
                     ->label('Companies')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn (CompanyType $record): string => CompanyResource::getUrl('index', [
+                        'tableFilters' => ['company_type_id' => ['values' => [$record->id]]],
+                    ])),
                 TextColumn::make('reachable_count')
                     ->label('Reachable by email')
                     ->numeric()
                     ->sortable()
-                    ->description(fn (CompanyType $record): string => self::percentOf($record->getAttribute('reachable_count'), $record->getAttribute('active_count'))),
+                    ->description(fn (CompanyType $record): string => self::percentOf($record->getAttribute('reachable_count'), $record->getAttribute('active_count')))
+                    ->url(fn (CompanyType $record): string => CompanyResource::getUrl('index', [
+                        'tableFilters' => [
+                            'company_type_id' => ['values' => [$record->id]],
+                            'reachable_by_email' => ['isActive' => true],
+                        ],
+                    ])),
                 TextColumn::make('verified_count')
                     ->label('Verified')
                     ->numeric()
                     ->sortable()
-                    ->description(fn (CompanyType $record): string => self::percentOf($record->getAttribute('verified_count'), $record->getAttribute('active_count'))),
+                    ->description(fn (CompanyType $record): string => self::percentOf($record->getAttribute('verified_count'), $record->getAttribute('active_count')))
+                    ->url(fn (CompanyType $record): string => CompanyResource::getUrl('index', [
+                        'tableFilters' => [
+                            'company_type_id' => ['values' => [$record->id]],
+                            'verification_status' => ['value' => CompanyVerificationStatus::Verified->value],
+                        ],
+                    ])),
                 TextColumn::make('needs_checking_count')
                     ->label('Need checking')
                     ->numeric()
                     ->sortable()
-                    ->color(fn (mixed $state): string => (int) $state > 0 ? 'warning' : 'gray'),
+                    ->color(fn (mixed $state): string => (int) $state > 0 ? 'warning' : 'gray')
+                    ->url(fn (CompanyType $record): string => CompanyResource::getUrl('index', [
+                        'tableFilters' => [
+                            'company_type_id' => ['values' => [$record->id]],
+                            'verification_status' => ['value' => CompanyVerificationStatus::NeedsChecking->value],
+                        ],
+                    ])),
+            ])
+            ->recordUrl(fn (CompanyType $record): string => CompanyResource::getUrl('index', [
+                'tableFilters' => ['company_type_id' => ['values' => [$record->id]]],
+            ]))
+            ->headerActions([
+                Action::make('view_all_companies')
+                    ->label('View all in Companies')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('gray')
+                    ->url(fn (): string => CompanyResource::getUrl('index')),
             ]);
     }
 

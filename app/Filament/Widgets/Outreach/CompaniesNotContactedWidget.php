@@ -9,6 +9,7 @@ use App\Enums\CompanyVerificationStatus;
 use App\Enums\OutreachRecipientStatus;
 use App\Filament\Resources\CompanyResource;
 use App\Models\Company;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -57,7 +58,10 @@ final class CompaniesNotContactedWidget extends TableWidget
                     ->url(fn (Company $record): string => CompanyResource::getUrl('view', ['record' => $record])),
                 TextColumn::make('companyType.name')
                     ->label('Type')
-                    ->badge(),
+                    ->badge()
+                    ->url(fn (Company $record): ?string => $record->company_type_id ? CompanyResource::getUrl('index', [
+                        'tableFilters' => ['company_type_id' => ['values' => [$record->company_type_id]]],
+                    ]) : null),
                 TextColumn::make('email')
                     ->label('General email')
                     ->placeholder('No email'),
@@ -69,7 +73,18 @@ final class CompaniesNotContactedWidget extends TableWidget
                     ->placeholder('Never'),
                 TextColumn::make('verification_status')
                     ->label('Verification')
-                    ->badge(),
+                    ->badge()
+                    ->url(fn (Company $record): ?string => $record->verification_status ? CompanyResource::getUrl('index', [
+                        'tableFilters' => ['verification_status' => ['value' => $record->verification_status->value]],
+                    ]) : null),
+            ])
+            ->recordUrl(fn (Company $record): string => CompanyResource::getUrl('view', ['record' => $record]))
+            ->headerActions([
+                Action::make('view_all_companies')
+                    ->label('View all in Companies')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('gray')
+                    ->url(fn (): string => CompanyResource::getUrl('index')),
             ])
             ->filters([
                 SelectFilter::make('company_type_id')
