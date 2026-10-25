@@ -5,24 +5,25 @@ declare(strict_types=1);
 namespace App\Http\Resources\Yeastar;
 
 use App\Filament\Resources\Calls\CallResource;
+use App\Filament\Resources\CompanyResource;
+use App\Filament\Resources\PeopleResource;
 use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Http\Middleware\AuthenticateYeastar;
 use App\Models\Call;
-use App\Models\ServiceUser;
+use App\Models\Company;
+use App\Models\People;
 use App\Models\Team;
-use Closure;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use App\Support\PhoneContacts;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * A service user as the PBX sees a contact. Only what the screen pop needs is shared, because the
- * PBX copies matched contacts into its own contact list.
+ * A person or company as the PBX sees a contact. Only what the screen pop needs is shared, because
+ * the PBX copies matched contacts into its own contact list.
  *
- * Load with {@see self::eagerLoads()}.
+ * Build the collection with {@see PhoneContacts}, which loads service users' calls due today.
  *
- * @mixin ServiceUser
+ * @property People|Company $resource
  */
 final class ContactResource extends JsonResource
 {
@@ -31,39 +32,38 @@ final class ContactResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        /** @var Team $team */
+        $team = $request->attributes->get(AuthenticateYeastar::TEAM_ATTRIBUTE);
+        $contact = $this->resource;
+
         return [
-            'id' => (string) $this->id,
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'phone' => $this->phone_normalized,
-            'url' => $this->screenPopUrl($request->attributes->get(AuthenticateYeastar::TEAM_ATTRIBUTE)),
+            'id' => PhoneContacts::key($contact),
+            'first_name' => $contact instanceof Company ? $contact->name : $contact->first_name,
+            'last_name' => $contact instanceof Company ? null : $contact->last_name,
+            'phone' => $contact->phone_normalized,
+            'url' => $this->screenPopUrl($contact, $team),
         ];
     }
 
     /**
-     * Relations the resource reads: the service user's open calls due today, earliest first.
-     *
-     * @return array<string, Closure(Relation<*, *, *>): void>
+     * A service user's call due today opens where the liaison records it; everyone else opens their record.
      */
-    public static function eagerLoads(): array
+    private function screenPopUrl(People|Company $contact, Team $team): string
     {
-        return ['calls' => function (Relation $calls): void {
-            /** @var HasMany<Call, ServiceUser> $calls */
-            $calls->dueByEndOfUkDay()->orderBy('calls.due_at');
-        }];
-    }
+        if ($contact instanceof Company) {
+            return CompanyResource::getUrl('view', ['record' => $contact], panel: 'app', tenant: $team);
+        }
 
-    /**
-     * Open the call that is due today, so the liaison lands where they record it; otherwise the service user.
-     */
-    private function screenPopUrl(Team $team): string
-    {
-        $dueCall = $this->calls->first();
+        if (! $contact->is_service_user) {
+            return PeopleResource::getUrl('view', ['record' => $contact], panel: 'app', tenant: $team);
+        }
+
+        $dueCall = $contact->calls->first();
 
         if ($dueCall instanceof Call) {
             return CallResource::getUrl('view', ['record' => $dueCall], panel: 'app', tenant: $team);
         }
 
-        return ServiceUserResource::getUrl('edit', ['record' => $this->resource], panel: 'app', tenant: $team);
+        return ServiceUserResource::getUrl('view', ['record' => $contact], panel: 'app', tenant: $team);
     }
 }

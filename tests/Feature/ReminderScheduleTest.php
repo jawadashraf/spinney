@@ -28,4 +28,5 @@ it('runs the daily reminders at UK local time all year', function (string $comma
     'call reminders at 07:45' => ['calls:send-reminders', '06:45', '07:45'],
     'task reminders at 08:00' => ['tasks:send-due-reminders', '07:00', '08:00'],
     'appointment reminders at 09:00' => ['appointments:send-reminders', '08:00', '09:00'],
+    'unmatched phone call clean-up at 03:00' => ['model:prune', '02:00', '03:00'],
 ]);

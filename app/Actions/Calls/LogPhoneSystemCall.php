@@ -8,10 +8,12 @@ use App\Enums\CallOutcome;
 use App\Enums\PbxCallResult;
 use App\Filament\Resources\Calls\CallResource;
 use App\Models\Call;
+use App\Models\Company;
 use App\Models\PbxCallLog;
-use App\Models\ServiceUser;
+use App\Models\People;
 use App\Models\Team;
 use App\Models\User;
+use App\Support\PhoneContacts;
 use App\Support\PhoneNumber;
 use Closure;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -20,9 +22,10 @@ use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 /**
- * Records a finished call reported by the phone system's call journal and applies it to the
- * service user's open liaison call: an answered call adds an attempt that waits for the
- * liaison's notes, and an unanswered outbound call is recorded as a failed attempt.
+ * Records a finished call reported by the phone system's call journal against the person or company
+ * it was with. A call with a service user is also applied to their open liaison call: an answered
+ * call adds an attempt that waits for the liaison's notes, and an unanswered outbound call is
+ * recorded as a failed attempt.
  */
 final readonly class LogPhoneSystemCall
 {
@@ -45,14 +48,15 @@ final readonly class LogPhoneSystemCall
 
         $liaison = $this->findLiaison($crmUserId);
         $contactNumber = PhoneNumber::normalize($data['contact_number'] ?? null);
-        $serviceUser = $this->findServiceUser($team, $data['contact_id'] ?? null, $contactNumber);
+        $contact = $this->findContact($team, $data['contact_id'] ?? null, $contactNumber);
 
         $log = new PbxCallLog([
             'team_id' => $team->id,
             'linked_id' => $data['linked_id'],
             'crm_user_id' => $crmUserId,
             'user_id' => $liaison?->id,
-            'people_id' => $serviceUser?->id,
+            'people_id' => $contact instanceof People ? $contact->id : null,
+            'company_id' => $contact instanceof Company ? $contact->id : null,
             'direction' => $data['direction'],
             'disposition' => $data['disposition'],
             'status' => $data['status'] ?? null,
@@ -64,7 +68,9 @@ final readonly class LogPhoneSystemCall
             'result' => PbxCallResult::LoggedOnly,
         ]);
 
-        $call = $liaison !== null && $serviceUser !== null ? $this->findOpenCall($team, $serviceUser, $liaison) : null;
+        $call = $liaison !== null && $contact instanceof People && $contact->is_service_user
+            ? $this->findOpenCall($team, $contact, $liaison)
+            : null;
 
         try {
             return DB::transaction(function () use ($log, $call, $liaison): PbxCallLog {
@@ -141,29 +147,24 @@ final readonly class LogPhoneSystemCall
         return CallResource::scopeAssignableUsers(User::query())->whereKey((int) $crmUserId)->first();
     }
 
-    private function findServiceUser(Team $team, ?string $contactId, ?string $contactNumber): ?ServiceUser
+    /**
+     * The contact the PBX matched, or else the first match for the number (service users first).
+     */
+    private function findContact(Team $team, ?string $contactId, ?string $contactNumber): People|Company|null
     {
-        $serviceUsers = ServiceUser::query()->where('team_id', $team->id);
+        $contact = PhoneContacts::find($team, $contactId);
 
-        if ($contactId !== null && ctype_digit($contactId)) {
-            $serviceUser = (clone $serviceUsers)->whereKey((int) $contactId)->first();
-
-            if ($serviceUser !== null) {
-                return $serviceUser;
-            }
+        if ($contact !== null || $contactNumber === null) {
+            return $contact;
         }
 
-        if ($contactNumber === null) {
-            return null;
-        }
-
-        return $serviceUsers->where('phone_normalized', $contactNumber)->oldest('id')->first();
+        return PhoneContacts::forNumber($team, $contactNumber)->first();
     }
 
     /**
      * The service user's earliest open call due by the end of the UK day, preferring the liaison's own.
      */
-    private function findOpenCall(Team $team, ServiceUser $serviceUser, User $liaison): ?Call
+    private function findOpenCall(Team $team, People $serviceUser, User $liaison): ?Call
     {
         return Call::query()
             ->dueByEndOfUkDay()

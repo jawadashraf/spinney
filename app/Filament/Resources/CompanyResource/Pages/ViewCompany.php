@@ -7,6 +7,7 @@ namespace App\Filament\Resources\CompanyResource\Pages;
 use App\Filament\Actions\GenerateRecordSummaryAction;
 use App\Filament\Components\Infolists\AvatarName;
 use App\Filament\Concerns\SyncsPermissionTeamId;
+use App\Filament\Resources\Calls\RelationManagers\PhoneCallsRelationManager;
 use App\Filament\Resources\CompanyResource;
 use App\Filament\Resources\CompanyResource\RelationManagers\ContactsRelationManager;
 use App\Filament\Resources\CompanyResource\RelationManagers\EngagementsRelationManager;
@@ -160,6 +161,7 @@ final class ViewCompany extends ViewRecord
             DonationsRelationManager::class,
             NotesRelationManager::class,
             TasksRelationManager::class,
+            PhoneCallsRelationManager::class,
         ];
     }
 }

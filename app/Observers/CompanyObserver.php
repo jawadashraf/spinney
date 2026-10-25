@@ -7,7 +7,9 @@ namespace App\Observers;
 use App\Enums\CompanyVerificationStatus;
 use App\Jobs\FetchFaviconForCompany;
 use App\Models\Company;
+use App\Models\PbxCallLog;
 use App\Models\User;
+use App\Support\PhoneNumber;
 
 final readonly class CompanyObserver
 {
@@ -31,6 +33,10 @@ final readonly class CompanyObserver
         if ($company->isDirty('verification_status')) {
             $company->verified_at = $company->verification_status === CompanyVerificationStatus::Verified ? now() : null;
         }
+
+        if ($company->isDirty('phone')) {
+            $company->phone_normalized = PhoneNumber::normalize($company->phone);
+        }
     }
 
     /**
@@ -43,10 +49,14 @@ final readonly class CompanyObserver
 
     /**
      * Handle the Company "saved" event.
-     * Invalidate AI summary when company data changes.
+     * Invalidate AI summary when company data changes, and link earlier calls from a newly saved number.
      */
     public function saved(Company $company): void
     {
         $company->invalidateAiSummary();
+
+        if ($company->wasRecentlyCreated || $company->wasChanged('phone_normalized')) {
+            PbxCallLog::linkUnmatchedCalls($company);
+        }
     }
 }

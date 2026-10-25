@@ -8,8 +8,11 @@ use App\Enums\PbxCallResult;
 use App\Models\Concerns\HasTeam;
 use Database\Factories\PbxCallLogFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
@@ -22,6 +25,8 @@ use Illuminate\Support\Carbon;
  * @property string $crm_user_id
  * @property int|null $user_id
  * @property int|null $people_id
+ * @property int|null $company_id
+ * @property int|null $enquiry_id
  * @property int|null $call_id
  * @property int|null $call_attempt_id
  * @property string $direction
@@ -34,7 +39,9 @@ use Illuminate\Support\Carbon;
  * @property string|null $recording_url
  * @property PbxCallResult $result
  * @property-read User|null $user
- * @property-read ServiceUser|null $serviceUser
+ * @property-read People|null $person
+ * @property-read Company|null $company
+ * @property-read Enquiry|null $enquiry
  * @property-read Call|null $call
  * @property-read CallAttempt|null $callAttempt
  */
@@ -44,6 +51,8 @@ use Illuminate\Support\Carbon;
     'crm_user_id',
     'user_id',
     'people_id',
+    'company_id',
+    'enquiry_id',
     'call_id',
     'call_attempt_id',
     'direction',
@@ -62,6 +71,7 @@ final class PbxCallLog extends Model
     use HasFactory;
 
     use HasTeam;
+    use Prunable;
 
     public const string DIRECTION_INBOUND = 'inbound';
 
@@ -70,6 +80,46 @@ final class PbxCallLog extends Model
     public const string DISPOSITION_ANSWERED = 'ANSWERED';
 
     public const string DISPOSITION_VOICEMAIL = 'VOICEMAIL';
+
+    /**
+     * Link earlier calls from a number nobody recognised to the person or company now holding it.
+     */
+    public static function linkUnmatchedCalls(People|Company $contact): int
+    {
+        if (blank($contact->phone_normalized)) {
+            return 0;
+        }
+
+        return self::query()
+            ->unmatched()
+            ->where('team_id', $contact->team_id)
+            ->where('contact_number', $contact->phone_normalized)
+            ->update($contact instanceof Company ? ['company_id' => $contact->id] : ['people_id' => $contact->id]);
+    }
+
+    /**
+     * Calls from unknown numbers that nobody linked are deleted after the retention period.
+     *
+     * @return Builder<self>
+     */
+    public function prunable(): Builder
+    {
+        return self::query()
+            ->unmatched()
+            ->where('started_at', '<', now()->subDays((int) config('services.yeastar.unmatched_retention_days')));
+    }
+
+    /**
+     * Calls from numbers that are not linked to a person, company or enquiry.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    #[Scope]
+    protected function unmatched(Builder $query): Builder
+    {
+        return $query->whereNull('people_id')->whereNull('company_id')->whereNull('enquiry_id');
+    }
 
     /**
      * @return array<string, string|class-string>
@@ -93,11 +143,31 @@ final class PbxCallLog extends Model
     }
 
     /**
-     * @return BelongsTo<ServiceUser, $this>
+     * The service user, relative, professional or donor on the other end of the call.
+     *
+     * @return BelongsTo<People, $this>
      */
-    public function serviceUser(): BelongsTo
+    public function person(): BelongsTo
     {
-        return $this->belongsTo(ServiceUser::class, 'people_id');
+        return $this->belongsTo(People::class, 'people_id');
+    }
+
+    /**
+     * @return BelongsTo<Company, $this>
+     */
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * The enquiry started from a call by an unknown number.
+     *
+     * @return BelongsTo<Enquiry, $this>
+     */
+    public function enquiry(): BelongsTo
+    {
+        return $this->belongsTo(Enquiry::class);
     }
 
     /**

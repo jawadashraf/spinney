@@ -147,6 +147,12 @@ class People extends Model implements HasCustomFieldsContract
                 $people->phone_normalized = PhoneNumber::normalize($people->phone);
             }
         });
+
+        self::saved(function (People $people): void {
+            if ($people->wasRecentlyCreated || $people->wasChanged('phone_normalized')) {
+                PbxCallLog::linkUnmatchedCalls($people);
+            }
+        });
     }
 
     public function getAvatarAttribute(): string
@@ -223,6 +229,16 @@ class People extends Model implements HasCustomFieldsContract
     public function callPlans(): HasMany
     {
         return $this->hasMany(CallPlan::class, 'people_id');
+    }
+
+    /**
+     * Calls with this person reported by the phone system.
+     *
+     * @return HasMany<PbxCallLog, $this>
+     */
+    public function pbxCallLogs(): HasMany
+    {
+        return $this->hasMany(PbxCallLog::class, 'people_id');
     }
 
     /**

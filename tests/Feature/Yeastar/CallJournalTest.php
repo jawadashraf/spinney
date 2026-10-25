@@ -7,6 +7,7 @@ use App\Enums\CallStatus;
 use App\Enums\PbxCallResult;
 use App\Models\Call;
 use App\Models\CallPlan;
+use App\Models\Company;
 use App\Models\PbxCallLog;
 use App\Models\People;
 use App\Models\Team;
@@ -328,4 +329,73 @@ it('attributes the call changes to the liaison without leaving them signed in', 
 
     expect($activity->causer_id)->toBe($this->liaison->id)
         ->and(auth()->guard('web')->hasUser())->toBeFalse();
+});
+
+it('applies the call when the phone system sends the prefixed contact id', function () {
+    $call = Call::factory()->assignedTo($this->liaison)->overdue()->create(['team_id' => $this->team->id, 'people_id' => $this->serviceUser->id]);
+
+    $this->withHeaders(yeastarHeaders($this->team->id))
+        ->postJson(route('yeastar.call-journal.store'), callJournalPayload($this->liaison, $this->serviceUser, ['contact_id' => 'person-'.$this->serviceUser->id]))
+        ->assertCreated();
+
+    expect($call->refresh()->isAwaitingNotes())->toBeTrue();
+});
+
+it('logs a call with a relative against the relative without touching any liaison call', function () {
+    $relative = People::factory()->create(['team_id' => $this->team->id, 'type' => 'relative', 'phone' => '07700 900123']);
+    $call = Call::factory()->assignedTo($this->liaison)->overdue()->create(['team_id' => $this->team->id, 'people_id' => $this->serviceUser->id]);
+
+    $this->withHeaders(yeastarHeaders($this->team->id))
+        ->postJson(route('yeastar.call-journal.store'), callJournalPayload($this->liaison, $relative, ['contact_number' => '+447700900123']))
+        ->assertCreated();
+
+    expect($call->refresh()->attempt_count)->toBe(0)
+        ->and(PbxCallLog::query()->sole())
+        ->people_id->toBe($relative->id)
+        ->company_id->toBeNull()
+        ->call_id->toBeNull()
+        ->result->toBe(PbxCallResult::LoggedOnly);
+});
+
+it('logs a call with a company against the company', function () {
+    $company = Company::factory()->create(['team_id' => $this->team->id, 'phone' => '0116 496 0000']);
+
+    $this->withHeaders(yeastarHeaders($this->team->id))
+        ->postJson(route('yeastar.call-journal.store'), callJournalPayload($this->liaison, $this->serviceUser, [
+            'contact_id' => 'company-'.$company->id,
+            'contact_number' => '01164960000',
+        ]))
+        ->assertCreated();
+
+    expect(PbxCallLog::query()->sole())
+        ->company_id->toBe($company->id)
+        ->people_id->toBeNull()
+        ->result->toBe(PbxCallResult::LoggedOnly);
+});
+
+it('matches a number shared with a relative to the service user', function () {
+    People::factory()->create(['team_id' => $this->team->id, 'type' => 'relative', 'phone' => '+447438356414']);
+    $call = Call::factory()->assignedTo($this->liaison)->overdue()->create(['team_id' => $this->team->id, 'people_id' => $this->serviceUser->id]);
+
+    $this->withHeaders(yeastarHeaders($this->team->id))
+        ->postJson(route('yeastar.call-journal.store'), callJournalPayload($this->liaison, $this->serviceUser, ['contact_id' => '']))
+        ->assertCreated();
+
+    expect($call->refresh()->isAwaitingNotes())->toBeTrue()
+        ->and(PbxCallLog::query()->sole()->people_id)->toBe($this->serviceUser->id);
+});
+
+it('logs a call from an unknown number as unmatched', function () {
+    $this->serviceUser->update(['phone' => null]);
+
+    $this->withHeaders(yeastarHeaders($this->team->id))
+        ->postJson(route('yeastar.call-journal.store'), callJournalPayload($this->liaison, $this->serviceUser, [
+            'contact_id' => 'unknown-447438356414',
+            'contact_number' => '07438356414',
+        ]))
+        ->assertCreated();
+
+    expect(PbxCallLog::query()->unmatched()->sole())
+        ->contact_number->toBe('+447438356414')
+        ->user_id->toBe($this->liaison->id);
 });

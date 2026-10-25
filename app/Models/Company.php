@@ -204,6 +204,16 @@ final class Company extends Model implements HasCustomFieldsContract, HasMedia
     }
 
     /**
+     * Calls with this company reported by the phone system.
+     *
+     * @return HasMany<PbxCallLog, $this>
+     */
+    public function pbxCallLogs(): HasMany
+    {
+        return $this->hasMany(PbxCallLog::class);
+    }
+
+    /**
      * @return HasMany<CompanyEngagement, $this>
      */
     public function engagements(): HasMany

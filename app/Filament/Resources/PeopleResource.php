@@ -6,6 +6,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\CreationSource;
 use App\Filament\Exports\PeopleExporter;
+use App\Filament\Resources\Calls\RelationManagers\PhoneCallsRelationManager;
 use App\Filament\Resources\Donations\RelationManagers\DonationsRelationManager;
 use App\Filament\Resources\PeopleResource\Pages\ListPeople;
 use App\Filament\Resources\PeopleResource\Pages\ViewPeople;
@@ -305,6 +306,7 @@ final class PeopleResource extends Resource
             ThirdPartyCarePlansRelationManager::class,
             DonationsRelationManager::class,
             GiftAidDeclarationsRelationManager::class,
+            PhoneCallsRelationManager::class,
         ];
     }
 

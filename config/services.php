@@ -68,5 +68,6 @@ return [
         'api_key' => env('YEASTAR_API_KEY'),
         'team_id' => env('YEASTAR_TEAM_ID'),
         'misdial_seconds' => (int) env('YEASTAR_MISDIAL_SECONDS', 10),
+        'unmatched_retention_days' => (int) env('YEASTAR_UNMATCHED_RETENTION_DAYS', 90),
     ],
 ];

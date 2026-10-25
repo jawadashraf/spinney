@@ -1,4 +1,4 @@
-<Information Provider="crm" Name="Spinney" Key="spinney" Logo="" Remark="Spinney Hill liaison calls: liaison users, service user lookup and call journal. Never creates contacts." Version="1.0.0" AuthType="basic" MaxConcurrentRequest="10" UserAssociation="1" CallJournal="1" ChatJournal="0" CreateNewContact="0">
+<Information Provider="crm" Name="Spinney" Key="spinney" Logo="" Remark="Spinney Hill: liaison users, lookup of service users, relatives, professionals, donors and companies, and call journal. Unknown numbers are acknowledged so their calls are journalled, but never stored as contacts." Version="1.2.0" AuthType="basic" MaxConcurrentRequest="10" UserAssociation="1" CallJournal="1" ChatJournal="0" CreateNewContact="1">
   <Parameters />
   <Scenarios>
     <Scenario Id="AuthMethod" Type="AUTH">
@@ -61,7 +61,7 @@
         <Parameter Name="CustomValueEnable" Value="0" />
       </Parameters>
       <Requests>
-        <Request Name="service_users" Method="GET" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/contacts?phone={{UrlEncode .Phone}}">
+        <Request Name="contacts" Method="GET" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/contacts?phone={{UrlEncode .Phone}}">
           <Parameters />
           <Outputs>
             <Output Name="ContactsId" Path="data.#.id" />
@@ -74,13 +74,27 @@
     </Scenario>
     <Scenario Id="SearchContact" Type="REST">
       <Requests>
-        <Request Name="SearchContact_service_users" Method="GET" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/contacts/search?q={{UrlEncode .SearchValue}}">
+        <Request Name="SearchContact_contacts" Method="GET" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/contacts/search?q={{UrlEncode .SearchValue}}">
           <Parameters />
           <Outputs>
             <Output Name="ContactsId" Path="data.#.id" />
             <Output Name="FirstName" Path="data.#.first_name" />
             <Output Name="LastName" Path="data.#.last_name" />
             <Output Name="MobileNumber" Path="data.#.phone" />
+          </Outputs>
+        </Request>
+      </Requests>
+    </Scenario>
+    <Scenario Id="CreateNewContact" Type="REST">
+      <Presets />
+      <Parameters />
+      <Requests>
+        <Request Name="contacts" Method="POST" ResponseType="application/json" URLFormat="{{.spinney_url}}/api/yeastar/contacts">
+          <Parameters>
+            <Parameter Name="Data" Type="Body" Value="{&quot;first_name&quot;:&quot;{{.FirstName}}&quot;,&quot;last_name&quot;:&quot;{{.LastName}}&quot;,&quot;phone&quot;:&quot;{{.BusinessNumber}}&quot;}" />
+          </Parameters>
+          <Outputs>
+            <Output Name="ContactId" Path="id" />
           </Outputs>
         </Request>
       </Requests>
