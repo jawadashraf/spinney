@@ -146,7 +146,7 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Self-registration is off: staff accounts are created by admins (Workspace → Users).
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::updateProfileInformation(),

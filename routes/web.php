@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Filament\Pages\Auth\Login;
-use App\Filament\Pages\Auth\Register;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OutreachUnsubscribeController;
 use App\Http\Controllers\PrivacyPolicyController;
@@ -37,7 +36,8 @@ Route::post('/filament/logout', [AuthenticatedSessionController::class, 'destroy
 
 // Aliases for common route names used in blade views
 Route::livewire('/login', Login::class)->name('login');
-Route::livewire('/register', Register::class)->name('register');
+// Self-registration is closed; the name stays so older pages that link to it send people to log in.
+Route::redirect('/register', '/login')->name('register');
 Route::livewire('/forgot-password', RequestPasswordReset::class)->name('password.request');
 
 Route::get('/', HomeController::class);

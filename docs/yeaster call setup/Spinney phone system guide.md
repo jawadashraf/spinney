@@ -78,7 +78,7 @@ After any change, run `php artisan optimize:clear` on the server.
 
 1. Go to **Integrations → CRM** and upload the template `Spinney.xml` (version 1.2.0, in `docs/yeaster call setup/`).
 2. Enter the connection details:
-   - **Spinney URL:** `https://spinney.j-commerce.co.uk`
+   - **Spinney URL:** the address Spinney runs on. Currently the staging site, `https://spinney.j-commerce.co.uk`; change it to the **recoverynetwork.org.uk** address at go-live.
    - **API Key:** the same key as `YEASTAR_API_KEY`
 3. Save. The integration should show as connected.
 4. In the integration settings, make sure these are switched on:
@@ -306,7 +306,7 @@ Past calls are **never** used to complete a liaison call. Linking only adds them
 
 ### Endpoints called by Yeastar
 
-All endpoints are under `https://spinney.j-commerce.co.uk/api/yeastar/` and use the API key as basic authentication.
+All endpoints are under `<Spinney URL>/api/yeastar/` (currently `https://spinney.j-commerce.co.uk/api/yeastar/`, staging) and use the API key as basic authentication.
 
 | Request | Purpose |
 |---|---|

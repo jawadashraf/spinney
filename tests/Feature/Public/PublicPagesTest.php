@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 
 describe('Home page', function () {
@@ -70,10 +71,19 @@ describe('Authentication redirects', function () {
         $response->assertRedirect(url()->getAppUrl('login'));
     });
 
-    it('redirects register to app subdomain', function () {
-        $response = $this->get('/register');
+    it('sends anyone opening the registration page to log in, because self-registration is closed', function () {
+        $this->get('/register')->assertRedirect('/login');
+    });
 
-        $response->assertRedirect(url()->getAppUrl('register'));
+    it('does not create an account from a registration form post', function () {
+        $this->post('/register', [
+            'name' => 'Stranger',
+            'email' => 'stranger@example.com',
+            'password' => 'password-123456',
+            'password_confirmation' => 'password-123456',
+        ]);
+
+        expect(User::query()->where('email', 'stranger@example.com')->exists())->toBeFalse();
     });
 
     it('redirects forgot password to app subdomain', function () {
