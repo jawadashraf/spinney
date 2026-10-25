@@ -45,6 +45,11 @@ final class ServiceUsersTable
                     ->sortable()
                     ->description(fn ($record): ?string => str_contains((string) $record->email, '@'.config('app.temp_email_domain', 'spinney.local')) ? 'Temporary email' : null)
                     ->color(fn ($record): ?string => str_contains((string) $record->email, '@'.config('app.temp_email_domain', 'spinney.local')) ? 'warning' : null),
+                TextColumn::make('phone')
+                    ->label('Phone')
+                    ->searchable()
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('profile.target_service_team')
                     ->label('Service Team')
                     ->badge()

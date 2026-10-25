@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ServiceUsers\Pages;
 
 use App\Filament\Resources\ServiceUsers\Concerns\HasServiceUserTabNavigation;
+use App\Filament\Resources\ServiceUsers\Concerns\ShowsPhoneForClickToCall;
 use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Models\ServiceUser;
 use Filament\Actions\DeleteAction;
@@ -18,6 +19,7 @@ use Illuminate\Support\Arr;
 final class EditServiceUser extends EditRecord
 {
     use HasServiceUserTabNavigation;
+    use ShowsPhoneForClickToCall;
 
     protected static string $resource = ServiceUserResource::class;
 
