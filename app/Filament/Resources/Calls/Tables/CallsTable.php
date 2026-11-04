@@ -45,7 +45,6 @@ final class CallsTable
                 TextColumn::make('serviceUser.phone')
                     ->label('Phone')
                     ->placeholder('—')
-                    ->url(fn (Call $record): ?string => filled($record->serviceUser?->phone) ? 'tel:'.$record->serviceUser->phone : null)
                     ->toggleable(),
                 TextColumn::make('due_at')
                     ->label('Due')

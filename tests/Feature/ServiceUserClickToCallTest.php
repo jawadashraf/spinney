@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Filament\Resources\Calls\Pages\ListCalls;
 use App\Filament\Resources\ServiceUsers\Pages\EditServiceUser;
 use App\Filament\Resources\ServiceUsers\Pages\ListServiceUsers;
 use App\Filament\Resources\ServiceUsers\Pages\ViewServiceUser;
+use App\Models\Call;
 use App\Models\People;
 use App\Models\Team;
 use App\Models\User;
@@ -49,4 +51,14 @@ it('lists service users with their phone number', function () {
 
     livewire(ListServiceUsers::class)
         ->assertTableColumnStateSet('phone', '+447438356414', $serviceUser->id);
+});
+
+it('shows the phone number on the calls list as plain text, not a tel: link that would bypass the phone system', function () {
+    $serviceUser = People::factory()->serviceUser()->create(['team_id' => $this->team->id, 'phone' => '+447438356414']);
+    Call::factory()->create(['team_id' => $this->team->id, 'people_id' => $serviceUser->id]);
+
+    livewire(ListCalls::class)
+        ->set('activeTab', 'all')
+        ->assertSee('+447438356414')
+        ->assertDontSee('tel:+447438356414');
 });
