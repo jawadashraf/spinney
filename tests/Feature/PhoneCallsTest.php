@@ -9,6 +9,7 @@ use App\Models\People;
 use App\Models\Team;
 use App\Models\User;
 use App\Support\CallPermissions;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 
 use function Pest\Laravel\actingAs;
@@ -68,6 +69,25 @@ it('filters to calls matched to a contact', function () {
         ->filterTable('matched', false)
         ->assertCanSeeTableRecords([$unmatched])
         ->assertCanNotSeeTableRecords([$matched]);
+});
+
+it('plays a call recording in a modal', function () {
+    $log = PbxCallLog::factory()->create([
+        'team_id' => $this->team->id,
+        'recording_url' => 'https://pbx.example.test/recordings/1791457200.101.wav',
+    ]);
+
+    livewire(ListPhoneCalls::class)
+        ->mountAction(TestAction::make('playRecording')->table($log))
+        ->assertActionMounted(TestAction::make('playRecording')->table($log))
+        ->assertMountedActionModalSeeHtml(['<audio', 'src="https://pbx.example.test/recordings/1791457200.101.wav"']);
+});
+
+it('offers no player for a call without a recording', function () {
+    $log = PbxCallLog::factory()->create(['team_id' => $this->team->id, 'recording_url' => null]);
+
+    livewire(ListPhoneCalls::class)
+        ->assertActionHidden(TestAction::make('playRecording')->table($log));
 });
 
 it('forbids users without access to calls', function () {

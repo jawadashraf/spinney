@@ -55,7 +55,7 @@ it('lists a service user phone calls with the liaison call they updated', functi
         ->assertCanNotSeeTableRecords([$otherLog])
         ->assertTableColumnVisible('result')
         ->assertSee('04:00')
-        ->assertSee('https://pbx.example.test/recordings/1791457200.101.wav');
+        ->assertActionVisible(TestAction::make('playRecording')->table($log));
 });
 
 it('lists a relative phone calls without the liaison call column', function () {

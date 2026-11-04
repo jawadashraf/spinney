@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\UnmatchedCalls\Tables;
 
+use App\Filament\Actions\PlayRecordingAction;
 use App\Filament\Resources\Enquiries\EnquiryResource;
 use App\Filament\Resources\UnmatchedCalls\Actions\LinkToContactAction;
 use App\Models\PbxCallLog;
@@ -54,7 +55,8 @@ final class UnmatchedCallsTable
                 TextColumn::make('recording_url')
                     ->label('Recording')
                     ->formatStateUsing(fn (): string => 'Play')
-                    ->url(fn (PbxCallLog $record): ?string => $record->recording_url, shouldOpenInNewTab: true)
+                    ->icon(Heroicon::OutlinedPlay)
+                    ->action(PlayRecordingAction::make())
                     ->color('primary')
                     ->placeholder('—'),
             ])

@@ -364,14 +364,15 @@ it('renders the call page with its activity log', function () {
         ->assertOk();
 });
 
-it('shows the phone system talk time and recording link on the call page', function () {
+it('shows the phone system talk time and recording player on the call page', function () {
     $call = Call::factory()->assignedTo($this->liaison)->awaitingNotes()->create(['team_id' => $this->team->id]);
     $call->attempts()->sole()->pbxCallLog->update(['recording_url' => 'https://pbx.example.test/recordings/1791457200.101.wav']);
 
     livewire(ViewCall::class, ['record' => $call->id])
         ->assertOk()
         ->assertSee('Talked 04:00')
-        ->assertSee('https://pbx.example.test/recordings/1791457200.101.wav')
+        ->assertSeeHtml('<audio')
+        ->assertSeeHtml('src="https://pbx.example.test/recordings/1791457200.101.wav"')
         ->assertSee('Awaiting notes from the liaison');
 });
 

@@ -10,6 +10,7 @@ use App\Models\CallAttempt;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -105,11 +106,9 @@ final class CallInfolist
                                     ->label('Phone system')
                                     ->formatStateUsing(fn (CallAttempt $record): string => 'Talked '.$record->pbxCallLog?->formattedTalkDuration())
                                     ->visible(fn (CallAttempt $record): bool => $record->pbxCallLog !== null),
-                                TextEntry::make('pbxCallLog.recording_url')
+                                ViewEntry::make('pbxCallLog.recording_url')
                                     ->label('Recording')
-                                    ->formatStateUsing(fn (): string => 'Play recording')
-                                    ->url(fn (CallAttempt $record): ?string => $record->pbxCallLog?->recording_url, shouldOpenInNewTab: true)
-                                    ->color('primary')
+                                    ->view('filament.components.infolists.call-recording-entry')
                                     ->visible(fn (CallAttempt $record): bool => filled($record->pbxCallLog?->recording_url)),
                                 TextEntry::make('notes')
                                     ->placeholder(fn (CallAttempt $record): string => $record->call?->isAwaitingNotes() && $record->pbxCallLog !== null ? 'Awaiting notes from the liaison' : '—')

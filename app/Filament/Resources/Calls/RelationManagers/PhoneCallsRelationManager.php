@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Calls\RelationManagers;
 
+use App\Filament\Actions\PlayRecordingAction;
 use App\Filament\Resources\Calls\CallResource;
 use App\Filament\Resources\PhoneCalls\Actions\AddCallNotesAction;
 use App\Filament\Resources\PhoneCalls\Actions\SkipCallNotesAction;
@@ -11,6 +12,7 @@ use App\Models\PbxCallLog;
 use App\Models\People;
 use Filament\Actions\ActionGroup;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -62,7 +64,8 @@ final class PhoneCallsRelationManager extends RelationManager
                 TextColumn::make('recording_url')
                     ->label('Recording')
                     ->formatStateUsing(fn (): string => 'Play')
-                    ->url(fn (PbxCallLog $record): ?string => $record->recording_url, shouldOpenInNewTab: true)
+                    ->icon(Heroicon::OutlinedPlay)
+                    ->action(PlayRecordingAction::make())
                     ->color('primary')
                     ->placeholder('—'),
                 TextColumn::make('result')
