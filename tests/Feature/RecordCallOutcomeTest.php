@@ -189,7 +189,8 @@ it('completes the answered attempt logged by the phone system instead of adding 
         ->and($call->attempt_count)->toBe(1)
         ->and($call->attempts()->sole())
         ->notes->toBe('Doing well, talked about the lunch club.')
-        ->pbxCallLog->not->toBeNull();
+        ->pbxCallLog->not->toBeNull()
+        ->and($call->attempts()->sole()->pbxCallLog->note_id)->toBe($call->note_id)->not->toBeNull();
 });
 
 it('records the attempt at the time given rather than now', function () {

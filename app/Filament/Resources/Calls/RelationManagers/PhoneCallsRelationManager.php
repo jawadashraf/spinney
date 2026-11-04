@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Calls\RelationManagers;
 
 use App\Filament\Resources\Calls\CallResource;
+use App\Filament\Resources\PhoneCalls\Actions\AddCallNotesAction;
+use App\Filament\Resources\PhoneCalls\Actions\SkipCallNotesAction;
 use App\Models\PbxCallLog;
 use App\Models\People;
+use Filament\Actions\ActionGroup;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -31,7 +34,7 @@ final class PhoneCallsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('user'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['user', 'person', 'company', 'call']))
             ->defaultSort('started_at', 'desc')
             ->emptyStateHeading('No phone calls yet')
             ->emptyStateDescription('Calls made or received on the phone system appear here.')
@@ -67,6 +70,13 @@ final class PhoneCallsRelationManager extends RelationManager
                     ->badge()
                     ->url(fn (PbxCallLog $record): ?string => $record->call_id !== null ? CallResource::getUrl('view', ['record' => $record->call_id]) : null)
                     ->visible(fn (): bool => $this->ownerIsServiceUser()),
+            ])
+            ->recordActions([
+                AddCallNotesAction::make(),
+                AddCallNotesAction::makeForLiaisonCall(),
+                ActionGroup::make([
+                    SkipCallNotesAction::make(),
+                ]),
             ]);
     }
 

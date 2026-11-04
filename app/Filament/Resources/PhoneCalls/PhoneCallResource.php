@@ -67,6 +67,23 @@ final class PhoneCallResource extends Resource
         return false;
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        $count = self::getEloquentQuery()->needingNotes()->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'warning';
+    }
+
+    public static function getNavigationBadgeTooltip(): string
+    {
+        return 'Answered calls that need notes';
+    }
+
     /**
      * @return Builder<PbxCallLog>
      */

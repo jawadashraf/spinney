@@ -29,6 +29,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $enquiry_id
  * @property int|null $call_id
  * @property int|null $call_attempt_id
+ * @property int|null $note_id
  * @property string $direction
  * @property string $disposition
  * @property string|null $status
@@ -38,12 +39,15 @@ use Illuminate\Support\Carbon;
  * @property string|null $contact_number
  * @property string|null $recording_url
  * @property PbxCallResult $result
+ * @property Carbon|null $notes_prompted_at
+ * @property Carbon|null $notes_skipped_at
  * @property-read User|null $user
  * @property-read People|null $person
  * @property-read Company|null $company
  * @property-read Enquiry|null $enquiry
  * @property-read Call|null $call
  * @property-read CallAttempt|null $callAttempt
+ * @property-read Note|null $note
  */
 #[Fillable([
     'team_id',
@@ -55,6 +59,7 @@ use Illuminate\Support\Carbon;
     'enquiry_id',
     'call_id',
     'call_attempt_id',
+    'note_id',
     'direction',
     'disposition',
     'status',
@@ -64,6 +69,8 @@ use Illuminate\Support\Carbon;
     'contact_number',
     'recording_url',
     'result',
+    'notes_prompted_at',
+    'notes_skipped_at',
 ])]
 final class PbxCallLog extends Model
 {
@@ -122,6 +129,23 @@ final class PbxCallLog extends Model
     }
 
     /**
+     * Answered calls with a person or company that nobody has written notes for or marked as not needing them.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    #[Scope]
+    protected function needingNotes(Builder $query): Builder
+    {
+        return $query
+            ->where('pbx_call_logs.disposition', self::DISPOSITION_ANSWERED)
+            ->where('pbx_call_logs.talk_duration_sec', '>', 0)
+            ->where(fn (Builder $query): Builder => $query->whereNotNull('pbx_call_logs.people_id')->orWhereNotNull('pbx_call_logs.company_id'))
+            ->whereNull('pbx_call_logs.note_id')
+            ->whereNull('pbx_call_logs.notes_skipped_at');
+    }
+
+    /**
      * Managers and admins see every call; everyone else sees only the calls they made or answered.
      *
      * @param  Builder<self>  $query
@@ -147,6 +171,8 @@ final class PbxCallLog extends Model
             'talk_duration_sec' => 'integer',
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
+            'notes_prompted_at' => 'datetime',
+            'notes_skipped_at' => 'datetime',
         ];
     }
 
@@ -200,6 +226,40 @@ final class PbxCallLog extends Model
     public function callAttempt(): BelongsTo
     {
         return $this->belongsTo(CallAttempt::class);
+    }
+
+    /**
+     * The note written about this call, on the person's or company's record.
+     *
+     * @return BelongsTo<Note, $this>
+     */
+    public function note(): BelongsTo
+    {
+        return $this->belongsTo(Note::class);
+    }
+
+    /**
+     * Matches the visibleTo scope: managers and admins see every call, everyone else only their own.
+     */
+    public function isVisibleTo(?User $user): bool
+    {
+        return $user instanceof User && (Call::userSeesAllCalls($user) || $this->user_id === $user->id);
+    }
+
+    public function needsNotes(): bool
+    {
+        return $this->isAnswered()
+            && ($this->people_id !== null || $this->company_id !== null)
+            && $this->note_id === null
+            && $this->notes_skipped_at === null;
+    }
+
+    /**
+     * Whether the notes belong on the service user's liaison call, through Record outcome, rather than a plain note.
+     */
+    public function hasLiaisonCallAwaitingNotes(): bool
+    {
+        return $this->call_id !== null && $this->call?->isAwaitingNotes() === true;
     }
 
     public function isAnswered(): bool

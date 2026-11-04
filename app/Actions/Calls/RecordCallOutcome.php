@@ -10,6 +10,7 @@ use App\Enums\CreationSource;
 use App\Enums\SupportStatus;
 use App\Models\Call;
 use App\Models\Note;
+use App\Models\PbxCallLog;
 use App\Models\People;
 use App\Models\User;
 use App\Notifications\CallAttemptsExhaustedNotification;
@@ -111,8 +112,24 @@ final readonly class RecordCallOutcome
                 }
             }
 
+            if ($pendingAttempt !== null) {
+                $this->markPhoneCallNoted($pendingAttempt->id, $note);
+            }
+
             return $call->refresh();
         });
+    }
+
+    /**
+     * The phone call whose attempt this completed has its notes now: link the note, or, when the outcome
+     * created none, mark it as dealt with so it is no longer listed as needing notes.
+     */
+    private function markPhoneCallNoted(int $attemptId, ?Note $note): void
+    {
+        PbxCallLog::query()
+            ->where('call_attempt_id', $attemptId)
+            ->whereNull('note_id')
+            ->update($note !== null ? ['note_id' => $note->id] : ['notes_skipped_at' => now()]);
     }
 
     /**

@@ -7,11 +7,16 @@ namespace App\Filament\Resources\PhoneCalls\Tables;
 use App\Filament\Resources\Calls\CallResource;
 use App\Filament\Resources\CompanyResource;
 use App\Filament\Resources\PeopleResource;
+use App\Filament\Resources\PhoneCalls\Actions\AddCallNotesAction;
+use App\Filament\Resources\PhoneCalls\Actions\SkipCallNotesAction;
 use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Models\Call;
 use App\Models\PbxCallLog;
 use App\Models\User;
+use Filament\Actions\ActionGroup;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -22,7 +27,7 @@ final class PhoneCallsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['user', 'person', 'company']))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['user', 'person', 'company', 'call']))
             ->defaultSort('started_at', 'desc')
             ->emptyStateHeading('No phone calls yet')
             ->emptyStateDescription('Calls made or received on the phone system appear here.')
@@ -68,6 +73,20 @@ final class PhoneCallsTable
                     ->url(fn (PbxCallLog $record): ?string => $record->recording_url, shouldOpenInNewTab: true)
                     ->color('primary')
                     ->placeholder('—'),
+                IconColumn::make('notes')
+                    ->label('Notes')
+                    ->state(fn (PbxCallLog $record): ?string => self::notesState($record))
+                    ->icon(fn (?string $state): ?string => match ($state) {
+                        'added' => 'heroicon-o-document-text',
+                        'needed' => 'heroicon-o-exclamation-circle',
+                        default => null,
+                    })
+                    ->color(fn (?string $state): string => $state === 'needed' ? 'warning' : 'success')
+                    ->tooltip(fn (?string $state): ?string => match ($state) {
+                        'added' => 'Notes added',
+                        'needed' => 'Needs notes',
+                        default => null,
+                    }),
                 TextColumn::make('result')
                     ->label('Liaison call')
                     ->badge()
@@ -88,11 +107,34 @@ final class PhoneCallsTable
                         true: fn (Builder $query): Builder => $query->where(fn (Builder $query): Builder => $query->whereNotNull('people_id')->orWhereNotNull('company_id')->orWhereNotNull('enquiry_id')),
                         false: fn (Builder $query): Builder => $query->whereNull('people_id')->whereNull('company_id')->whereNull('enquiry_id'),
                     ),
+                Filter::make('needs_notes')
+                    ->label('Needs notes')
+                    ->toggle()
+                    ->query(function (Builder $query): Builder {
+                        /** @var Builder<PbxCallLog> $query */
+                        return $query->needingNotes();
+                    }),
                 SelectFilter::make('user_id')
                     ->label('Staff')
                     ->relationship('user', 'name')
                     ->visible(fn (): bool => auth()->user() instanceof User && Call::userSeesAllCalls(auth()->user())),
+            ])
+            ->recordActions([
+                AddCallNotesAction::make(),
+                AddCallNotesAction::makeForLiaisonCall(),
+                ActionGroup::make([
+                    SkipCallNotesAction::make(),
+                ]),
             ]);
+    }
+
+    private static function notesState(PbxCallLog $record): ?string
+    {
+        if ($record->note_id !== null) {
+            return 'added';
+        }
+
+        return $record->needsNotes() ? 'needed' : null;
     }
 
     /**

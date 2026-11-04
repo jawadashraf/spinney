@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Observers;
 
 use App\Models\Note;
+use App\Models\PbxCallLog;
 use App\Models\User;
 
 final readonly class NoteObserver
@@ -24,8 +25,13 @@ final readonly class NoteObserver
         $note->invalidateRelatedSummaries();
     }
 
+    /**
+     * A phone call whose note is deleted needs notes again.
+     */
     public function deleted(Note $note): void
     {
         $note->invalidateRelatedSummaries();
+
+        PbxCallLog::query()->where('note_id', $note->getKey())->update(['note_id' => null]);
     }
 }

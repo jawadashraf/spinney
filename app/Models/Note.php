@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -29,6 +30,7 @@ use Illuminate\Support\Carbon;
  * @property CreationSource $creation_source
  * @property SupportStatus|null $support_status
  * @property NoteVisibility $visibility
+ * @property-read PbxCallLog|null $pbxCallLog
  */
 #[ObservedBy(NoteObserver::class)]
 #[ScopedBy(HideRestrictedNotes::class)]
@@ -115,6 +117,16 @@ final class Note extends Model implements HasCustomFieldsContract
             ->using(Noteable::class)
             ->withPivot(['team_id'])
             ->withTimestamps();
+    }
+
+    /**
+     * The phone call this note was written for, if any.
+     *
+     * @return HasOne<PbxCallLog, $this>
+     */
+    public function pbxCallLog(): HasOne
+    {
+        return $this->hasOne(PbxCallLog::class);
     }
 
     /**

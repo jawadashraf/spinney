@@ -11,9 +11,11 @@ use App\Models\Call;
 use App\Models\Company;
 use App\Models\PbxCallLog;
 use App\Models\People;
+use App\Models\Relative;
 use App\Models\ServiceUser;
 use App\Models\Team;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 
 use function Pest\Laravel\actingAs;
@@ -102,4 +104,18 @@ it('shows the phone calls tab to a liaison on a service user record', function (
     $serviceUser = ServiceUser::query()->findOrFail(People::factory()->serviceUser()->create(['team_id' => $this->team->id])->id);
 
     expect(PhoneCallsRelationManager::canViewForRecord($serviceUser, ViewServiceUser::class))->toBeTrue();
+});
+
+it('adds call notes from a person\'s phone calls tab', function () {
+    $relative = Relative::query()->findOrFail(People::factory()->create(['team_id' => $this->team->id, 'type' => 'relative'])->id);
+    $log = PbxCallLog::factory()->create(['team_id' => $this->team->id, 'people_id' => $relative->id, 'user_id' => $this->admin->id]);
+
+    livewire(PhoneCallsRelationManager::class, [
+        'ownerRecord' => $relative,
+        'pageClass' => ViewPeople::class,
+    ])
+        ->callAction(TestAction::make('addNotes')->table($log), data: ['notes' => 'Called back about transport.'])
+        ->assertHasNoFormErrors();
+
+    expect($log->fresh()->note_id)->toBe($relative->notes()->sole()->id);
 });

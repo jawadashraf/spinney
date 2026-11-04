@@ -15,6 +15,7 @@ use App\Filament\Pages\Tenancy\RegisterOrganization;
 use App\Filament\Resources\PeopleResource;
 use App\Http\Middleware\EnsureVolunteerWorkHours;
 use App\Http\Middleware\SyncSpatiePermissionsTeamId;
+use App\Livewire\App\PhoneCalls\CallEndedNotesPrompt;
 use App\Models\Donation;
 use App\Models\People;
 use App\Models\Team;
@@ -206,6 +207,10 @@ final class AppPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn (): View|Factory => view('filament.app.analytics')
+            )
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): string => CallEndedNotesPrompt::shouldRender() ? Blade::render('<livewire:app.phone-calls.call-ended-notes-prompt />') : '',
             );
 
         if (Features::hasApiFeatures()) {
