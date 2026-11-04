@@ -3,9 +3,12 @@
 declare(strict_types=1);
 
 use App\Filament\Pages\Auth\Login;
+use App\Http\Controllers\DonateController;
+use App\Http\Controllers\DonationThankYouController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OutreachUnsubscribeController;
 use App\Http\Controllers\PrivacyPolicyController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\TermsOfServiceController;
 use Filament\Auth\Pages\PasswordReset\RequestPasswordReset;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -46,6 +49,13 @@ Route::get('/terms-of-service', TermsOfServiceController::class)->name('terms.sh
 Route::get('/privacy-policy', PrivacyPolicyController::class)->name('policy.show');
 
 Route::redirect('/dashboard', '/')->name('dashboard');
+
+// Public donate page. Stripe Checkout takes the payment; gifts are recorded once Stripe confirms them.
+Route::get('/donate', [DonateController::class, 'show'])->name('donate');
+Route::get('/donate/thank-you', DonationThankYouController::class)->name('donate.thank-you');
+Route::post('/stripe/webhook', StripeWebhookController::class)
+    ->withoutMiddleware(PreventRequestForgery::class)
+    ->name('stripe.webhook');
 
 // Signed links in outreach emails. The POST has no CSRF token because mail clients send it for one-click unsubscribe.
 Route::get('/outreach/unsubscribe/{recipient}', [OutreachUnsubscribeController::class, 'show'])

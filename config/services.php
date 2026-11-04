@@ -70,4 +70,12 @@ return [
         'misdial_seconds' => (int) env('YEASTAR_MISDIAL_SECONDS', 10),
         'unmatched_retention_days' => (int) env('YEASTAR_UNMATCHED_RETENTION_DAYS', 90),
     ],
+
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'team_id' => env('STRIPE_DONATIONS_TEAM_ID'),
+        'fee_percent' => (float) env('STRIPE_FEE_PERCENT', 1.2),
+        'fee_fixed_pence' => (int) env('STRIPE_FEE_FIXED_PENCE', 20),
+    ],
 ];
