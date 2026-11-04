@@ -75,6 +75,7 @@ final class NoteForm
                 ->mentions([
                     MentionProvider::make('@')
                         ->getSearchResultsUsing(fn (string $search): array => User::role(['admin', 'manager', 'liaison', 'counselor', 'service_user'])
+                            ->whereNull('users.deactivated_at')
                             ->where('name', 'like', "%{$search}%")
                             ->limit(10)
                             ->pluck('name', 'id')

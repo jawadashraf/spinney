@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use AlizHarb\ActivityLog\RelationManagers\ActivitiesRelationManager;
+use App\Filament\Resources\UserResource\Actions\AccountStatusActions;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
@@ -25,6 +26,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use STS\FilamentImpersonate\Actions\Impersonate;
 
 final class UserResource extends Resource
@@ -116,6 +118,15 @@ final class UserResource extends Resource
                 TextColumn::make('email')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('status')
+                    ->state(fn (User $record): string => $record->isDeactivated() ? 'Deactivated' : 'Active')
+                    ->badge()
+                    ->color(fn (string $state): string => $state === 'Deactivated' ? 'danger' : 'success'),
+                TextColumn::make('deactivated_at')
+                    ->label('Deactivated')
+                    ->dateTime('d M Y, H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('currentTeam.name')
                     ->label('Current Team')
                     ->sortable()
@@ -144,6 +155,16 @@ final class UserResource extends Resource
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload(),
+                TernaryFilter::make('status')
+                    ->label('Status')
+                    ->placeholder('All staff')
+                    ->trueLabel('Active')
+                    ->falseLabel('Deactivated')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereNull('users.deactivated_at'),
+                        false: fn (Builder $query): Builder => $query->whereNotNull('users.deactivated_at'),
+                        blank: fn (Builder $query): Builder => $query,
+                    ),
                 TernaryFilter::make('email_verified_at')
                     ->label('Email Verified')
                     ->nullable(),
@@ -153,6 +174,8 @@ final class UserResource extends Resource
                     ViewAction::make(),
                     EditAction::make(),
                     Impersonate::make(),
+                    AccountStatusActions::deactivate(),
+                    AccountStatusActions::reactivate(),
                 ]),
             ])
             ->toolbarActions([

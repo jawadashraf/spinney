@@ -399,3 +399,13 @@ it('logs a call from an unknown number as unmatched', function () {
         ->contact_number->toBe('+447438356414')
         ->user_id->toBe($this->liaison->id);
 });
+
+it('still attributes a call to a liaison who has since been deactivated', function () {
+    $this->liaison->forceFill(['deactivated_at' => now()])->save();
+
+    $this->withHeaders(yeastarHeaders($this->team->id))
+        ->postJson(route('yeastar.call-journal.store'), callJournalPayload($this->liaison, $this->serviceUser))
+        ->assertCreated();
+
+    expect(PbxCallLog::query()->sole()->user_id)->toBe($this->liaison->id);
+});

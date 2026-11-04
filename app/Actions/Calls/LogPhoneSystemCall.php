@@ -144,7 +144,7 @@ final readonly class LogPhoneSystemCall
             return null;
         }
 
-        return CallResource::scopeAssignableUsers(User::query())->whereKey((int) $crmUserId)->first();
+        return CallResource::scopeCallStaff(User::query())->whereKey((int) $crmUserId)->first();
     }
 
     /**

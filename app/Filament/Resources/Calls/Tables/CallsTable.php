@@ -97,7 +97,7 @@ final class CallsTable
             ->filters([
                 SelectFilter::make('assigned_user_id')
                     ->label('Liaison')
-                    ->relationship('assignee', 'name', fn (Builder $query): Builder => CallResource::scopeAssignableUsers($query))
+                    ->relationship('assignee', 'name', fn (Builder $query): Builder => CallResource::scopeCallStaff($query))
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('department_id')

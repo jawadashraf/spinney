@@ -16,7 +16,9 @@ final readonly class NotifyManagersOfServiceUserNeedsAttention
             setPermissionsTeamId($event->serviceUser->team_id);
         }
 
-        $recipients = User::whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager']))
+        $recipients = User::query()
+            ->active()
+            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager']))
             ->get();
 
         foreach ($recipients as $user) {

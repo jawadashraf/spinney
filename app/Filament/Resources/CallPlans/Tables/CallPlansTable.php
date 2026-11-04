@@ -71,7 +71,7 @@ final class CallPlansTable
             ->filters([
                 SelectFilter::make('assigned_user_id')
                     ->label('Liaison')
-                    ->relationship('assignee', 'name', fn (Builder $query): Builder => CallResource::scopeAssignableUsers($query))
+                    ->relationship('assignee', 'name', fn (Builder $query): Builder => CallResource::scopeCallStaff($query))
                     ->preload(),
                 SelectFilter::make('frequency')
                     ->options(CallFrequency::class),

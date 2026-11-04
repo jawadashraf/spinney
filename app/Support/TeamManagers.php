@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 final class TeamManagers
 {
     /**
-     * Admins and managers of the given team.
+     * Active admins and managers of the given team.
      *
      * @return Collection<int, User>
      */
@@ -19,6 +19,7 @@ final class TeamManagers
         setPermissionsTeamId($teamId);
 
         return User::query()
+            ->active()
             ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager']))
             ->get();
     }

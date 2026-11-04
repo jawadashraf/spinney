@@ -31,7 +31,7 @@ final class CoverAbsenceAction
             ->schema([
                 Select::make('from_user_id')
                     ->label('From liaison')
-                    ->options(fn (): array => CallResource::assignableUserOptions())
+                    ->options(fn (): array => CallResource::callStaffOptions())
                     ->searchable()
                     ->required(),
                 Select::make('to_user_id')

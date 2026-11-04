@@ -6,6 +6,8 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Concerns\SyncsPermissionTeamId;
 use App\Filament\Resources\UserResource;
+use App\Filament\Resources\UserResource\Actions\AccountStatusActions;
+use App\Models\User;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -27,6 +29,8 @@ final class ViewUser extends ViewRecord
             Impersonate::make()
                 ->record($this->getRecord()),
             EditAction::make(),
+            AccountStatusActions::deactivate(),
+            AccountStatusActions::reactivate(),
         ];
     }
 
@@ -57,6 +61,12 @@ final class ViewUser extends ViewRecord
                     TextEntry::make('created_at')
                         ->label('Member Since')
                         ->dateTime(),
+                    TextEntry::make('deactivated_at')
+                        ->label('Deactivated')
+                        ->dateTime('d M Y, H:i')
+                        ->badge()
+                        ->color('danger')
+                        ->visible(fn (User $record): bool => $record->isDeactivated()),
                 ]),
             ])->columnSpanFull(),
         ]);

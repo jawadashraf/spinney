@@ -20,6 +20,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -36,6 +38,7 @@ use Illuminate\Support\Collection;
  * @property string|null $profile_photo_path
  * @property-read string $profile_photo_url
  * @property Carbon|null $email_verified_at
+ * @property Carbon|null $deactivated_at
  * @property string|null $remember_token
  * @property string|null $two_factor_secret
  * @property array<int, string> $counselor_types
@@ -93,7 +96,9 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logAll();
+            ->logAll()
+            ->logExcept(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])
+            ->dontLogEmptyChanges();
     }
 
     /**
@@ -105,6 +110,7 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
     {
         return [
             'email_verified_at' => 'datetime',
+            'deactivated_at' => 'datetime',
             'password' => 'hashed',
             'is_system_admin' => 'boolean',
             'counselor_types' => 'array',
@@ -426,7 +432,39 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
      */
     public function canBeImpersonated(): bool
     {
-        return ! $this->isSuperAdmin();
+        return ! $this->isSuperAdmin() && ! $this->isDeactivated();
+    }
+
+    /**
+     * Whether this user may deactivate or reactivate the given staff member's account. Nobody can lock themselves
+     * or a super admin out, and only admins can lock out another admin.
+     */
+    public function canChangeAccountStatusOf(User $staff): bool
+    {
+        if ($staff->is($this) || $staff->isSuperAdmin() || ! $this->can('Update:User')) {
+            return false;
+        }
+
+        return ! $staff->hasRoleInAnyTeam('admin') || $this->isSuperAdmin() || $this->hasRoleInAnyTeam('admin');
+    }
+
+    /**
+     * A deactivated account cannot sign in to any panel; its history stays attached to it.
+     */
+    public function isDeactivated(): bool
+    {
+        return $this->deactivated_at !== null;
+    }
+
+    /**
+     * Staff whose accounts have not been deactivated.
+     *
+     * @param  Builder<User>  $query
+     */
+    #[Scope]
+    protected function active(Builder $query): void
+    {
+        $query->whereNull($query->qualifyColumn('deactivated_at'));
     }
 
     /**
@@ -434,6 +472,10 @@ final class User extends Authenticatable implements FilamentUser, HasAvatar, Has
      */
     public function canAccessPanel(Panel $panel): bool
     {
+        if ($this->isDeactivated()) {
+            return false;
+        }
+
         if ($panel->getId() === 'sysadmin') {
             return $this->is_system_admin && $this->hasVerifiedEmail();
         }

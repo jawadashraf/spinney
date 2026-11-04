@@ -48,7 +48,7 @@ final class AppointmentForm
                                             ->types([
                                                 MorphToSelect\Type::make(User::class)
                                                     ->titleAttribute('name')
-                                                    ->modifyOptionsQueryUsing(fn ($query) => $query->whereHas('roles', fn ($q) => $q->whereNot('name', 'service_user')))
+                                                    ->modifyOptionsQueryUsing(fn ($query) => $query->whereNull('users.deactivated_at')->whereHas('roles', fn ($q) => $q->whereNot('name', 'service_user')))
                                                     ->label('Staff member'),
                                                 MorphToSelect\Type::make(People::class)
                                                     ->titleAttribute('name')

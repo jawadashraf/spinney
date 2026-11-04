@@ -38,7 +38,7 @@ final class CallsRelationManager extends RelationManager
             ->components([
                 Select::make('assigned_user_id')
                     ->label('Assigned liaison')
-                    ->relationship('assignee', 'name', fn (Builder $query): Builder => CallResource::scopeAssignableUsers($query))
+                    ->relationship('assignee', 'name', fn (Builder $query, mixed $state): Builder => CallResource::scopeAssignableUsers($query, $state))
                     ->searchable()
                     ->preload(),
                 DateTimePicker::make('due_at')

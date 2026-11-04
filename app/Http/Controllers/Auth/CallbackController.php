@@ -32,6 +32,10 @@ final readonly class CallbackController
             $socialUser = $this->retrieveSocialUser($provider);
             $user = $this->resolveUser($provider, $socialUser, $creator);
 
+            if ($user->isDeactivated()) {
+                return $this->handleError('This account has been deactivated. Please contact your manager.');
+            }
+
             return $this->loginAndRedirect($user);
         } catch (InvalidStateException) {
             return $this->handleError('Authentication state mismatch. Please try again.');

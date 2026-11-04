@@ -109,12 +109,40 @@ final class CallResource extends Resource
     }
 
     /**
+     * Staff with a role that handles calls, including deactivated staff, for filtering and matching past calls.
+     *
      * @param  Builder<User>  $query
      * @return Builder<User>
      */
-    public static function scopeAssignableUsers(Builder $query): Builder
+    public static function scopeCallStaff(Builder $query): Builder
     {
         return $query->whereHas('roles', fn (Builder $roles): Builder => $roles->whereIn('name', Call::ASSIGNABLE_ROLES));
+    }
+
+    /**
+     * Call staff who can be given calls now. Pass the currently assigned user so a deactivated assignee still shows
+     * on the record being edited.
+     *
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
+    public static function scopeAssignableUsers(Builder $query, mixed $currentlyAssigned = null): Builder
+    {
+        return self::scopeCallStaff($query)->where(fn (Builder $users): Builder => $users
+            ->whereNull('users.deactivated_at')
+            ->when(is_numeric($currentlyAssigned), fn (Builder $users): Builder => $users->orWhere('users.id', (int) $currentlyAssigned)));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function callStaffOptions(): array
+    {
+        return self::scopeCallStaff(User::query())
+            ->get()
+            ->sortBy('name')
+            ->pluck('name', 'id')
+            ->all();
     }
 
     /**

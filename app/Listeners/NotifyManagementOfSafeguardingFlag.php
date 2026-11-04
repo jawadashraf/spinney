@@ -14,7 +14,9 @@ final readonly class NotifyManagementOfSafeguardingFlag
     {
         $enquiry = $event->enquiry;
 
-        $recipients = User::whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager']))
+        $recipients = User::query()
+            ->active()
+            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'manager']))
             ->get();
 
         foreach ($recipients as $user) {

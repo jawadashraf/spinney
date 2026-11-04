@@ -49,6 +49,7 @@ final class ServiceUserAppointmentsRelationManager extends RelationManager
                     ->required()
                     ->live()
                     ->options(fn (): array => User::query()
+                        ->active()
                         ->whereHas('roles', fn ($query) => $query->whereNot('name', 'service_user'))
                         ->orderBy('name')
                         ->pluck('name', 'id')

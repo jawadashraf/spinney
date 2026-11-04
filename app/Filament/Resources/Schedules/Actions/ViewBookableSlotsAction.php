@@ -23,7 +23,7 @@ final class ViewBookableSlotsAction extends Action
             ->form([
                 Select::make('counselor_id')
                     ->label('Counselor')
-                    ->options(fn () => User::whereHas('roles', fn ($q) => $q->whereNot('name', 'service_user'))->pluck('name', 'id'))
+                    ->options(fn () => User::query()->active()->whereHas('roles', fn ($q) => $q->whereNot('name', 'service_user'))->pluck('name', 'id'))
                     ->searchable()
                     ->preload()
                     ->required(),

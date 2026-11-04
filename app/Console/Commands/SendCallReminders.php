@@ -38,7 +38,7 @@ final class SendCallReminders extends Command
     {
         $calls = Call::query()
             ->open()
-            ->whereNotNull('assigned_user_id')
+            ->whereHas('assignee', fn (Builder $assignee): Builder => $assignee->whereNull('users.deactivated_at'))
             ->where('due_at', '<=', today()->endOfDay())
             ->with(['assignee', 'team'])
             ->get();

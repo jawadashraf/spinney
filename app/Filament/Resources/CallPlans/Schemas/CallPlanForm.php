@@ -37,7 +37,7 @@ final class CallPlanForm
                     ->columnSpanFull(),
                 Select::make('assigned_user_id')
                     ->label('Assigned liaison')
-                    ->relationship('assignee', 'name', fn (Builder $query): Builder => CallResource::scopeAssignableUsers($query))
+                    ->relationship('assignee', 'name', fn (Builder $query, mixed $state): Builder => CallResource::scopeAssignableUsers($query, $state))
                     ->searchable()
                     ->preload(),
                 Select::make('department_id')
