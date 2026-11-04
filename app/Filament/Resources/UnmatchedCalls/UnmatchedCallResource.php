@@ -6,9 +6,7 @@ namespace App\Filament\Resources\UnmatchedCalls;
 
 use App\Filament\Resources\UnmatchedCalls\Pages\ListUnmatchedCalls;
 use App\Filament\Resources\UnmatchedCalls\Tables\UnmatchedCallsTable;
-use App\Models\Call;
 use App\Models\PbxCallLog;
-use App\Models\User;
 use BackedEnum;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
@@ -35,7 +33,7 @@ final class UnmatchedCallResource extends Resource
 
     protected static ?string $modelLabel = 'unmatched call';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 5;
 
     public static function table(Table $table): Table
     {
@@ -79,23 +77,9 @@ final class UnmatchedCallResource extends Resource
         /** @var Builder<PbxCallLog> $query */
         $query = parent::getEloquentQuery();
 
-        $query->unmatched()->where('pbx_call_logs.team_id', Filament::getTenant()?->getKey());
-
-        return self::scopeVisibleTo($query, auth()->user());
-    }
-
-    /**
-     * Managers and admins see every unmatched call; everyone else sees the calls they handled.
-     *
-     * @param  Builder<PbxCallLog>  $query
-     * @return Builder<PbxCallLog>
-     */
-    public static function scopeVisibleTo(Builder $query, ?User $user): Builder
-    {
-        if (! $user instanceof User) {
-            return $query->whereRaw('0 = 1');
-        }
-
-        return Call::userSeesAllCalls($user) ? $query : $query->where('pbx_call_logs.user_id', $user->id);
+        return $query
+            ->unmatched()
+            ->where('pbx_call_logs.team_id', Filament::getTenant()?->getKey())
+            ->visibleTo(auth()->user());
     }
 }

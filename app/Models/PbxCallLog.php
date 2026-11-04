@@ -122,6 +122,22 @@ final class PbxCallLog extends Model
     }
 
     /**
+     * Managers and admins see every call; everyone else sees only the calls they made or answered.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    #[Scope]
+    protected function visibleTo(Builder $query, ?User $user): Builder
+    {
+        if (! $user instanceof User) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        return Call::userSeesAllCalls($user) ? $query : $query->where('pbx_call_logs.user_id', $user->id);
+    }
+
+    /**
      * @return array<string, string|class-string>
      */
     protected function casts(): array
