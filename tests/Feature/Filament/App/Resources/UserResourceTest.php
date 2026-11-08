@@ -190,3 +190,85 @@ it('hashes password and defaults email_verified_at on user creation', function (
         ->and(Hash::check('secret-password-123', $createdUser->password))->toBeTrue()
         ->and($createdUser->email_verified_at)->not->toBeNull();
 });
+
+it('detects duplicate active staff user by email', function (): void {
+    setPermissionsTeamId($this->team->id);
+    $role = Role::firstOrCreate(['name' => 'counselor', 'guard_name' => 'web', 'team_id' => $this->team->id]);
+
+    $existing = User::factory()->create([
+        'first_name' => 'John',
+        'last_name' => 'Smith',
+        'email' => 'john.smith@example.com',
+        'deactivated_at' => null,
+    ]);
+    $existing->assignRole($role);
+
+    $get = fn (string $path) => match ($path) {
+        'email' => 'john.smith@example.com',
+        default => null,
+    };
+    $result = UserResource::detectUserDuplicate($get, null);
+
+    expect($result)->not->toBeNull()
+        ->and($result['heading'])->toBe('Active Account Already Exists')
+        ->and($result['color'])->toBe('danger')
+        ->and((string) $result['description'])->toContain('John Smith')
+        ->and($result['action_label'])->toBe('View User Profile');
+});
+
+it('detects duplicate deactivated staff user and suggests reactivation', function (): void {
+    $existing = User::factory()->create([
+        'first_name' => 'Alice',
+        'last_name' => 'Brown',
+        'email' => 'alice.brown@example.com',
+        'deactivated_at' => now()->subMonths(3),
+    ]);
+
+    $get = fn (string $path) => match ($path) {
+        'email' => 'alice.brown@example.com',
+        default => null,
+    };
+    $result = UserResource::detectUserDuplicate($get, null);
+
+    expect($result)->not->toBeNull()
+        ->and($result['heading'])->toBe('Deactivated Staff Account Exists')
+        ->and($result['color'])->toBe('warning')
+        ->and((string) $result['description'])->toContain('Alice Brown')
+        ->and($result['action_label'])->toBe('View & Reactivate Account');
+});
+
+it('warns when email belongs to a service user on staff creation', function (): void {
+    setPermissionsTeamId($this->team->id);
+    $serviceUserRole = Role::firstOrCreate(['name' => 'service_user', 'guard_name' => 'web', 'team_id' => $this->team->id]);
+
+    $existing = User::factory()->create([
+        'first_name' => 'Bob',
+        'last_name' => 'Client',
+        'email' => 'bob.client@example.com',
+    ]);
+    $existing->assignRole($serviceUserRole);
+
+    $get = fn (string $path) => match ($path) {
+        'email' => 'bob.client@example.com',
+        default => null,
+    };
+    $result = UserResource::detectUserDuplicate($get, null);
+
+    expect($result)->not->toBeNull()
+        ->and($result['heading'])->toBe('Email Belongs to a Service User')
+        ->and($result['color'])->toBe('danger');
+});
+
+it('ignores duplicate check if editing the same user record', function (): void {
+    $user = User::factory()->create([
+        'email' => 'same.user@example.com',
+    ]);
+
+    $get = fn (string $path) => match ($path) {
+        'email' => 'same.user@example.com',
+        default => null,
+    };
+    $result = UserResource::detectUserDuplicate($get, $user);
+
+    expect($result)->toBeNull();
+});

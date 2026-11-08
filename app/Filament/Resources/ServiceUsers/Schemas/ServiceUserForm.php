@@ -11,10 +11,15 @@ use App\Enums\ReferralType;
 use App\Enums\ServiceTeam;
 use App\Enums\SubstanceUseFrequency;
 use App\Enums\TreatmentOutcome;
+use App\Filament\Resources\ServiceUsers\ServiceUserResource;
 use App\Models\Enquiry;
+use App\Models\People;
 use App\Models\ServiceUser;
+use App\Models\User;
 use App\Services\AddressLookupService;
+use App\Support\PhoneNumber;
 use Filament\Actions\Action;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
@@ -23,6 +28,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ViewField;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -32,7 +38,10 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -77,10 +86,12 @@ final class ServiceUserForm
                             TextInput::make('first_name')
                                 ->required()
                                 ->maxLength(255)
+                                ->live(onBlur: true)
                                 ->default(fn (?Model $record) => $record instanceof Enquiry ? $record->people?->first_name : null),
                             TextInput::make('last_name')
                                 ->required()
                                 ->maxLength(255)
+                                ->live(onBlur: true)
                                 ->default(fn (?Model $record) => $record instanceof Enquiry ? $record->people?->last_name : null),
                             Toggle::make('has_no_email')
                                 ->label('No email address available')
@@ -107,6 +118,7 @@ final class ServiceUserForm
                                 ->email()
                                 ->required()
                                 ->maxLength(255)
+                                ->live(onBlur: true)
                                 ->unique(
                                     table: 'users',
                                     column: 'email',
@@ -132,6 +144,21 @@ final class ServiceUserForm
                                 ->helperText('Leave blank to auto-generate a secure password if creating.')
                                 ->dehydrated(false)
                                 ->visible(fn (string $context): bool => $context === 'create'),
+                            Callout::make('duplicate_identity_warning')
+                                ->columnSpanFull()
+                                ->visible(fn (Get $get, ?Model $record): bool => self::detectIdentityDuplicate($get, $record) !== null)
+                                ->heading(fn (Get $get, ?Model $record): ?string => self::detectIdentityDuplicate($get, $record)['heading'] ?? null)
+                                ->color(fn (Get $get, ?Model $record): ?string => self::detectIdentityDuplicate($get, $record)['color'] ?? 'warning')
+                                ->description(fn (Get $get, ?Model $record): ?HtmlString => self::detectIdentityDuplicate($get, $record)['description'] ?? null)
+                                ->actions([
+                                    Action::make('viewDuplicateServiceUser')
+                                        ->label(fn (Get $get, ?Model $record): string => self::detectIdentityDuplicate($get, $record)['action_label'] ?? 'View Record')
+                                        ->url(fn (Get $get, ?Model $record): ?string => self::detectIdentityDuplicate($get, $record)['action_url'] ?? null)
+                                        ->visible(fn (Get $get, ?Model $record): bool => filled(self::detectIdentityDuplicate($get, $record)['action_url'] ?? null))
+                                        ->openUrlInNewTab()
+                                        ->color(fn (Get $get, ?Model $record): string => self::detectIdentityDuplicate($get, $record)['color'] ?? 'warning')
+                                        ->icon('heroicon-m-arrow-top-right-on-square'),
+                                ]),
                         ])->columns(2)->collapsible(),
 
                     Section::make('Service User Details')
@@ -148,7 +175,8 @@ final class ServiceUserForm
                                         ->schema([
                                             Section::make('Demographics')
                                                 ->schema([
-                                                    DatePicker::make('date_of_birth'),
+                                                    DatePicker::make('date_of_birth')
+                                                        ->live(),
                                                     Select::make('gender')
                                                         ->options([
                                                             'male' => 'Male',
@@ -175,7 +203,8 @@ final class ServiceUserForm
                                                         ->collapsed()
                                                         ->columnSpanFull(),
                                                     PhoneInput::make('phone')
-                                                        ->initialCountry('gb'),
+                                                        ->initialCountry('gb')
+                                                        ->live(onBlur: true),
                                                     TextInput::make('postcode')
                                                         ->live(onBlur: true)
                                                         ->suffixAction(
@@ -228,6 +257,21 @@ final class ServiceUserForm
                                                             'anytime' => 'Anytime',
                                                         ])
                                                         ->native(false),
+                                                    Callout::make('duplicate_demographics_warning')
+                                                        ->columnSpanFull()
+                                                        ->visible(fn (Get $get, ?Model $record): bool => self::detectDemographicDuplicateForComponent($get, $record) !== null)
+                                                        ->heading(fn (Get $get, ?Model $record): ?string => self::detectDemographicDuplicateForComponent($get, $record)['heading'] ?? null)
+                                                        ->color(fn (Get $get, ?Model $record): ?string => self::detectDemographicDuplicateForComponent($get, $record)['color'] ?? 'warning')
+                                                        ->description(fn (Get $get, ?Model $record): ?HtmlString => self::detectDemographicDuplicateForComponent($get, $record)['description'] ?? null)
+                                                        ->actions([
+                                                            Action::make('viewDemographicDuplicate')
+                                                                ->label(fn (Get $get, ?Model $record): string => self::detectDemographicDuplicateForComponent($get, $record)['action_label'] ?? 'View Record')
+                                                                ->url(fn (Get $get, ?Model $record): ?string => self::detectDemographicDuplicateForComponent($get, $record)['action_url'] ?? null)
+                                                                ->visible(fn (Get $get, ?Model $record): bool => filled(self::detectDemographicDuplicateForComponent($get, $record)['action_url'] ?? null))
+                                                                ->openUrlInNewTab()
+                                                                ->color(fn (Get $get, ?Model $record): string => self::detectDemographicDuplicateForComponent($get, $record)['color'] ?? 'warning')
+                                                                ->icon('heroicon-m-arrow-top-right-on-square'),
+                                                        ]),
                                                 ])->columns(3),
 
                                             Section::make('Emergency Contact')
@@ -419,5 +463,216 @@ final class ServiceUserForm
                 ])
                 ->columnSpanFull(),
         ];
+    }
+
+    /**
+     * @return array{heading: string, color: string, description: HtmlString, action_label?: string|null, action_url?: string|null}|null
+     */
+    public static function detectEmailDuplicate(?string $email, ?Model $record): ?array
+    {
+        if (blank($email)) {
+            return null;
+        }
+
+        $email = mb_strtolower(mb_trim((string) $email));
+        $tempDomain = config('app.temp_email_domain', 'spinney.local');
+
+        if (str_contains($email, '@'.$tempDomain)) {
+            return null;
+        }
+
+        // 1. Check if an existing Service User has this email
+        /** @var ServiceUser|null $serviceUser */
+        $serviceUser = ServiceUser::query()
+            ->when($record, fn (Builder $query) => $query->whereKeyNot($record->getKey()))
+            ->where('is_service_user', true)
+            ->whereRaw('LOWER(email) = ?', [$email])
+            ->first();
+
+        if ($serviceUser) {
+            $name = e($serviceUser->name);
+            $url = rescue(fn () => ServiceUserResource::getUrl('view', [
+                'tenant' => Filament::getTenant() ?? $serviceUser->team ?? auth()->user()?->currentTeam,
+                'record' => $serviceUser,
+            ]));
+
+            return [
+                'heading' => 'Service User Already Exists',
+                'color' => 'warning',
+                'description' => new HtmlString(
+                    "A Service User with this email already exists: <strong>{$name}</strong>."
+                ),
+                'action_label' => 'View Service User Profile',
+                'action_url' => $url,
+            ];
+        }
+
+        // 2. Check if a general Person/Contact exists (not yet a Service User)
+        /** @var People|null $person */
+        $person = People::query()
+            ->when($record, fn (Builder $query) => $query->whereKeyNot($record->getKey()))
+            ->where('is_service_user', false)
+            ->whereRaw('LOWER(email) = ?', [$email])
+            ->first();
+
+        if ($person) {
+            $name = e($person->name);
+
+            return [
+                'heading' => 'Person Already on Record as Contact',
+                'color' => 'info',
+                'description' => new HtmlString(
+                    "A contact record for <strong>{$name}</strong> already exists with this email (e.g. from an enquiry or referral). ".
+                    'If they are already known, you can promote their existing enquiry or contact record instead of creating a duplicate.'
+                ),
+                'action_label' => null,
+                'action_url' => null,
+            ];
+        }
+
+        // 3. Check if a Staff User account exists
+        /** @var User|null $staffUser */
+        $staffUser = User::query()
+            ->when($record && $record->user_id, fn (Builder $query) => $query->whereKeyNot($record->user_id))
+            ->whereRaw('LOWER(email) = ?', [$email])
+            ->first();
+
+        if ($staffUser && ! $staffUser->hasRole('service_user')) {
+            $name = e($staffUser->name);
+
+            return [
+                'heading' => 'Email Belongs to a Staff Member',
+                'color' => 'danger',
+                'description' => new HtmlString(
+                    "This email is registered to a staff member (<strong>{$name}</strong>). ".
+                    'Service user records cannot share an email address with a staff account.'
+                ),
+                'action_label' => null,
+                'action_url' => null,
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array{heading: string, color: string, description: HtmlString, action_label?: string|null, action_url?: string|null}|null
+     */
+    public static function detectDemographicDuplicate(?string $firstName, ?string $lastName, mixed $dob, ?string $phone, ?Model $record): ?array
+    {
+        $tenantId = Filament::getTenant()?->getKey();
+        $lastNameClean = filled($lastName) ? mb_strtolower(mb_trim((string) $lastName)) : null;
+        $firstNameClean = filled($firstName) ? mb_strtolower(mb_trim((string) $firstName)) : null;
+
+        $dobFormatted = null;
+        $dobDisplay = null;
+        if (filled($dob)) {
+            try {
+                $parsed = Carbon::parse((string) $dob);
+                $dobFormatted = $parsed->format('Y-m-d');
+                $dobDisplay = $parsed->format('d/m/Y');
+            } catch (\Throwable) {
+                $dobFormatted = null;
+            }
+        }
+
+        // 1. UK Surgery / NHS standard: Last Name + Date of Birth (and First Name if provided)
+        if ($lastNameClean && $dobFormatted) {
+            /** @var People|null $demographicMatch */
+            $demographicMatch = People::query()
+                ->when($record, fn (Builder $query) => $query->whereKeyNot($record->getKey()))
+                ->when($tenantId, fn (Builder $query) => $query->where('team_id', $tenantId))
+                ->whereRaw('LOWER(last_name) = ?', [$lastNameClean])
+                ->when($firstNameClean, fn (Builder $query) => $query->whereRaw('LOWER(first_name) = ?', [$firstNameClean]))
+                ->whereDate('date_of_birth', $dobFormatted)
+                ->first();
+
+            if ($demographicMatch) {
+                $name = e($demographicMatch->name);
+                $isServiceUser = (bool) $demographicMatch->is_service_user;
+                $url = $isServiceUser ? rescue(fn () => ServiceUserResource::getUrl('view', [
+                    'tenant' => Filament::getTenant() ?? $demographicMatch->team ?? auth()->user()?->currentTeam,
+                    'record' => $demographicMatch,
+                ])) : null;
+
+                return [
+                    'heading' => $isServiceUser
+                        ? 'Possible Duplicate: Service User on Record'
+                        : 'Possible Duplicate: Contact on Record',
+                    'color' => $isServiceUser ? 'warning' : 'info',
+                    'description' => new HtmlString(
+                        $isServiceUser
+                            ? "A Service User with this name and date of birth already exists on record: <strong>{$name}</strong> (DOB: {$dobDisplay})."
+                            : "A contact record with this name and date of birth already exists: <strong>{$name}</strong> (DOB: {$dobDisplay})."
+                    ),
+                    'action_label' => $isServiceUser ? 'View Existing Profile' : null,
+                    'action_url' => $url,
+                ];
+            }
+        }
+
+        // 2. Normalized Phone Match
+        $normalizedPhone = PhoneNumber::normalize($phone);
+        if ($normalizedPhone) {
+            /** @var People|null $phoneMatch */
+            $phoneMatch = People::query()
+                ->when($record, fn (Builder $query) => $query->whereKeyNot($record->getKey()))
+                ->when($tenantId, fn (Builder $query) => $query->where('team_id', $tenantId))
+                ->where('phone_normalized', $normalizedPhone)
+                ->first();
+
+            if ($phoneMatch) {
+                $name = e($phoneMatch->name);
+                $isServiceUser = (bool) $phoneMatch->is_service_user;
+                $url = $isServiceUser ? rescue(fn () => ServiceUserResource::getUrl('view', [
+                    'tenant' => Filament::getTenant() ?? $phoneMatch->team ?? auth()->user()?->currentTeam,
+                    'record' => $phoneMatch,
+                ])) : null;
+
+                return [
+                    'heading' => 'Possible Duplicate: Matching Phone Number',
+                    'color' => 'warning',
+                    'description' => new HtmlString(
+                        "A record with this phone number already exists: <strong>{$name}</strong>."
+                    ),
+                    'action_label' => $isServiceUser ? 'View Existing Profile' : null,
+                    'action_url' => $url,
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array{heading: string, color: string, description: HtmlString, action_label?: string|null, action_url?: string|null}|null
+     */
+    public static function detectIdentityDuplicate(Get|\Closure $get, ?Model $record): ?array
+    {
+        $hasNoEmail = (bool) rescue(fn () => $get('has_no_email'), rescue: false);
+        $email = rescue(fn () => $get('email'), rescue: false);
+
+        if (! $hasNoEmail && filled($email)) {
+            $emailMatch = self::detectEmailDuplicate($email, $record);
+            if ($emailMatch) {
+                return $emailMatch;
+            }
+        }
+
+        return self::detectDemographicDuplicateForComponent($get, $record);
+    }
+
+    /**
+     * @return array{heading: string, color: string, description: HtmlString, action_label?: string|null, action_url?: string|null}|null
+     */
+    public static function detectDemographicDuplicateForComponent(Get|\Closure $get, ?Model $record): ?array
+    {
+        return self::detectDemographicDuplicate(
+            rescue(fn () => $get('first_name'), rescue: false),
+            rescue(fn () => $get('last_name'), rescue: false),
+            rescue(fn () => $get('date_of_birth'), rescue: false),
+            rescue(fn () => $get('phone'), rescue: false),
+            $record,
+        );
     }
 }

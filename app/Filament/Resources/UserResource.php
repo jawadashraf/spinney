@@ -10,6 +10,7 @@ use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -20,6 +21,8 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Callout;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -27,6 +30,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 use STS\FilamentImpersonate\Actions\Impersonate;
 
 final class UserResource extends Resource
@@ -55,7 +60,24 @@ final class UserResource extends Resource
             TextInput::make('email')
                 ->email()
                 ->required()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->live(onBlur: true)
+                ->unique(ignoreRecord: true),
+            Callout::make('duplicate_user_warning')
+                ->columnSpanFull()
+                ->visible(fn (Get $get, ?Model $record): bool => self::detectUserDuplicate($get, $record) !== null)
+                ->heading(fn (Get $get, ?Model $record): ?string => self::detectUserDuplicate($get, $record)['heading'] ?? null)
+                ->color(fn (Get $get, ?Model $record): ?string => self::detectUserDuplicate($get, $record)['color'] ?? 'warning')
+                ->description(fn (Get $get, ?Model $record): ?HtmlString => self::detectUserDuplicate($get, $record)['description'] ?? null)
+                ->actions([
+                    Action::make('resolveDuplicateUser')
+                        ->label(fn (Get $get, ?Model $record): string => self::detectUserDuplicate($get, $record)['action_label'] ?? 'View Record')
+                        ->url(fn (Get $get, ?Model $record): ?string => self::detectUserDuplicate($get, $record)['action_url'] ?? null)
+                        ->visible(fn (Get $get, ?Model $record): bool => filled(self::detectUserDuplicate($get, $record)['action_url'] ?? null))
+                        ->openUrlInNewTab()
+                        ->color(fn (Get $get, ?Model $record): string => self::detectUserDuplicate($get, $record)['color'] ?? 'warning')
+                        ->icon('heroicon-m-arrow-top-right-on-square'),
+                ]),
             TextInput::make('password')
                 ->password()
                 ->revealable()
@@ -199,6 +221,83 @@ final class UserResource extends Resource
             'index' => ListUsers::route('/'),
             'view' => ViewUser::route('/{record}'),
             'edit' => EditUser::route('/{record}/edit'),
+        ];
+    }
+
+    /**
+     * @return array{heading: string, color: string, description: HtmlString, action_label?: string|null, action_url?: string|null}|null
+     */
+    public static function detectUserDuplicate(Get|\Closure $get, ?Model $record): ?array
+    {
+        $email = rescue(fn () => $get('email'), rescue: false);
+
+        if (blank($email)) {
+            return null;
+        }
+
+        $email = mb_strtolower(mb_trim((string) $email));
+
+        /** @var User|null $existingUser */
+        $existingUser = User::query()
+            ->when($record, fn (Builder $query) => $query->whereKeyNot($record->getKey()))
+            ->whereRaw('LOWER(email) = ?', [$email])
+            ->first();
+
+        if (! $existingUser) {
+            return null;
+        }
+
+        $name = e($existingUser->name);
+
+        if ($existingUser->isDeactivated()) {
+            $deactivatedAt = $existingUser->deactivated_at?->format('d M Y') ?? 'previously';
+            $editUrl = rescue(fn () => self::getUrl('edit', [
+                'tenant' => Filament::getTenant() ?? $existingUser->currentTeam ?? $existingUser->allTeams()->first() ?? auth()->user()?->currentTeam,
+                'record' => $existingUser,
+            ]));
+
+            return [
+                'heading' => 'Deactivated Staff Account Exists',
+                'color' => 'warning',
+                'description' => new HtmlString(
+                    "A deactivated account already exists for <strong>{$name}</strong> (deactivated on {$deactivatedAt}). ".
+                    'In accordance with staff policy, accounts are deactivated rather than deleted. '.
+                    'You can reactivate this account instead of creating a new one.'
+                ),
+                'action_label' => 'View & Reactivate Account',
+                'action_url' => $editUrl,
+            ];
+        }
+
+        if ($existingUser->hasRole('service_user')) {
+            return [
+                'heading' => 'Email Belongs to a Service User',
+                'color' => 'danger',
+                'description' => new HtmlString(
+                    "This email is registered to a Service User (<strong>{$name}</strong>). ".
+                    'Staff accounts must use an organizational email address.'
+                ),
+                'action_label' => null,
+                'action_url' => null,
+            ];
+        }
+
+        $roles = $existingUser->roles->pluck('name')->implode(', ');
+        $roleInfo = filled($roles) ? " (Roles: {$roles})" : '';
+        $viewUrl = rescue(fn () => self::getUrl('view', [
+            'tenant' => Filament::getTenant() ?? $existingUser->currentTeam ?? $existingUser->allTeams()->first() ?? auth()->user()?->currentTeam,
+            'record' => $existingUser,
+        ]));
+
+        return [
+            'heading' => 'Active Account Already Exists',
+            'color' => 'danger',
+            'description' => new HtmlString(
+                "An active staff account already exists for <strong>{$name}</strong>{$roleInfo}. ".
+                'Each staff member must have a unique email address.'
+            ),
+            'action_label' => 'View User Profile',
+            'action_url' => $viewUrl,
         ];
     }
 }
