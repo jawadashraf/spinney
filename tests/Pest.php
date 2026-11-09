@@ -20,6 +20,7 @@ use App\Models\Team;
 use App\Models\User;
 use App\Support\CompanyPermissions;
 use App\Support\DonationPermissions;
+use App\Support\ReferralOrganisationPermissions;
 use App\Support\ReportPermissions;
 use Database\Seeders\ShieldSeeder;
 use Filament\Facades\Filament;
@@ -170,4 +171,22 @@ function signInToReportsAs(Team $team, string $role): User
     ReportPermissions::ensure($team->id);
 
     return signInToDirectoryAs($team, $role);
+}
+
+/**
+ * Sign in as a new member of the team with the given role, with referral organisation permissions granted.
+ */
+function signInToReferralsAs(Team $team, string $role): User
+{
+    Role::firstOrCreate(['name' => $role, 'team_id' => $team->id], ['guard_name' => 'web']);
+    ReferralOrganisationPermissions::ensure($team->id);
+
+    $user = User::factory()->create(['current_team_id' => $team->id]);
+    $user->teams()->syncWithoutDetaching([$team->id => ['role' => 'member']]);
+    $user->assignRole($role);
+
+    actingAs($user);
+    Filament::setTenant($team);
+
+    return $user;
 }

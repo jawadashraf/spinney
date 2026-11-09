@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Parental\HasParent;
+use Spatie\Activitylog\Models\Activity;
 
 final class ServiceUser extends People
 {
@@ -24,10 +26,10 @@ final class ServiceUser extends People
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany<\Spatie\Activitylog\Models\Activity, $this>
+     * @return MorphMany<Activity, $this>
      */
-    public function activities(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function activities(): MorphMany
     {
-        return $this->morphMany(\Spatie\Activitylog\Models\Activity::class, 'subject');
+        return $this->morphMany(Activity::class, 'subject');
     }
 }
